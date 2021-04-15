@@ -7,8 +7,11 @@
 //
 
 #include <stdio.h>
-#include <SDL.h>
-#include <SDL_image.h>
+//#include <SDL.h>
+//#include <SDL_image.h>
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
+#include <SDL2/SDL_net.h>
 #include <stdbool.h>
 #include "world.h"
 #include "Alien.h"
