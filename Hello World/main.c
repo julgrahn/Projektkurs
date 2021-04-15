@@ -19,7 +19,7 @@ void renderBackground(SDL_Renderer *gRenderer, SDL_Texture *mTile, SDL_Rect gTil
 
 int main(int argc, char* args[])
 {
-    
+    printf("hej hej");
     SDL_Event e;
     SDL_Renderer *gRenderer = NULL;
     SDL_RendererFlip flip = SDL_FLIP_NONE;
