@@ -1,9 +1,9 @@
 #include <stdio.h>
  #include <SDL.h>
  #include <SDL_image.h>
+ #include <SDL_timer.h>
 //#include <SDL2/SDL.h>
 //#include <SDL2/SDL_image.h>
-#include <SDL_timer.h>
 #include <stdbool.h>
 
 int main(int argc, char* args[]) {
@@ -47,10 +47,9 @@ int main(int argc, char* args[]) {
             default:
                 break;
             }
-            SDL_RenderClear(renderer);
-            SDL_RenderPresent(renderer);
-
         }
+        SDL_RenderClear(renderer);
+        SDL_RenderPresent(renderer);
         SDL_Delay(1000 / 60);
     }
   
