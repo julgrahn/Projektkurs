@@ -9,3 +9,6 @@
 .vscode
 *.exe
 *.dll
+main.o
+player.o
+theGame
