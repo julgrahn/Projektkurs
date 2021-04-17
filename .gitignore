@@ -6,6 +6,6 @@
 .DS_Store
 .out
 .o
-.vscode
+//.vscode
 *.exe
 *.dll
