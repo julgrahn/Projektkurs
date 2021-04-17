@@ -1,11 +1,12 @@
 #include <stdio.h>
-  #include <SDL.h>
-  #include <SDL_image.h>
-  #include <SDL_timer.h>
-//#include <SDL2/SDL.h>
-//#include <SDL2/SDL_image.h>
+//  #include <SDL.h>
+//  #include <SDL_image.h>
+//  #include <SDL_timer.h>
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
+#include <SDL2/SDL_timer.h>
 #include <stdbool.h>
-#include "player.h""
+#include "player.h"
 
 #define WINDOWWIDTH 1280
 #define WINDOWHEIGTH 720
@@ -24,7 +25,7 @@ int main(int argc, char* args[])
     SDL_FreeSurface(testSurface);
     SDL_Rect testSquare;
 
-    Player testPlayer = createPlayer(64, 64);
+    Player testPlayer = createPlayer(0, 0);
 
     bool isPlaying = true;
     int up = 0, down = 0, left = 0, right = 0;
@@ -44,7 +45,7 @@ int main(int argc, char* args[])
     }
 
     SDL_DestroyRenderer(renderer);
-    //SDL_DestroyWindow(window); // behövs denna?
+    //SDL_DestroyWindow(window); // behï¿½vs denna?
     SDL_Quit();
 
     return 0;
