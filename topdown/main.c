@@ -1,11 +1,3 @@
-<<<<<<< Updated upstream
-#include <stdio.h>
-  #include <SDL.h>
-  #include <SDL_image.h>
-  #include <SDL_timer.h>
-//#include <SDL2/SDL.h>
-//#include <SDL2/SDL_image.h>
-=======
 ﻿#include <stdio.h>
 #include <SDL.h>
 #include <SDL_image.h>
@@ -13,17 +5,10 @@
 //#include <SDL2/SDL.h>
 //#include <SDL2/SDL_image.h>
 //#include <SDL2/SDL_timer.h>
->>>>>>> Stashed changes
 #include <stdbool.h>
-#include "player.h""
+#include "player.h"
+#include "world.h"
 
-<<<<<<< Updated upstream
-#define WINDOWWIDTH 1280
-#define WINDOWHEIGTH 720
-
-bool init(SDL_Renderer **renderer);
-void handleEvents(SDL_Event *event, int* up, int* down, int* right, int* left, bool* isPlaying);
-=======
 #define WINDOWWIDTH 704
 #define WINDOWHEIGHT 704
 
@@ -31,7 +16,6 @@ bool init(SDL_Renderer** renderer);
 void handleEvents(SDL_Event* event, int* up, int* down, int* right, int* left, bool* isPlaying);
 void renderBackground(SDL_Renderer* gRenderer, SDL_Texture* mTiles, SDL_Rect gTiles[]);
 void loadMedia(SDL_Renderer* renderer, SDL_Rect gridTiles[], SDL_Texture** tiles);
->>>>>>> Stashed changes
 
 int main(int argc, char* args[])
 {
@@ -44,18 +28,12 @@ int main(int argc, char* args[])
     SDL_FreeSurface(testSurface);
     SDL_Rect testSquare;
 
-<<<<<<< Updated upstream
-    Player testPlayer = createPlayer(64, 64);
-=======
     // Player
     Player testPlayer = createPlayer(0, 0);
->>>>>>> Stashed changes
 
     bool isPlaying = true;
     int up = 0, down = 0, left = 0, right = 0;
 
-<<<<<<< Updated upstream
-=======
     // Background
     SDL_Texture* tiles = NULL;
     SDL_Rect gridTiles[900];   // Kommer innehålla alla 900 rutor från bakgrundsbilden, kan optmiseras.
@@ -63,7 +41,6 @@ int main(int argc, char* args[])
     loadMedia(renderer, gridTiles, &tiles);
 
 
->>>>>>> Stashed changes
     while (isPlaying)
     {
         handleEvents(&event, &up, &down, &right, &left, &isPlaying);
@@ -72,6 +49,8 @@ int main(int argc, char* args[])
 
         testSquare = getPlayerRect(testPlayer);
         SDL_RenderClear(renderer);
+
+        renderBackground(renderer, tiles, gridTiles);
         SDL_RenderCopy(renderer, texture, NULL, &testSquare);
         SDL_RenderPresent(renderer);
 
@@ -82,13 +61,11 @@ int main(int argc, char* args[])
     //Game renderer
 
     SDL_DestroyRenderer(renderer);
-    //SDL_DestroyWindow(window); // beh�vs denna?
+    //SDL_DestroyWindow(window); // beh�vs denna?
     SDL_Quit();
 
     return 0;
 }
-<<<<<<< Updated upstream
-=======
 
 
 void loadMedia(SDL_Renderer* renderer, SDL_Rect gTiles[], SDL_Texture** tiles)
@@ -128,7 +105,6 @@ void renderBackground(SDL_Renderer* gRenderer, SDL_Texture* mTiles, SDL_Rect gTi
         }
     }
 }
->>>>>>> Stashed changes
 
 
 
