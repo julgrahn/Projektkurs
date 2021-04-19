@@ -4,10 +4,11 @@
 //#include <SDL2/SDL.h>
 
 #define WINDOWWIDTH 1280
-#define WINDOWHEIGTH 720
+#define WINDOWHEIGHT 720
 
 #define PUBLIC
 #define SPEED 10
+#define HEALTH 100
 
 struct Player_type {
     int health;
@@ -18,7 +19,7 @@ struct Player_type {
 PUBLIC Player createPlayer(int x, int y)
 {
     Player a = malloc(sizeof(struct Player_type));
-    a->health = 100;
+    a->health = HEALTH;
     a->speed = SPEED;
 
     a->pDimensions.x = x;
@@ -38,7 +39,7 @@ PUBLIC void movePlayer(Player p, int up, int down, int right, int left)
     
     // Collision detection with window
     if (p->pDimensions.y <= 0 ) p->pDimensions.y = 0;
-    if (p->pDimensions.y >= WINDOWHEIGTH-p->pDimensions.w ) p->pDimensions.y = WINDOWHEIGTH-p->pDimensions.w;
+    if (p->pDimensions.y >= WINDOWHEIGHT-p->pDimensions.w ) p->pDimensions.y = WINDOWHEIGHT-p->pDimensions.w;
     if (p->pDimensions.x <=0 ) p->pDimensions.x = 0;
     if (p->pDimensions.x >= WINDOWWIDTH-p->pDimensions.h ) p->pDimensions.x = WINDOWWIDTH-p->pDimensions.h;
 
