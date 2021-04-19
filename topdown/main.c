@@ -15,6 +15,7 @@
 bool init(SDL_Renderer **renderer);
 void handleEvents(SDL_Event *event, int* up, int* down, int* right, int* left, bool* isPlaying);
 void renderBackground(SDL_Renderer *gRenderer, SDL_Texture *mTiles, SDL_Rect gTiles[]);
+void loadMedia(SDL_Renderer *renderer, SDL_Texture **tiles, SDL_Rect gridTiles[]);
 
 int main(int argc, char* args[])
 {
@@ -36,14 +37,7 @@ int main(int argc, char* args[])
     SDL_Texture* tiles = NULL;
     SDL_Rect gridTiles[22];
 
-    SDL_Surface* gridTilesSurface = IMG_Load("resources/batch4.png");
-    tiles = SDL_CreateTextureFromSurface(renderer, gridTilesSurface);
-    for (int i = 0; i < 22; i++) {
-        gridTiles[i].x = i*getTileWidth();
-        gridTiles[i].y = 0;
-        gridTiles[i].w = getTileWidth();
-        gridTiles[i].h = getTileHeight();
-    }
+    loadMedia(renderer, &tiles, gridTiles);
 
     while (isPlaying)
     {
@@ -66,6 +60,17 @@ int main(int argc, char* args[])
     SDL_Quit();
 
     return 0;
+}
+void loadMedia(SDL_Renderer *renderer, SDL_Texture **tiles, SDL_Rect gridTiles[]){
+    SDL_Surface* gridTilesSurface = IMG_Load("resources/batch4.png");
+    *tiles = SDL_CreateTextureFromSurface(renderer, gridTilesSurface);
+    for (int i = 0; i < 22; i++) {
+        gridTiles[i].x = i*getTileWidth();
+        gridTiles[i].y = 0;
+        gridTiles[i].w = getTileWidth();
+        gridTiles[i].h = getTileHeight();
+    }
+
 }
 void renderBackground(SDL_Renderer *gRenderer, SDL_Texture *mTiles, SDL_Rect gTiles[]){
     
