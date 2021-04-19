@@ -9,7 +9,7 @@
 
 #define PUBLIC
 #define SPEED 5
-#define ANIMATIONSPEED 10               //lägre värde = snabbare
+#define ANIMATIONSPEED 15               //lägre värde = snabbare
 
 struct Player_type {
     int health;
