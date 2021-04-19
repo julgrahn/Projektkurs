@@ -41,18 +41,6 @@ int main(int argc, char* args[])
     loadMedia(renderer, gridTiles, &tiles);
 
 
-    /*SDL_Surface* gTilesSurface = IMG_Load("resources/tilemap.png");
-    tiles = SDL_CreateTextureFromSurface(renderer, gTilesSurface);
-
-    for (int i = 0; i < 22; i++)
-    {
-        gridTiles[i].x = i * getTileWidth();
-        gridTiles[i].y = 0;
-        gridTiles[i].w = getTileWidth();
-        gridTiles[i].h = getTileHeight();
-    }*/
-
-
     while (isPlaying)
     {
         handleEvents(&event, &up, &down, &right, &left, &isPlaying);
@@ -83,7 +71,7 @@ int main(int argc, char* args[])
 void loadMedia(SDL_Renderer *renderer, SDL_Rect gTiles[], SDL_Texture **tiles)
 {
     SDL_Surface* gTilesSurface = IMG_Load("resources/tilemap.png");
-    tiles = SDL_CreateTextureFromSurface(renderer, gTilesSurface);
+    *tiles = SDL_CreateTextureFromSurface(renderer, gTilesSurface);
 
     for (int i = 0; i < 22; i++)
     {
