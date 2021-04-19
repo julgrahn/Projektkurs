@@ -1,7 +1,7 @@
 #ifndef PLAYER_H
 #define PLAYER_H
-#include <SDL.h>
-//#include <SDL2/SDL.h>
+// #include <SDL.h>
+#include <SDL2/SDL.h>
 typedef struct Player_type* Player;
 
 
@@ -11,6 +11,6 @@ SDL_Rect* getPlayerRect(Player p);
 int getPlayerFrame(Player p);
 
 void playerHealth(Player p, int health);
-SDL_Rect getPlayerRect(Player p);
+//SDL_Rect getPlayerRect(Player p);
 
 #endif

@@ -1,10 +1,10 @@
 #include <stdio.h>
-#include <SDL.h>
-#include <SDL_image.h>
-#include <SDL_timer.h>
-//#include <SDL2/SDL.h>
-//#include <SDL2/SDL_image.h>
-//#include <SDL2/SDL_timer.h>
+// #include <SDL.h>
+// #include <SDL_image.h>
+// #include <SDL_timer.h>
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
+#include <SDL2/SDL_timer.h>
 #include <stdbool.h>
 #include "player.h"
 #include "world.h"
@@ -58,11 +58,12 @@ int main(int argc, char* args[])
 
         SDL_RenderClear(renderer);
         //SDL_RenderCopy(renderer, texture, NULL, &testSquare);
-        SDL_SetRenderDrawColor(renderer, 211, 211, 211, 255);
+        // SDL_SetRenderDrawColor(renderer, 211, 211, 211, 255);
+        renderBackground(renderer, tiles, gridTiles);
         SDL_RenderCopyEx(renderer, playerText, &playerRect[getPlayerFrame(testPlayer)], getPlayerRect(testPlayer), 0, NULL, SDL_FLIP_NONE);
 
-        renderBackground(renderer, tiles, gridTiles);
-        SDL_RenderCopy(renderer, texture, NULL, &testSquare);
+        
+        //SDL_RenderCopy(renderer, texture, NULL, &testSquare);
         SDL_RenderPresent(renderer);
         
 
