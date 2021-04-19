@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include "player.h"
+#include <math.h>
 // #include <SDL.h>
 #include <SDL2/SDL.h>
 
@@ -19,6 +20,7 @@ struct Player_type {
     int frame;
     int frameCounter;
     int isMoving;
+    double direction;
 };
 
 PUBLIC Player createPlayer(int x, int y)
@@ -30,6 +32,7 @@ PUBLIC Player createPlayer(int x, int y)
     a->frame = 0;
     a->isMoving = 0;
     a->frameCounter = 0;
+    a->direction = 0;
 
     a->pDimensions.x = (WINDOWWIDTH - 64) / 2;
     a->pDimensions.y = (WINDOWHEIGHT - 64) / 2;
@@ -44,7 +47,7 @@ PUBLIC int getPlayerFrame(Player p)
     return p->frame;
 }
 
-PUBLIC void movePlayer(Player p, int up, int down, int right, int left)
+PUBLIC void movePlayer(Player p, int up, int down, int right, int left, int mouseX, int mouseY)
 {
     p->isMoving=0;
     if (up && !down) {p->pDimensions.y -= SPEED; p->isMoving=1;}
@@ -52,29 +55,23 @@ PUBLIC void movePlayer(Player p, int up, int down, int right, int left)
     if (left && !right) {p->pDimensions.x -= SPEED; p->isMoving=1;}
     if (right && !left) {p->pDimensions.x += SPEED; p->isMoving=1;}
 
-
-    p->frameCounter = (p->frameCounter+p->isMoving)%(ANIMATIONSPEED+1);     // framecounter går från 0-ANIMATIONSPEED
-    p->frame = (p->frame+((p->frameCounter/ANIMATIONSPEED)*p->isMoving))%4; // ökar frame varje gång framcounter == ANIMATIONSPEED
-
-    // Gör samma som ovan
-    // if(p->isMoving)
-    // {
-    //     p->frameCounter++;
-    //     if(p->frameCounter==20)
-    //     {
-    //         p->frameCounter=0;
-    //         p->frame++;
-    //         if(p->frame==4) p->frame=0;
-    //     }
-    // }
-
-
+    // Update player sprite frame
+    p->frameCounter = (p->frameCounter+p->isMoving)%(ANIMATIONSPEED+1);
+    p->frame = (p->frame+((p->frameCounter/ANIMATIONSPEED)*p->isMoving))%4;
+    // Rotate player
+    p->direction = atan2(mouseY-p->pDimensions.y-32, mouseX-p->pDimensions.x-32)*180/M_PI;
+    
     // Collision detection with window
     if (p-> pDimensions.y <= 0 ) p->pDimensions.y = 0;
     if (p-> pDimensions.y >= WINDOWHEIGHT-p->pDimensions.w ) p->pDimensions.y = WINDOWHEIGHT-p->pDimensions.w;
     if (p-> pDimensions.x <= 0 ) p->pDimensions.x = 0;
     if (p-> pDimensions.x >= WINDOWWIDTH-p->pDimensions.h ) p->pDimensions.x = WINDOWWIDTH-p->pDimensions.h;
 
+}
+
+PUBLIC int getPlayerDirection(Player p)
+{
+    return p->direction;
 }
 
 PUBLIC void playerHealth(Player p, int health)

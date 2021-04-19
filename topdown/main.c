@@ -13,9 +13,9 @@
 #define WINDOWHEIGHT 704
 
 bool init(SDL_Renderer **renderer);
-void handleEvents(SDL_Event *event, int* up, int* down, int* right, int* left, bool* isPlaying);
+void handleEvents(SDL_Event *event, int* up, int* down, int* right, int* left, bool* isPlaying, int *mouseX, int *mouseY);
 void renderBackground(SDL_Renderer *gRenderer, SDL_Texture *mTiles, SDL_Rect gTiles[]);
-void loadMedia(SDL_Renderer *renderer, SDL_Rect gridTiles[], SDL_Texture **tiles);
+void loadMedia(SDL_Renderer *renderer, SDL_Rect gTiles[], SDL_Texture **tiles, SDL_Rect playerRect[], SDL_Texture **pTexture, SDL_Cursor **cursor);
 
 int main(int argc, char* args[])
 {
@@ -23,23 +23,13 @@ int main(int argc, char* args[])
     SDL_Renderer* renderer = NULL;
     if (!init(&renderer)) return 1;
 
-    SDL_Surface *playerSurface = IMG_Load("resources/playerRifle.PNG");
-    SDL_Texture *playerText = SDL_CreateTextureFromSurface(renderer, playerSurface);
-    SDL_FreeSurface(playerSurface);
+    SDL_Cursor *cursor = NULL;
     
-    SDL_Rect playerRect[4];
-    for(int n = 0; n < 4; n++)
-    {
-        playerRect[n].x = 0 + (n*64);
-        playerRect[n].y = 0;
-        playerRect[n].h = 64;
-        playerRect[n].w = 64;
-    }
-
-
     // Player
     Player testPlayer = createPlayer(0, 0);
-
+    SDL_Texture *playerText;
+    SDL_Rect playerRect[4];
+    int mouseX = 0, mouseY = 0;
     bool isPlaying = true;
     int up = 0, down = 0, left = 0, right = 0;
 
@@ -47,26 +37,19 @@ int main(int argc, char* args[])
     SDL_Texture* tiles = NULL;
     SDL_Rect gridTiles[22];
 
-    loadMedia(renderer, gridTiles, &tiles);
-
+    loadMedia(renderer, gridTiles, &tiles, playerRect, &playerText, &cursor);
 
     while (isPlaying)
     {
-        handleEvents(&event, &up, &down, &right, &left, &isPlaying);
+        handleEvents(&event, &up, &down, &right, &left, &isPlaying, &mouseX, &mouseY);
       
-        movePlayer(testPlayer, up, down, right, left);
+        movePlayer(testPlayer, up, down, right, left, mouseX, mouseY);
 
         SDL_RenderClear(renderer);
-        //SDL_RenderCopy(renderer, texture, NULL, &testSquare);
-        // SDL_SetRenderDrawColor(renderer, 211, 211, 211, 255);
         renderBackground(renderer, tiles, gridTiles);
-        SDL_RenderCopyEx(renderer, playerText, &playerRect[getPlayerFrame(testPlayer)], getPlayerRect(testPlayer), 0, NULL, SDL_FLIP_NONE);
-
-        
-        //SDL_RenderCopy(renderer, texture, NULL, &testSquare);
+        SDL_RenderCopyEx(renderer, playerText, &playerRect[getPlayerFrame(testPlayer)], getPlayerRect(testPlayer), getPlayerDirection(testPlayer), NULL, SDL_FLIP_NONE);
         SDL_RenderPresent(renderer);
         
-
         SDL_Delay(1000 / 60);
     }
 
@@ -80,11 +63,11 @@ int main(int argc, char* args[])
 }
 
 
-void loadMedia(SDL_Renderer *renderer, SDL_Rect gTiles[], SDL_Texture **tiles)
+void loadMedia(SDL_Renderer *renderer, SDL_Rect gTiles[], SDL_Texture **tiles, SDL_Rect playerRect[], SDL_Texture **pTexture, SDL_Cursor **cursor)
 {
     SDL_Surface* gTilesSurface = IMG_Load("resources/tilemap.png");
     *tiles = SDL_CreateTextureFromSurface(renderer, gTilesSurface);
-
+    SDL_FreeSurface(gTilesSurface);
     for (int i = 0; i < 22; i++)
     {
         gTiles[i].x = i * getTileWidth();
@@ -92,6 +75,20 @@ void loadMedia(SDL_Renderer *renderer, SDL_Rect gTiles[], SDL_Texture **tiles)
         gTiles[i].w = getTileWidth();
         gTiles[i].h = getTileHeight();
     }
+    SDL_Surface *playerSurface = IMG_Load("resources/playerRifle.png");
+    *pTexture = SDL_CreateTextureFromSurface(renderer, playerSurface);
+    SDL_FreeSurface(playerSurface);
+    for(int n = 0; n < 4; n++)
+    {
+        playerRect[n].x = 0 + (n*64);
+        playerRect[n].y = 0;
+        playerRect[n].h = 64;
+        playerRect[n].w = 64;
+    }
+    SDL_Surface *cursorSurface = IMG_Load("resources/crosshair161.png");
+    *cursor = SDL_CreateColorCursor(cursorSurface, 36, 36);
+    SDL_FreeSurface(cursorSurface);
+    SDL_SetCursor(*cursor);
 }
 
 void renderBackground(SDL_Renderer *gRenderer, SDL_Texture *mTiles, SDL_Rect gTiles[])
@@ -142,61 +139,62 @@ bool init(SDL_Renderer **renderer)
     return true;
 }
 
-void handleEvents(SDL_Event *event, int* up, int* down, int* right, int* left, bool* isPlaying)
+void handleEvents(SDL_Event *event, int* up, int* down, int* right, int* left, bool* isPlaying, int *mouseX, int *mouseY)
 {
+    SDL_GetMouseState(mouseX, mouseY);
     while (SDL_PollEvent(event))
     {
         switch (event->type)
         {
-        case SDL_QUIT:
-            *isPlaying = false;
-            break;
-        case SDL_KEYDOWN:
-            switch (event->key.keysym.scancode)
-            {
-            case SDL_SCANCODE_W:
-            case SDL_SCANCODE_UP:
-                *up = 1;
+            case SDL_QUIT:
+                *isPlaying = false;
                 break;
-            case SDL_SCANCODE_A:
-            case SDL_SCANCODE_LEFT:
-                *left = 1;
+            case SDL_KEYDOWN:
+                switch (event->key.keysym.scancode)
+                {
+                    case SDL_SCANCODE_W:
+                    case SDL_SCANCODE_UP:
+                        *up = 1;
+                        break;
+                    case SDL_SCANCODE_A:
+                    case SDL_SCANCODE_LEFT:
+                        *left = 1;
+                        break;
+                    case SDL_SCANCODE_S:
+                    case SDL_SCANCODE_DOWN:
+                        *down = 1;
+                        break;
+                    case SDL_SCANCODE_D:
+                    case SDL_SCANCODE_RIGHT:
+                        *right = 1;
+                        break;
+                    default:
+                        break;
+                }
                 break;
-            case SDL_SCANCODE_S:
-            case SDL_SCANCODE_DOWN:
-                *down = 1;
+            case SDL_KEYUP:
+                switch (event->key.keysym.scancode)
+                {
+                    case SDL_SCANCODE_W:
+                    case SDL_SCANCODE_UP:
+                        *up = 0;
+                        break;
+                    case SDL_SCANCODE_A:
+                    case SDL_SCANCODE_LEFT:
+                        *left = 0;
+                        break;
+                    case SDL_SCANCODE_S:
+                    case SDL_SCANCODE_DOWN:
+                        *down = 0;
+                        break;
+                    case SDL_SCANCODE_D:
+                    case SDL_SCANCODE_RIGHT:
+                        *right = 0;
+                        break;
+                    default:
+                        break;
+                }
                 break;
-            case SDL_SCANCODE_D:
-            case SDL_SCANCODE_RIGHT:
-                *right = 1;
-                break;
-            default:
-                break;
-            }
-            break;
-        case SDL_KEYUP:
-            switch (event->key.keysym.scancode)
-            {
-            case SDL_SCANCODE_W:
-            case SDL_SCANCODE_UP:
-                *up = 0;
-                break;
-            case SDL_SCANCODE_A:
-            case SDL_SCANCODE_LEFT:
-                *left = 0;
-                break;
-            case SDL_SCANCODE_S:
-            case SDL_SCANCODE_DOWN:
-                *down = 0;
-                break;
-            case SDL_SCANCODE_D:
-            case SDL_SCANCODE_RIGHT:
-                *right = 0;
-                break;
-            default:
-                break;
-            }
-            break;
         }
     }
     return;
