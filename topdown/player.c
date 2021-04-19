@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include "player.h"
-//#include <SDL.h>
-#include <SDL2/SDL.h>
+#include <SDL.h>
+//#include <SDL2/SDL.h>
 
 #define WINDOWWIDTH 1280
 #define WINDOWHEIGTH 720
