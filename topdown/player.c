@@ -3,8 +3,8 @@
 #include <SDL.h>
 //#include <SDL2/SDL.h>
 
-#define WINDOWWIDTH 1280
-#define WINDOWHEIGHT 720
+#define WINDOWWIDTH 704
+#define WINDOWHEIGHT 704
 
 #define PUBLIC
 #define SPEED 10
@@ -33,16 +33,16 @@ PUBLIC Player createPlayer(int x, int y)
 
 PUBLIC void movePlayer(Player p, int up, int down, int right, int left)
 {
-    if (up) p->pDimensions.y -= SPEED;
-    if (down) p->pDimensions.y += SPEED;
-    if (left) p->pDimensions.x -= SPEED;
-    if (right) p->pDimensions.x += SPEED;
+    if (up)    p->  pDimensions.y -= SPEED;
+    if (down)  p->  pDimensions.y += SPEED;
+    if (left)  p->  pDimensions.x -= SPEED;
+    if (right) p->  pDimensions.x += SPEED;
     
     // Collision detection with window
-    if (p->pDimensions.y <= 0 ) p->pDimensions.y = 0;
-    if (p->pDimensions.y >= WINDOWHEIGHT-p->pDimensions.w ) p->pDimensions.y = WINDOWHEIGHT-p->pDimensions.w;
-    if (p->pDimensions.x <=0 ) p->pDimensions.x = 0;
-    if (p->pDimensions.x >= WINDOWWIDTH-p->pDimensions.h ) p->pDimensions.x = WINDOWWIDTH-p->pDimensions.h;
+    if (p-> pDimensions.y <= 0 ) p->pDimensions.y = 0;
+    if (p-> pDimensions.y >= WINDOWHEIGHT-p->pDimensions.w ) p->pDimensions.y = WINDOWHEIGHT-p->pDimensions.w;
+    if (p-> pDimensions.x <= 0 ) p->pDimensions.x = 0;
+    if (p-> pDimensions.x >= WINDOWWIDTH-p->pDimensions.h ) p->pDimensions.x = WINDOWWIDTH-p->pDimensions.h;
 
 }
 

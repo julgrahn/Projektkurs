@@ -7,12 +7,15 @@
 //#include <SDL2/SDL_timer.h>
 #include <stdbool.h>
 #include "player.h"
+#include "world.h"
 
-#define WINDOWWIDTH 1280
-#define WINDOWHEIGHT 720
+#define WINDOWWIDTH 704
+#define WINDOWHEIGHT 704
 
 bool init(SDL_Renderer **renderer);
 void handleEvents(SDL_Event *event, int* up, int* down, int* right, int* left, bool* isPlaying);
+void renderBackground(SDL_Renderer *gRenderer, SDL_Texture *mTiles, SDL_Rect gTiles[]);
+void loadMedia(SDL_Renderer *renderer, SDL_Rect gridTiles[], SDL_Texture **tiles);
 
 int main(int argc, char* args[])
 {
@@ -25,10 +28,30 @@ int main(int argc, char* args[])
     SDL_FreeSurface(testSurface);
     SDL_Rect testSquare;
 
+    // Player
     Player testPlayer = createPlayer(0, 0);
 
     bool isPlaying = true;
     int up = 0, down = 0, left = 0, right = 0;
+
+    // Background
+    SDL_Texture* tiles = NULL;
+    SDL_Rect gridTiles[22];
+
+    loadMedia(renderer, gridTiles, &tiles);
+
+
+    /*SDL_Surface* gTilesSurface = IMG_Load("resources/tilemap.png");
+    tiles = SDL_CreateTextureFromSurface(renderer, gTilesSurface);
+
+    for (int i = 0; i < 22; i++)
+    {
+        gridTiles[i].x = i * getTileWidth();
+        gridTiles[i].y = 0;
+        gridTiles[i].w = getTileWidth();
+        gridTiles[i].h = getTileHeight();
+    }*/
+
 
     while (isPlaying)
     {
@@ -38,11 +61,16 @@ int main(int argc, char* args[])
 
         testSquare = getPlayerRect(testPlayer);
         SDL_RenderClear(renderer);
+
+        renderBackground(renderer, tiles, gridTiles);
         SDL_RenderCopy(renderer, texture, NULL, &testSquare);
         SDL_RenderPresent(renderer);
+        
 
         SDL_Delay(1000 / 60);
     }
+
+    //Game renderer
 
     SDL_DestroyRenderer(renderer);
     //SDL_DestroyWindow(window); // beh�vs denna?
@@ -50,6 +78,42 @@ int main(int argc, char* args[])
 
     return 0;
 }
+
+
+void loadMedia(SDL_Renderer *renderer, SDL_Rect gTiles[], SDL_Texture **tiles)
+{
+    SDL_Surface* gTilesSurface = IMG_Load("resources/tilemap.png");
+    tiles = SDL_CreateTextureFromSurface(renderer, gTilesSurface);
+
+    for (int i = 0; i < 22; i++)
+    {
+        gTiles[i].x = i * getTileWidth();
+        gTiles[i].y = 0;
+        gTiles[i].w = getTileWidth();
+        gTiles[i].h = getTileHeight();
+    }
+}
+
+void renderBackground(SDL_Renderer *gRenderer, SDL_Texture *mTiles, SDL_Rect gTiles[])
+{
+    SDL_Rect position;
+    position.y = 0;
+    position.x = 0;
+    position.h = getTileHeight();
+    position.w = getTileWidth();
+
+    for (int i = 0; i < getTileColumns(); i++)
+    {
+        for (int j = 0; j < getTileRows(); j++)
+        {
+            position.y = i * getTileHeight();
+            position.x = j * getTileWidth();
+            SDL_RenderCopyEx(gRenderer, mTiles, &gTiles[getTileGrid(i, j)], &position, 0, NULL, SDL_FLIP_NONE);
+        }
+    }
+}
+
+
 
 bool init(SDL_Renderer **renderer)
 {
