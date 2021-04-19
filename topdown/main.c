@@ -50,6 +50,7 @@ int main(int argc, char* args[])
         testSquare = getPlayerRect(testPlayer);
         SDL_RenderClear(renderer);
 
+        //Game renderer
         renderBackground(renderer, tiles, gridTiles);
         SDL_RenderCopy(renderer, texture, NULL, &testSquare);
         SDL_RenderPresent(renderer);
@@ -58,7 +59,7 @@ int main(int argc, char* args[])
         SDL_Delay(1000 / 60);
     }
 
-    //Game renderer
+    
 
     SDL_DestroyRenderer(renderer);
     //SDL_DestroyWindow(window); // beh�vs denna?
@@ -67,7 +68,7 @@ int main(int argc, char* args[])
     return 0;
 }
 
-
+//Load background surface
 void loadMedia(SDL_Renderer *renderer, SDL_Rect gTiles[], SDL_Texture **tiles)
 {
     SDL_Surface* gTilesSurface = IMG_Load("resources/tilemap.png");
