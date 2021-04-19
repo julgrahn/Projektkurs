@@ -3,8 +3,8 @@
 //#include <SDL.h>
 #include <SDL2/SDL.h>
 
-#define WINDOWWIDTH 1280
-#define WINDOWHEIGTH 720
+#define WINDOWWIDTH 704
+#define WINDOWHEIGTH 704
 
 #define PUBLIC
 #define SPEED 10

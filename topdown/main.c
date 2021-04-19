@@ -7,12 +7,14 @@
 #include <SDL2/SDL_timer.h>
 #include <stdbool.h>
 #include "player.h"
+#include "world.h"
 
-#define WINDOWWIDTH 1280
-#define WINDOWHEIGTH 720
+#define WINDOWWIDTH 704
+#define WINDOWHEIGTH 704
 
 bool init(SDL_Renderer **renderer);
 void handleEvents(SDL_Event *event, int* up, int* down, int* right, int* left, bool* isPlaying);
+void renderBackground(SDL_Renderer *gRenderer, SDL_Texture *mTiles, SDL_Rect gTiles[]);
 
 int main(int argc, char* args[])
 {
@@ -30,6 +32,19 @@ int main(int argc, char* args[])
     bool isPlaying = true;
     int up = 0, down = 0, left = 0, right = 0;
 
+    // Background
+    SDL_Texture* tiles = NULL;
+    SDL_Rect gridTiles[22];
+
+    SDL_Surface* gridTilesSurface = IMG_Load("resources/batch4.png");
+    tiles = SDL_CreateTextureFromSurface(renderer, gridTilesSurface);
+    for (int i = 0; i < 22; i++) {
+        gridTiles[i].x = i*getTileWidth();
+        gridTiles[i].y = 0;
+        gridTiles[i].w = getTileWidth();
+        gridTiles[i].h = getTileHeight();
+    }
+
     while (isPlaying)
     {
         handleEvents(&event, &up, &down, &right, &left, &isPlaying);
@@ -38,6 +53,8 @@ int main(int argc, char* args[])
 
         testSquare = getPlayerRect(testPlayer);
         SDL_RenderClear(renderer);
+
+        renderBackground(renderer, tiles, gridTiles);
         SDL_RenderCopy(renderer, texture, NULL, &testSquare);
         SDL_RenderPresent(renderer);
 
@@ -49,6 +66,22 @@ int main(int argc, char* args[])
     SDL_Quit();
 
     return 0;
+}
+void renderBackground(SDL_Renderer *gRenderer, SDL_Texture *mTiles, SDL_Rect gTiles[]){
+    
+    SDL_Rect possition;
+    possition.y = 0;
+    possition.x = 0;
+    possition.h = getTileHeight();
+    possition.w = getTileWidth();
+    
+    for (int i = 0; i<getTileColumns(); i++) {
+        for (int j = 0; j<getTileRows(); j++) {
+            possition.y = i*getTileHeight();
+            possition.x = j*getTileWidth();
+            SDL_RenderCopyEx(gRenderer, mTiles, &gTiles[getTileGrid(i,j)],&possition , 0, NULL, SDL_FLIP_NONE);
+        }
+    }
 }
 
 bool init(SDL_Renderer **renderer)
