@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 #include <stdio.h>
 //  #include <SDL.h>
 //  #include <SDL_image.h>
@@ -6,35 +5,17 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_timer.h>
-=======
-﻿#include <stdio.h>
-#include <SDL.h>
-#include <SDL_image.h>
-#include <SDL_timer.h>
-//#include <SDL2/SDL.h>
-//#include <SDL2/SDL_image.h>
-//#include <SDL2/SDL_timer.h>
->>>>>>> e00810607ca7030f068fa815f3bb1e47fe9a5eb2
 #include <stdbool.h>
 #include "player.h"
 #include "world.h"
 
 #define WINDOWWIDTH 704
-<<<<<<< HEAD
-#define WINDOWHEIGTH 704
-
-bool init(SDL_Renderer **renderer);
-void handleEvents(SDL_Event *event, int* up, int* down, int* right, int* left, bool* isPlaying);
-void renderBackground(SDL_Renderer *gRenderer, SDL_Texture *mTiles, SDL_Rect gTiles[]);
-void loadMedia(SDL_Renderer *renderer, SDL_Texture **tiles, SDL_Rect gridTiles[]);
-=======
 #define WINDOWHEIGHT 704
 
 bool init(SDL_Renderer** renderer);
 void handleEvents(SDL_Event* event, int* up, int* down, int* right, int* left, bool* isPlaying);
 void renderBackground(SDL_Renderer* gRenderer, SDL_Texture* mTiles, SDL_Rect gTiles[]);
 void loadMedia(SDL_Renderer* renderer, SDL_Rect gridTiles[], SDL_Texture** tiles);
->>>>>>> e00810607ca7030f068fa815f3bb1e47fe9a5eb2
 
 int main(int argc, char* args[])
 {
@@ -47,10 +28,7 @@ int main(int argc, char* args[])
     SDL_FreeSurface(testSurface);
     SDL_Rect testSquare;
 
-<<<<<<< HEAD
-=======
     // Player
->>>>>>> e00810607ca7030f068fa815f3bb1e47fe9a5eb2
     Player testPlayer = createPlayer(0, 0);
 
     bool isPlaying = true;
@@ -58,16 +36,10 @@ int main(int argc, char* args[])
 
     // Background
     SDL_Texture* tiles = NULL;
-<<<<<<< HEAD
-    SDL_Rect gridTiles[22];
-
-    loadMedia(renderer, &tiles, gridTiles);
-=======
     SDL_Rect gridTiles[900];   // Kommer innehålla alla 900 rutor från bakgrundsbilden, kan optmiseras.
 
     loadMedia(renderer, gridTiles, &tiles);
 
->>>>>>> e00810607ca7030f068fa815f3bb1e47fe9a5eb2
 
     while (isPlaying)
     {
@@ -94,34 +66,6 @@ int main(int argc, char* args[])
 
     return 0;
 }
-void loadMedia(SDL_Renderer *renderer, SDL_Texture **tiles, SDL_Rect gridTiles[]){
-    SDL_Surface* gridTilesSurface = IMG_Load("resources/batch4.png");
-    *tiles = SDL_CreateTextureFromSurface(renderer, gridTilesSurface);
-    for (int i = 0; i < 22; i++) {
-        gridTiles[i].x = i*getTileWidth();
-        gridTiles[i].y = 0;
-        gridTiles[i].w = getTileWidth();
-        gridTiles[i].h = getTileHeight();
-    }
-
-}
-void renderBackground(SDL_Renderer *gRenderer, SDL_Texture *mTiles, SDL_Rect gTiles[]){
-    
-    SDL_Rect possition;
-    possition.y = 0;
-    possition.x = 0;
-    possition.h = getTileHeight();
-    possition.w = getTileWidth();
-    
-    for (int i = 0; i<getTileColumns(); i++) {
-        for (int j = 0; j<getTileRows(); j++) {
-            possition.y = i*getTileHeight();
-            possition.x = j*getTileWidth();
-            SDL_RenderCopyEx(gRenderer, mTiles, &gTiles[getTileGrid(i,j)],&possition , 0, NULL, SDL_FLIP_NONE);
-        }
-    }
-}
-
 
 void loadMedia(SDL_Renderer* renderer, SDL_Rect gTiles[], SDL_Texture** tiles)
 {
