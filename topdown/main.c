@@ -9,7 +9,7 @@
 #include "player.h"
 
 #define WINDOWWIDTH 1280
-#define WINDOWHEIGTH 720
+#define WINDOWHEIGHT 720
 
 bool init(SDL_Renderer **renderer);
 void handleEvents(SDL_Event *event, int* up, int* down, int* right, int* left, bool* isPlaying);
@@ -58,7 +58,7 @@ bool init(SDL_Renderer **renderer)
         printf("error initializing SDL: %s\n", SDL_GetError());
         return false;
     }
-    SDL_Window* window = SDL_CreateWindow("top down extreme shooter", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOWWIDTH, WINDOWHEIGTH, 0);
+    SDL_Window* window = SDL_CreateWindow("top down extreme shooter", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOWWIDTH, WINDOWHEIGHT, 0);
     if (window == NULL)
     {
         printf("error creating window: %s\n", SDL_GetError());
