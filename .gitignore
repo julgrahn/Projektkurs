@@ -11,4 +11,5 @@
 *.dll
 main.o
 player.o
+world.o
 theGame
