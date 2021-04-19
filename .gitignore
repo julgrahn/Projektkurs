@@ -9,3 +9,12 @@
 //.vscode
 *.exe
 *.dll
+*.vcxproj
+*.filters
+*.user
+*.obj
+*.recipe
+*.log
+*.tlog
+*.idb
+*.pdb
