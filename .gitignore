@@ -6,10 +6,25 @@
 .DS_Store
 .out
 .o
-.vscode
+//.vscode
 *.exe
 *.dll
+<<<<<<< HEAD
 main.o
 player.o
 world.o
 theGame
+=======
+*.vcxproj
+*.filters
+*.user
+*.obj
+*.recipe
+*.log
+*.tlog
+*.idb
+*.pdb
+*.enc
+*.sln
+*.ilk
+>>>>>>> e00810607ca7030f068fa815f3bb1e47fe9a5eb2

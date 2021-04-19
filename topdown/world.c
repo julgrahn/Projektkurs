@@ -1,5 +1,6 @@
 #include "world.h"
 
+<<<<<<< HEAD
 int tileGrid[22][22] = {
     {0x05,0x05,0x05,0x05,0x05,0x05,0x05,0x05,0x05,0x05,0x05,0x05,0x05,0x05,0x05,0x05,0x05,0x05,0x05,0x05,0x05,0x05},
     {0x05,0x05,0x05,0x05,0x05,0x05,0x05,0x05,0x05,0x05,0x05,0x05,0x05,0x05,0x05,0x05,0x05,0x05,0x05,0x05,0x05,0x05},
@@ -23,6 +24,34 @@ int tileGrid[22][22] = {
     {0x05,0x05,0x05,0x05,0x05,0x05,0x05,0x05,0x05,0x05,0x05,0x05,0x05,0x05,0x05,0x05,0x05,0x05,0x05,0x05,0x05,0x05},
     {0x05,0x05,0x05,0x05,0x05,0x05,0x05,0x05,0x05,0x05,0x05,0x05,0x05,0x05,0x05,0x05,0x05,0x05,0x05,0x05,0x05,0x05},
     {0x05,0x05,0x05,0x05,0x05,0x05,0x05,0x05,0x05,0x05,0x05,0x05,0x05,0x05,0x05,0x05,0x05,0x05,0x05,0x05,0x05,0x05}
+=======
+enum material {bricks = 5, grass = 35};
+
+
+int tileGrid[22][22] = {
+    {bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks},
+    {bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks},
+    {bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks},
+    {bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks},
+    {bricks,bricks,bricks,bricks,bricks,grass,bricks,bricks,bricks,bricks,bricks,grass,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks},
+    {bricks,bricks,bricks,bricks,bricks,grass,bricks,bricks,bricks,bricks,bricks,grass,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks},
+    {bricks,bricks,bricks,bricks,bricks,grass,bricks,bricks,bricks,bricks,bricks,grass,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks},
+    {bricks,bricks,bricks,bricks,bricks,grass,bricks,bricks,bricks,bricks,bricks,grass,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks},
+    {bricks,bricks,bricks,bricks,bricks,grass,bricks,bricks,bricks,bricks,bricks,grass,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks},
+    {bricks,bricks,bricks,bricks,bricks,grass,bricks,bricks,bricks,bricks,bricks,grass,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks},
+    {bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks},
+    {bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks},
+    {bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks},
+    {bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks},
+    {bricks,bricks,bricks,bricks,bricks,grass,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks},
+    {bricks,bricks,bricks,bricks,bricks,bricks,grass,bricks,bricks,bricks,bricks,bricks,grass,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks},
+    {bricks,bricks,bricks,bricks,bricks,bricks,bricks,grass,bricks,bricks,bricks,grass,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks},
+    {bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,grass,grass,grass,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks},
+    {bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks},
+    {bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks},
+    {bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks},
+    {bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks},
+>>>>>>> e00810607ca7030f068fa815f3bb1e47fe9a5eb2
 };
 
 int tileRows = 22;
@@ -31,6 +60,7 @@ int tileColumns = 22;
 int tileWidth = 32;
 int tileHeight = 32;
 
+<<<<<<< HEAD
 int getTileRows(){
     return tileRows;
 }
@@ -44,5 +74,20 @@ int getTileHeight(){
     return tileHeight;
 }
 int getTileGrid(int x,int y){
+=======
+int getTileRows() {
+    return tileRows;
+}
+int getTileColumns() {
+    return tileColumns;
+}
+int getTileWidth() {
+    return tileWidth;
+}
+int getTileHeight() {
+    return tileHeight;
+}
+int getTileGrid(int x, int y) {
+>>>>>>> e00810607ca7030f068fa815f3bb1e47fe9a5eb2
     return tileGrid[x][y];
 }
