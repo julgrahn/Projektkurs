@@ -6,13 +6,18 @@
 #define WINDOWWIDTH 1280
 #define WINDOWHEIGTH 720
 
+
 #define PUBLIC
-#define SPEED 10
+#define SPEED 5
+#define ANIMATIONSPEED 10               //lägre värde = snabbare
 
 struct Player_type {
     int health;
     int speed;
     SDL_Rect pDimensions;
+    int frame;
+    int frameCounter;
+    int isMoving;
 };
 
 PUBLIC Player createPlayer(int x, int y)
@@ -20,6 +25,9 @@ PUBLIC Player createPlayer(int x, int y)
     Player a = malloc(sizeof(struct Player_type));
     a->health = 100;
     a->speed = SPEED;
+    a->frame = 0;
+    a->isMoving = 0;
+    a->frameCounter = 0;
 
     a->pDimensions.x = x;
     a->pDimensions.y = y;
@@ -29,13 +37,34 @@ PUBLIC Player createPlayer(int x, int y)
     return a;
 }
 
+PUBLIC int getPlayerFrame(Player p)
+{
+    return p->frame;
+}
+
 PUBLIC void movePlayer(Player p, int up, int down, int right, int left)
 {
-    if (up && !down) p->pDimensions.y -= SPEED;
-    if (down && !up) p->pDimensions.y += SPEED;
-    if (left && !right) p->pDimensions.x -= SPEED;
-    if (right && !left) p->pDimensions.x += SPEED;
-    
+    p->isMoving=0;
+    if (up && !down) {p->pDimensions.y -= SPEED; p->isMoving=1;}
+    if (down && !up) {p->pDimensions.y += SPEED; p->isMoving=1;}
+    if (left && !right) {p->pDimensions.x -= SPEED; p->isMoving=1;}
+    if (right && !left) {p->pDimensions.x += SPEED; p->isMoving=1;}
+
+    p->frameCounter = (p->frameCounter+p->isMoving)%(ANIMATIONSPEED+1);     // framecounter går från 0-ANIMATIONSPEED
+    p->frame = (p->frame+((p->frameCounter/ANIMATIONSPEED)*p->isMoving))%4; // ökar frame varje gång framcounter == ANIMATIONSPEED
+
+    // Gör samma som ovan
+    // if(p->isMoving)
+    // {
+    //     p->frameCounter++;
+    //     if(p->frameCounter==20)
+    //     {
+    //         p->frameCounter=0;
+    //         p->frame++;
+    //         if(p->frame==4) p->frame=0;
+    //     }
+    // }
+
     // Collision detection with window
     if (p->pDimensions.y <= 0 ) p->pDimensions.y = 0;
     if (p->pDimensions.y >= WINDOWHEIGTH-p->pDimensions.w ) p->pDimensions.y = WINDOWHEIGTH-p->pDimensions.w;
@@ -44,7 +73,7 @@ PUBLIC void movePlayer(Player p, int up, int down, int right, int left)
 
 }
 
-PUBLIC SDL_Rect getPlayerRect(Player p)
+PUBLIC SDL_Rect* getPlayerRect(Player p)
 {
-    return p->pDimensions;
+    return &p->pDimensions;
 }

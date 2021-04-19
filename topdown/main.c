@@ -20,10 +20,19 @@ int main(int argc, char* args[])
     SDL_Renderer* renderer = NULL;
     if (!init(&renderer)) return 1;
 
-    SDL_Surface* testSurface = SDL_CreateRGBSurface(0, 20, 90, 1, 0, 0, 0, 0);
-    SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, testSurface);
-    SDL_FreeSurface(testSurface);
-    SDL_Rect testSquare;
+    SDL_Surface *playerSurface = IMG_Load("resources/playerRifle.PNG");
+    SDL_Texture *playerText = SDL_CreateTextureFromSurface(renderer, playerSurface);
+    SDL_FreeSurface(playerSurface);
+    
+    SDL_Rect playerRect[4];
+    for(int n = 0; n < 4; n++)
+    {
+        playerRect[n].x = 0 + (n*64);
+        playerRect[n].y = 0;
+        playerRect[n].h = 64;
+        playerRect[n].w = 64;
+    }
+
 
     Player testPlayer = createPlayer(0, 0);
 
@@ -36,9 +45,10 @@ int main(int argc, char* args[])
       
         movePlayer(testPlayer, up, down, right, left);
 
-        testSquare = getPlayerRect(testPlayer);
         SDL_RenderClear(renderer);
-        SDL_RenderCopy(renderer, texture, NULL, &testSquare);
+        //SDL_RenderCopy(renderer, texture, NULL, &testSquare);
+        SDL_SetRenderDrawColor(renderer, 211, 211, 211, 255);
+        SDL_RenderCopyEx(renderer, playerText, &playerRect[getPlayerFrame(testPlayer)], getPlayerRect(testPlayer), 0, NULL, SDL_FLIP_NONE);
         SDL_RenderPresent(renderer);
 
         SDL_Delay(1000 / 60);
