@@ -1,8 +1,6 @@
 #include <stdlib.h>
 #include "player.h"
 #include <math.h>
-#include <SDL.h>
-//#include <SDL2/SDL.h>
 
 #define WINDOWWIDTH 704
 #define WINDOWHEIGHT 704
@@ -59,7 +57,7 @@ PUBLIC void movePlayer(Player p, int up, int down, int right, int left, int mous
     p->frameCounter = (p->frameCounter+p->isMoving)%(ANIMATIONSPEED+1);
     p->frame = (p->frame+((p->frameCounter/ANIMATIONSPEED)*p->isMoving))%4;
     // Rotate player
-    p->direction = atan2(mouseY-p->pDimensions.y-32, mouseX-p->pDimensions.x-32)*180/M_PI;
+    p->direction = atan2(mouseY-p->pDimensions.y-34, mouseX-p->pDimensions.x-18)*180/M_PI;
     
     // Collision detection with window
     if (p-> pDimensions.y <= 0 ) p->pDimensions.y = 0;

@@ -1,10 +1,5 @@
 ﻿#include <stdio.h>
-#include <SDL.h>
-#include <SDL_image.h>
-#include <SDL_timer.h>
-//#include <SDL2/SDL.h>
-//#include <SDL2/SDL_image.h>
-//#include <SDL2/SDL_timer.h>
+#include "sdlinclude.h"
 #include <stdbool.h>
 #include "player.h"
 #include "world.h"
@@ -30,10 +25,6 @@ int main(int argc, char* args[])
     SDL_Texture *playerText;
     SDL_Rect playerRect[4];
     int mouseX = 0, mouseY = 0;
-    SDL_Surface* testSurface = SDL_CreateRGBSurface(0, 20, 90, 1, 0, 0, 0, 0);
-    SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, testSurface);
-    SDL_FreeSurface(testSurface);
-    //SDL_Rect testSquare; kan tas bort
 
     bool isPlaying = true;
     int up = 0, down = 0, left = 0, right = 0;
@@ -44,6 +35,7 @@ int main(int argc, char* args[])
 
     loadMedia(renderer, gridTiles, &tiles, playerRect, &playerText, &cursor);
 
+    SDL_Point testPoint = {20, 32};
 
     while (isPlaying)
     {
@@ -55,7 +47,7 @@ int main(int argc, char* args[])
 
         //Game renderer
         renderBackground(renderer, tiles, gridTiles);
-        SDL_RenderCopyEx(renderer, playerText, &playerRect[getPlayerFrame(testPlayer)], getPlayerRect(testPlayer), getPlayerDirection(testPlayer), NULL, SDL_FLIP_NONE);
+        SDL_RenderCopyEx(renderer, playerText, &playerRect[getPlayerFrame(testPlayer)], getPlayerRect(testPlayer), getPlayerDirection(testPlayer), &testPoint, SDL_FLIP_NONE);
         SDL_RenderPresent(renderer);
         
         SDL_Delay(1000 / 60);
