@@ -4,9 +4,6 @@
 #include "player.h"
 #include "world.h"
 
-#define WINDOWWIDTH 704
-#define WINDOWHEIGHT 704
-
 bool init(SDL_Renderer **renderer);
 void handleEvents(SDL_Event *event, int* up, int* down, int* right, int* left, bool* isPlaying, int *mouseX, int *mouseY);
 void renderBackground(SDL_Renderer *gRenderer, SDL_Texture *mTiles, SDL_Rect gTiles[]);
@@ -21,7 +18,7 @@ int main(int argc, char* args[])
     SDL_Cursor *cursor = NULL;
     
     // Player
-    Player testPlayer = createPlayer(0, 0);
+    Player player1 = createPlayer(0, 0);
     SDL_Texture *playerText;
     SDL_Rect playerRect[4];
     int mouseX = 0, mouseY = 0;
@@ -35,19 +32,19 @@ int main(int argc, char* args[])
 
     loadMedia(renderer, gridTiles, &tiles, playerRect, &playerText, &cursor);
 
-    SDL_Point testPoint = {20, 32};
+    SDL_Point playerRotationPoint = {20, 32};
 
     while (isPlaying)
     {
         handleEvents(&event, &up, &down, &right, &left, &isPlaying, &mouseX, &mouseY);
 
-        movePlayer(testPlayer, up, down, right, left, mouseX, mouseY);
+        movePlayer(player1, up, down, right, left, mouseX, mouseY);
 
         SDL_RenderClear(renderer);
 
         //Game renderer
         renderBackground(renderer, tiles, gridTiles);
-        SDL_RenderCopyEx(renderer, playerText, &playerRect[getPlayerFrame(testPlayer)], getPlayerRect(testPlayer), getPlayerDirection(testPlayer), &testPoint, SDL_FLIP_NONE);
+        SDL_RenderCopyEx(renderer, playerText, &playerRect[getPlayerFrame(player1)], getPlayerRect(player1), getPlayerDirection(player1), &playerRotationPoint, SDL_FLIP_NONE);
         SDL_RenderPresent(renderer);
         
         SDL_Delay(1000 / 60);
