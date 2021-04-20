@@ -1,10 +1,10 @@
-#include <stdio.h>
-// #include <SDL.h>
-// #include <SDL_image.h>
-// #include <SDL_timer.h>
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
-#include <SDL2/SDL_timer.h>
+﻿#include <stdio.h>
+#include <SDL.h>
+#include <SDL_image.h>
+#include <SDL_timer.h>
+//#include <SDL2/SDL.h>
+//#include <SDL2/SDL_image.h>
+//#include <SDL2/SDL_timer.h>
 #include <stdbool.h>
 #include "player.h"
 #include "world.h"
@@ -26,24 +26,32 @@ int main(int argc, char* args[])
     SDL_Cursor *cursor = NULL;
     
     // Player
-    Player testPlayer = createPlayer(0, 0);
     SDL_Texture *playerText;
     SDL_Rect playerRect[4];
     int mouseX = 0, mouseY = 0;
+    SDL_Surface* testSurface = SDL_CreateRGBSurface(0, 20, 90, 1, 0, 0, 0, 0);
+    SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, testSurface);
+    SDL_FreeSurface(testSurface);
+    SDL_Rect testSquare;
+
+    // Player
+    Player testPlayer = createPlayer(0, 0);
+
     bool isPlaying = true;
     int up = 0, down = 0, left = 0, right = 0;
 
     // Background
     SDL_Texture* tiles = NULL;
-    SDL_Rect gridTiles[22];
+    SDL_Rect gridTiles[900];   // Kommer innehålla alla 900 rutor från bakgrundsbilden, kan optmiseras.
 
-    loadMedia(renderer, gridTiles, &tiles, playerRect, &playerText, &cursor);
+    loadMedia(renderer, gridTiles, &tiles);
+
 
     while (isPlaying)
     {
-        handleEvents(&event, &up, &down, &right, &left, &isPlaying, &mouseX, &mouseY);
-      
-        movePlayer(testPlayer, up, down, right, left, mouseX, mouseY);
+        handleEvents(&event, &up, &down, &right, &left, &isPlaying);
+
+        movePlayer(testPlayer, up, down, right, left);
 
         SDL_RenderClear(renderer);
         renderBackground(renderer, tiles, gridTiles);
@@ -92,6 +100,26 @@ void loadMedia(SDL_Renderer *renderer, SDL_Rect gTiles[], SDL_Texture **tiles, S
 }
 
 void renderBackground(SDL_Renderer *gRenderer, SDL_Texture *mTiles, SDL_Rect gTiles[])
+void loadMedia(SDL_Renderer* renderer, SDL_Rect gTiles[], SDL_Texture** tiles)
+{
+    SDL_Surface* gTilesSurface = IMG_Load("resources/tilemap.png");
+    *tiles = SDL_CreateTextureFromSurface(renderer, gTilesSurface);
+
+    for (int i = 0; i < 30; i++)
+    {
+        for (int j = 0; j < 30; j++)
+        {
+            gTiles[i * 30 + j].x = j * getTileWidth();
+            gTiles[i * 30 + j].y = i * getTileHeight();
+            gTiles[i * 30 + j].w = getTileWidth();
+            gTiles[i * 30 + j].h = getTileHeight();
+        }
+        
+    }
+ 
+}
+
+void renderBackground(SDL_Renderer* gRenderer, SDL_Texture* mTiles, SDL_Rect gTiles[])
 {
     SDL_Rect position;
     position.y = 0;
