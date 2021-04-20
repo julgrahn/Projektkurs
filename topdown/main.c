@@ -44,12 +44,12 @@ int main(int argc, char* args[])
     SDL_Texture* tiles = NULL;
     SDL_Rect gridTiles[900];   // Kommer innehålla alla 900 rutor från bakgrundsbilden, kan optmiseras.
 
-    loadMedia(renderer, gridTiles, &tiles, &playerRect, &playerText, &cursor);
+    loadMedia(renderer, gridTiles, &tiles, playerRect, &playerText, &cursor);
 
 
     while (isPlaying)
     {
-        handleEvents(&event, &up, &down, &right, &left, &isPlaying, mouseX, mouseY);
+        handleEvents(&event, &up, &down, &right, &left, &isPlaying, &mouseX, &mouseY);
 
         movePlayer(testPlayer, up, down, right, left, mouseX, mouseY);
 
