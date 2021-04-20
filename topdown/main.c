@@ -1,16 +1,8 @@
 ﻿#include <stdio.h>
-#include <SDL.h>
-#include <SDL_image.h>
-#include <SDL_timer.h>
-//#include <SDL2/SDL.h>
-//#include <SDL2/SDL_image.h>
-//#include <SDL2/SDL_timer.h>
+#include "sdlinclude.h"
 #include <stdbool.h>
 #include "player.h"
 #include "world.h"
-
-#define WINDOWWIDTH 704
-#define WINDOWHEIGHT 704
 
 bool init(SDL_Renderer **renderer);
 void handleEvents(SDL_Event *event, int* up, int* down, int* right, int* left, bool* isPlaying, int *mouseX, int *mouseY);
@@ -26,15 +18,10 @@ int main(int argc, char* args[])
     SDL_Cursor* cursor = NULL;
 
     // Player
-    Player testPlayer = createPlayer(0, 0);
-    SDL_Texture* playerText;
+    Player player1 = createPlayer(0, 0);
+    SDL_Texture *playerText;
     SDL_Rect playerRect[4];
     int mouseX = 0, mouseY = 0;
-    SDL_Surface* testSurface = SDL_CreateRGBSurface(0, 20, 90, 1, 0, 0, 0, 0);
-    SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, testSurface);
-    SDL_FreeSurface(testSurface);
-    SDL_Point position = { 20, 32 };
-    //SDL_Rect testSquare; kan tas bort
 
     bool isPlaying = true;
     int up = 0, down = 0, left = 0, right = 0;
@@ -43,25 +30,21 @@ int main(int argc, char* args[])
     SDL_Texture* tiles = NULL;
     SDL_Rect gridTiles[900];   // Kommer innehålla alla 900 rutor från bakgrundsbilden, kan optmiseras.
 
-    //Testing to draw rectangle around character
-    
-    
-
-
     loadMedia(renderer, gridTiles, &tiles, playerRect, &playerText, &cursor);
 
+    SDL_Point playerRotationPoint = {20, 32};
 
     while (isPlaying)
     {
         handleEvents(&event, &up, &down, &right, &left, &isPlaying, &mouseX, &mouseY);
 
-        movePlayer(testPlayer, up, down, right, left, mouseX, mouseY);
+        movePlayer(player1, up, down, right, left, mouseX, mouseY);
 
         SDL_RenderClear(renderer);
 
         //Game renderer
         renderBackground(renderer, tiles, gridTiles);
-        SDL_RenderCopyEx(renderer, playerText, &playerRect[getPlayerFrame(testPlayer)], getPlayerRect(testPlayer), getPlayerDirection(testPlayer), &position, SDL_FLIP_NONE);
+        SDL_RenderCopyEx(renderer, playerText, &playerRect[getPlayerFrame(player1)], getPlayerRect(player1), getPlayerDirection(player1), &playerRotationPoint, SDL_FLIP_NONE);
         SDL_RenderPresent(renderer);
         
         SDL_Delay(1000 / 60);
