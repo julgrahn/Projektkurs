@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "*.c": "c",
+        "stdbool.h": "c",
+        "sdl_image.h": "c"
+    }
+}

@@ -3,16 +3,16 @@
 ################################################################################
 
 /.vs
-.DS_Store
-.out
-.o
+*.DS_Store
+*.out
+*.o
 //.vscode
 *.exe
 *.dll
-*main.o
-*player.o
-*world.o
-*theGame
+*.main.o
+*.player.o
+*.world.o
+*.theGame
 *.vcxproj
 *.filters
 *.user
@@ -22,6 +22,7 @@
 *.tlog
 *.idb
 *.pdb
-*.enc
 *.sln
 *.ilk
+*.enc
+*.main.exe
