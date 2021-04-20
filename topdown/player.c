@@ -1,7 +1,10 @@
 #include <stdlib.h>
 #include "player.h"
-//#include <SDL.h>
+#include <math.h>
+// #include <SDL.h>
+// #include <SDL_image.h>
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
 
 #define WINDOWWIDTH 704
 #define WINDOWHEIGTH 704
@@ -12,14 +15,17 @@
 #define HEALTH 100
 
 struct Player_type {
+    SDL_Rect pDimensions;
+
     int health;
     int speed;
-    SDL_Rect pDimensions;
     int frame;
     int frameCounter;
     int isMoving;
     double direction;
 };
+
+//int SDL_RenderDrawRect(SDL_Renderer* renderer, SDL_Rect NULL);
 
 PUBLIC Player createPlayer(int x, int y)
 {

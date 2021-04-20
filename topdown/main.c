@@ -23,19 +23,18 @@ int main(int argc, char* args[])
     SDL_Renderer* renderer = NULL;
     if (!init(&renderer)) return 1;
 
-    SDL_Cursor *cursor = NULL;
-    
+    SDL_Cursor* cursor = NULL;
+
     // Player
-    SDL_Texture *playerText;
+    Player testPlayer = createPlayer(0, 0);
+    SDL_Texture* playerText;
     SDL_Rect playerRect[4];
     int mouseX = 0, mouseY = 0;
     SDL_Surface* testSurface = SDL_CreateRGBSurface(0, 20, 90, 1, 0, 0, 0, 0);
     SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, testSurface);
     SDL_FreeSurface(testSurface);
-    SDL_Rect testSquare;
-
-    // Player
-    Player testPlayer = createPlayer(0, 0);
+    SDL_Point position = { 20, 32 };
+    //SDL_Rect testSquare; kan tas bort
 
     bool isPlaying = true;
     int up = 0, down = 0, left = 0, right = 0;
@@ -43,6 +42,11 @@ int main(int argc, char* args[])
     // Background
     SDL_Texture* tiles = NULL;
     SDL_Rect gridTiles[900];   // Kommer innehålla alla 900 rutor från bakgrundsbilden, kan optmiseras.
+
+    //Testing to draw rectangle around character
+    
+    
+
 
     loadMedia(renderer, gridTiles, &tiles, playerRect, &playerText, &cursor);
 
@@ -54,14 +58,15 @@ int main(int argc, char* args[])
         movePlayer(testPlayer, up, down, right, left, mouseX, mouseY);
 
         SDL_RenderClear(renderer);
+
+        //Game renderer
         renderBackground(renderer, tiles, gridTiles);
-        SDL_RenderCopyEx(renderer, playerText, &playerRect[getPlayerFrame(testPlayer)], getPlayerRect(testPlayer), getPlayerDirection(testPlayer), NULL, SDL_FLIP_NONE);
+        SDL_RenderCopyEx(renderer, playerText, &playerRect[getPlayerFrame(testPlayer)], getPlayerRect(testPlayer), getPlayerDirection(testPlayer), &position, SDL_FLIP_NONE);
         SDL_RenderPresent(renderer);
         
         SDL_Delay(1000 / 60);
     }
 
-    //Game renderer
 
     SDL_DestroyRenderer(renderer);
     //SDL_DestroyWindow(window); // beh�vs denna?
