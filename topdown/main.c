@@ -5,17 +5,17 @@
 #include "world.h"
 
 bool init(SDL_Renderer **renderer);
-void handleEvents(SDL_Event *event, int* up, int* down, int* right, int* left, bool* isPlaying, int *mouseX, int *mouseY);
+void handleEvents(SDL_Event *event, int* up, int *down, int *right, int *left, bool *isPlaying, int *mouseX, int *mouseY);
 void renderBackground(SDL_Renderer *gRenderer, SDL_Texture *mTiles, SDL_Rect gTiles[]);
 void loadMedia(SDL_Renderer *renderer, SDL_Rect gTiles[], SDL_Texture **tiles, SDL_Rect playerRect[], SDL_Texture **pTexture, SDL_Cursor **cursor);
 
-int main(int argc, char* args[])
+int main(int argc, char *args[])
 {
     SDL_Event event;
-    SDL_Renderer* renderer = NULL;
+    SDL_Renderer *renderer = NULL;
     if (!init(&renderer)) return 1;
 
-    SDL_Cursor* cursor = NULL;
+    SDL_Cursor *cursor = NULL;
 
     // Player
     Player player1 = createPlayer(0, 0);
@@ -27,7 +27,7 @@ int main(int argc, char* args[])
     int up = 0, down = 0, left = 0, right = 0;
 
     // Background
-    SDL_Texture* tiles = NULL;
+    SDL_Texture *tiles = NULL;
     SDL_Rect gridTiles[900];   // Kommer innehålla alla 900 rutor från bakgrundsbilden, kan optmiseras.
 
     loadMedia(renderer, gridTiles, &tiles, playerRect, &playerText, &cursor);

@@ -2,7 +2,7 @@
 
 
 theGame: main.o player.o world.o
-	gcc -o theGame main.o player.o world.o -lSDL2 -lSDL2_image
+	gcc -o theGame main.o player.o world.o -lSDL2 -lSDL2_image -lSDL2_net
 	
 main.o: main.c
 	gcc -c main.c
