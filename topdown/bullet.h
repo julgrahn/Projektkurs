@@ -1,0 +1,12 @@
+#ifndef BULLET_H
+#define BULLET_H
+#include "sdlinclude.h"
+#include <stdbool.h>
+
+typedef struct Bullet_type* Bullet;
+
+Bullet createBullet();
+void spawnBullet(Bullet bullet, int x, int y, int direction);
+bool isBulletActive(Bullet bullet);
+void moveBullet(Bullet bullet);
+#endif
