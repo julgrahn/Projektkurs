@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include "player.h"
 #include "world.h"
+#include "net.h"
 
 bool init(SDL_Renderer **renderer);
 void handleEvents(SDL_Event *event, int* up, int* down, int* right, int* left, bool* isPlaying, int *mouseX, int *mouseY);
@@ -17,11 +18,12 @@ int main(int argc, char* args[])
 
     SDL_Cursor* cursor = NULL;
 
-    // Player
+    // Player1
     Player player1 = createPlayer(0, 0);
     SDL_Texture *playerText;
     SDL_Rect playerRect[4];
     int mouseX = 0, mouseY = 0;
+
 
     bool isPlaying = true;
     int up = 0, down = 0, left = 0, right = 0;
@@ -29,6 +31,37 @@ int main(int argc, char* args[])
     // Background
     SDL_Texture* tiles = NULL;
     SDL_Rect gridTiles[900];   // Kommer innehålla alla 900 rutor från bakgrundsbilden, kan optmiseras.
+
+    // Netinit
+    UDPsocket sd;
+    IPaddress srvadd;
+    UDPpacket *p;
+    if (SDLNet_Init() < 0)
+    {
+        fprintf(stderr, "SDLNet_Init: %s\n", SDLNet_GetError());
+        exit(EXIT_FAILURE);
+    }
+
+    if (!(sd = SDLNet_UDP_Open(0)))
+    {
+        fprintf(stderr, "SDLNet_UDP_Open: %s\n", SDLNet_GetError());
+        exit(EXIT_FAILURE);
+    }
+
+    /* Resolve server name  */
+    if (SDLNet_ResolveHost(&srvadd, "127.0.0.1", 2000) == -1)
+    {
+        fprintf(stderr, "SDLNet_ResolveHost(192.0.0.1 2000): %s\n", SDLNet_GetError());
+        exit(EXIT_FAILURE);
+    }
+
+    if (!((p = SDLNet_AllocPacket(512))))
+    {
+        fprintf(stderr, "SDLNet_AllocPacket: %s\n", SDLNet_GetError());
+        exit(EXIT_FAILURE);
+    }
+
+    //netInit(&srvadd, &sd, p);
 
     loadMedia(renderer, gridTiles, &tiles, playerRect, &playerText, &cursor);
 
@@ -39,6 +72,13 @@ int main(int argc, char* args[])
         handleEvents(&event, &up, &down, &right, &left, &isPlaying, &mouseX, &mouseY);
 
         movePlayer(player1, up, down, right, left, mouseX, mouseY);
+
+        //netTest(&srvadd, &sd, p);
+        sprintf((char *)p->data, "%d %d\n", (int)100, (int)200);
+        p->address.host = srvadd.host;	/* Set the destination host */
+        p->address.port = srvadd.port;	/* And destination port */
+        p->len = strlen((char *)p->data) + 1;
+        SDLNet_UDP_Send(sd, -1, p);
 
         SDL_RenderClear(renderer);
 
@@ -57,7 +97,6 @@ int main(int argc, char* args[])
 
     return 0;
 }
-
 
 void loadMedia(SDL_Renderer *renderer, SDL_Rect gTiles[], SDL_Texture **tiles, SDL_Rect playerRect[], SDL_Texture **pTexture, SDL_Cursor **cursor)
 {
