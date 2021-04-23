@@ -19,8 +19,6 @@ struct Player_type {
     double direction;
 };
 
-//int SDL_RenderDrawRect(SDL_Renderer* renderer, SDL_Rect NULL);
-
 PUBLIC Player createPlayer(int x, int y)
 {
     Player a = malloc(sizeof(struct Player_type));
