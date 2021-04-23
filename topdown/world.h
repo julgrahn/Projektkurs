@@ -1,6 +1,6 @@
 #pragma once
-#ifndef world_h
-#define world_h
+#ifndef WORLD_H
+#define WORLD_H
 #include <stdio.h>
 
 int getTileRows();

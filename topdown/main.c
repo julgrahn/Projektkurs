@@ -55,6 +55,19 @@ int main(int argc, char* args[])
     //SDL_DestroyWindow(window); // beh�vs denna?
     SDL_Quit();
 
+    //Network
+    if (SDL_Init(0) == -1)
+    {
+        printf("SDL_Init: %s\n", SDL_GetError());
+        exit(1);
+    }
+
+    if (SDLNet_Init() == -1)
+    {
+        printf("SDLNet_init: %s", SDLNet_GetError());
+        exit(2);
+    }
+
     return 0;
 }
 

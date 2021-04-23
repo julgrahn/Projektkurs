@@ -31,6 +31,7 @@ PUBLIC Player createPlayer(int x, int y)
     a->isMoving = 0;
     a->frameCounter = 0;
     a->direction = 0;
+
     a->posX = (WINDOWWIDTH - 64) / 2;
     a->posY = (WINDOWHEIGHT - 64) / 2;
     a->pDimensions.x = (WINDOWWIDTH - 64) / 2;
