@@ -1,30 +1,31 @@
 #include <stdlib.h>
 #include "player.h"
-#include <SDL.h>
-//#include <SDL2/SDL.h>
-
-#define WINDOWWIDTH 704
-#define WINDOWHEIGTH 704
+#include <math.h>
 
 #define PUBLIC
-#define SPEED 10
+#define SPEED 2
+#define ANIMATIONSPEED 8               //lower = faster
+#define HEALTH 100
 
 struct Player_type {
     int health;
-    int speed;
+    double speed;
+    double diaSpeed;
+    double posX, posY;
     SDL_Rect pDimensions;
+    int frame;
+    int frameCounter;
+    int isMoving;
+    double direction;
 };
+
+//int SDL_RenderDrawRect(SDL_Renderer* renderer, SDL_Rect NULL);
 
 PUBLIC Player createPlayer(int x, int y)
 {
     Player a = malloc(sizeof(struct Player_type));
-    a->health = 100;
+    a->health = HEALTH;
     a->speed = SPEED;
-<<<<<<< Updated upstream
-
-    a->pDimensions.x = x;
-    a->pDimensions.y = y;
-=======
     a->diaSpeed = sqrt(SPEED * SPEED / 2);
     a->frame = 0;
     a->isMoving = 0;
@@ -34,27 +35,18 @@ PUBLIC Player createPlayer(int x, int y)
     a->posY = (WINDOWHEIGHT - 64) / 2;
     a->pDimensions.x = (WINDOWWIDTH - 64) / 2;
     a->pDimensions.y = (WINDOWHEIGHT - 64) / 2;
->>>>>>> Stashed changes
     a->pDimensions.w = 64;
     a->pDimensions.h = 64;
-
     return a;
 }
 
-PUBLIC void movePlayer(Player p, int up, int down, int right, int left)
+PUBLIC int getPlayerFrame(Player p)
 {
-<<<<<<< Updated upstream
-    if (up && !down) p->pDimensions.y -= SPEED;
-    if (down && !up) p->pDimensions.y += SPEED;
-    if (left && !right) p->pDimensions.x -= SPEED;
-    if (right && !left) p->pDimensions.x += SPEED;
+    return p->frame;
+}
 
-    // Collision detection with window
-    if (p->pDimensions.y <= 0) p->pDimensions.y = 0;
-    if (p->pDimensions.y >= WINDOWHEIGTH - p->pDimensions.w) p->pDimensions.y = WINDOWHEIGTH - p->pDimensions.w;
-    if (p->pDimensions.x <= 0) p->pDimensions.x = 0;
-    if (p->pDimensions.x >= WINDOWWIDTH - p->pDimensions.h) p->pDimensions.x = WINDOWWIDTH - p->pDimensions.h;
-=======
+PUBLIC void movePlayer(Player p, int up, int down, int right, int left, int mouseX, int mouseY)
+{
     double newX = 0, newY = 0;
     p->isMoving = 0;
     if (up && !down) { newY -= p->speed; p->isMoving = 1; }
@@ -93,16 +85,11 @@ PUBLIC int getPlayerDirection(Player p)
 
 PUBLIC void playerHealth(Player p, int health)
 {
->>>>>>> Stashed changes
 
 }
 
-PUBLIC SDL_Rect getPlayerRect(Player p)
+PUBLIC SDL_Rect* getPlayerRect(Player p)
 {
-<<<<<<< Updated upstream
-    return p->pDimensions;
-}
-=======
     return &p->pDimensions;
 }
 
@@ -127,4 +114,3 @@ PUBLIC int getPlayerY(Player p)
         }
     }
 }*/
->>>>>>> Stashed changes
