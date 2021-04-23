@@ -11,6 +11,7 @@ bool init(SDL_Renderer** renderer);
 void handleEvents(SDL_Event* event, int* up, int* down, int* right, int* left, bool* isPlaying, int* mouseX, int* mouseY, bool* shooting);
 void renderBackground(SDL_Renderer* gRenderer, SDL_Texture* mTiles, SDL_Rect gTiles[]);
 void loadMedia(SDL_Renderer* renderer, SDL_Rect gTiles[], SDL_Texture** tiles, SDL_Rect playerRect[], SDL_Texture** pTexture, SDL_Cursor** cursor);
+bool rectCollisionTest(SDL_Rect* a, SDL_Rect* b);
 
 int main(int argc, char* args[])
 {
@@ -21,10 +22,13 @@ int main(int argc, char* args[])
     SDL_Cursor* cursor = NULL;
 
     // Player
-    Player player1 = createPlayer(0, 0);
+    Player player1 = createPlayer(200, 200);
     SDL_Texture* playerText;
     SDL_Rect playerRect[4];
     int mouseX = 0, mouseY = 0;
+
+    Player dummy = createPlayer(100, 100);
+    
 
     // Bullet
     Bullet bullets[MAX_BULLETS];
@@ -67,19 +71,26 @@ int main(int argc, char* args[])
             if (isBulletActive(bullets[i]))
             {
                 moveBullet(bullets[i]);
+                if (rectCollisionTest(getBulletRect(bullets[i]), getPlayerRect(dummy)))
+                {
+                    freeBullet(bullets[i]);
+                }
             }
         }
+
+        
         
         SDL_RenderClear(renderer);
 
         //Game renderer
         renderBackground(renderer, tiles, gridTiles);
         SDL_RenderCopyEx(renderer, playerText, &playerRect[getPlayerFrame(player1)], getPlayerRect(player1), getPlayerDirection(player1), &playerRotationPoint, SDL_FLIP_NONE);
+        SDL_RenderCopyEx(renderer, playerText, &playerRect[getPlayerFrame(dummy)], getPlayerRect(dummy), getPlayerDirection(dummy), &playerRotationPoint, SDL_FLIP_NONE);
         for (int i = 0; i < MAX_BULLETS; i++)
         {
             if (isBulletActive(bullets[i]))
             {
-                SDL_RenderCopy(renderer, bulletTexture, NULL, bullets[i]);
+                SDL_RenderCopy(renderer, bulletTexture, NULL, getBulletRect(bullets[i]));
             }
             
         }
@@ -149,7 +160,12 @@ void renderBackground(SDL_Renderer* gRenderer, SDL_Texture* mTiles, SDL_Rect gTi
     }
 }
 
-
+bool rectCollisionTest(SDL_Rect* a, SDL_Rect* b)
+{
+    if((a->x)>(b->x) && (a->x)<((b->x)+(b->w)) && (a->y) > (b->y) && (a->y) < ((b->y) + (b->h)))
+        return true;
+    return false;
+}
 
 bool init(SDL_Renderer **renderer)
 {
@@ -234,16 +250,16 @@ void handleEvents(SDL_Event* event, int* up, int* down, int* right, int* left, b
                         break;
                 }
                 break;
-            }
-            break;
-        case SDL_MOUSEBUTTONDOWN: //KP
-           
-            *shooting = true;           
-             break;           
             
-        case SDL_MOUSEBUTTONUP: //KP
-                *shooting = false;
-                break;
+          
+            case SDL_MOUSEBUTTONDOWN: //KP
+           
+                *shooting = true;           
+                 break;           
+            
+            case SDL_MOUSEBUTTONUP: //KP
+                    *shooting = false;
+                    break;
 
         }
         

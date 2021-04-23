@@ -66,3 +66,13 @@ PUBLIC void moveBullet(Bullet bullet)
 		bullet->dimensions.y > WINDOWHEIGHT) bullet->active = false;
 
 }
+
+SDL_Rect* getBulletRect(Bullet bullet)
+{
+	return &bullet->dimensions;
+}
+
+void freeBullet(Bullet a)
+{
+	a->active = false;
+}
