@@ -375,7 +375,7 @@ void initClient(UDPsocket* sd, IPaddress* srvadd, UDPpacket** p, UDPpacket** p2,
 
     printf("Connected to : %s\n", ip);
 
-    if (!((*p = SDLNet_AllocPacket(32)) && (*p2 = SDLNet_AllocPacket(32))))
+    if (!((*p = SDLNet_AllocPacket(512)) && (*p2 = SDLNet_AllocPacket(512))))
     {
         fprintf(stderr, "SDLNet_AllocPacket: %s\n", SDLNet_GetError());
         exit(EXIT_FAILURE);

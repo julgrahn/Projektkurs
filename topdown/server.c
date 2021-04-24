@@ -45,7 +45,7 @@ PUBLIC Server createServer()
     }
 
     // Make space for the packet 
-    if (!((server->pSent = SDLNet_AllocPacket(32)) && (server->pRecive = SDLNet_AllocPacket(32))))
+    if (!((server->pSent = SDLNet_AllocPacket(512)) && (server->pRecive = SDLNet_AllocPacket(512))))
     {
         fprintf(stderr, "SDLNet_AllocPacket: %s\n", SDLNet_GetError());
         exit(EXIT_FAILURE);
