@@ -45,7 +45,7 @@ PUBLIC Server createServer()
     }
 
     // Make space for the packet 
-    if (!((server->pSent = SDLNet_AllocPacket(512)) && (server->pRecive = SDLNet_AllocPacket(512))))
+    if (!((server->pSent = SDLNet_AllocPacket(32)) && (server->pRecive = SDLNet_AllocPacket(32))))
     {
         fprintf(stderr, "SDLNet_AllocPacket: %s\n", SDLNet_GetError());
         exit(EXIT_FAILURE);
@@ -85,8 +85,8 @@ PUBLIC void refreshServer(Server server)
             }
         }
 
-        // i är den som skickar
-        // j är den som tar emot
+        // i ï¿½r den som skickar
+        // j ï¿½r den som tar emot
         for (int i = 0; i < server->noOfPlayers+1; i++)
         {
             if (server->pRecive->address.port == server->portClients[i])

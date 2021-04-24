@@ -72,7 +72,7 @@ int main(int argc, char* args[])
     scanf(" %c", &input);
     if (strcmp(&input, "h") == 1)
     {
-        server = createServer();
+        server = createServer(server);
         printf("hosted!\n");
         host = true;
     }
@@ -150,7 +150,7 @@ int main(int argc, char* args[])
             sscanf((char * )p2->data, "%d %d %d\n", &a, &b, &c);
             updatePlayerPosition(players[c], a, b);
 
-            printf("UDP Packet incoming %d %d %d\n", a, b, c);
+            // printf("UDP Packet incoming %d %d %d\n", a, b, c);
         }
    
         if(host) refreshServer(server);
@@ -351,7 +351,7 @@ void initClient(UDPsocket* sd, IPaddress* srvadd, UDPpacket** p, UDPpacket** p2,
 
     printf("Connected to : %s\n", ip);
 
-    if (!((*p = SDLNet_AllocPacket(512)) && (*p2 = SDLNet_AllocPacket(512))))
+    if (!((*p = SDLNet_AllocPacket(32)) && (*p2 = SDLNet_AllocPacket(32))))
     {
         fprintf(stderr, "SDLNet_AllocPacket: %s\n", SDLNet_GetError());
         exit(EXIT_FAILURE);

@@ -5,7 +5,7 @@
 typedef struct Player_type* Player;
 
 
-Player createPlayer(int x, int y);
+Player createPlayer(int x, int y, int id);
 void movePlayer(Player p, int up, int down, int right, int left, int mouseX, int mouseY);
 SDL_Rect* getPlayerRect(Player p);
 int getPlayerFrame(Player p);
