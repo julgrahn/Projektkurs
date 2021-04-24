@@ -23,3 +23,10 @@
 *.enc
 *.xml
 *.iml
+topdown/theGame
+topdown/x64/Debug/TopDown.vcxproj.FileListAbsolute.txt
+topdown/x64/Release/TopDown.iobj
+*.ipdb
+*.txt
+*.iobj
+x64/Release/SDL2.lib

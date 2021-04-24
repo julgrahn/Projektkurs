@@ -1,13 +1,19 @@
-﻿#include <stdio.h>
+﻿#pragma warning(disable : 4996)
+
+#include <stdio.h>
 #include "sdlinclude.h"
 #include <stdbool.h>
 #include "player.h"
 #include "world.h"
 
+#define EXIT_FAILURE "could not run"
+
 bool init(SDL_Renderer **renderer);
 void handleEvents(SDL_Event *event, int* up, int *down, int *right, int *left, bool *isPlaying, int *mouseX, int *mouseY);
 void renderBackground(SDL_Renderer *gRenderer, SDL_Texture *mTiles, SDL_Rect gTiles[]);
 void loadMedia(SDL_Renderer *renderer, SDL_Rect gTiles[], SDL_Texture **tiles, SDL_Rect playerRect[], SDL_Texture **pTexture, SDL_Cursor **cursor);
+//void netTest(UDPsocket* sd, IPaddress* srvadd, UDPpacket* p);
+//void SDLNetInit(UDPsocket* sd, IPaddress* srvadd, UDPpacket* p);
 
 int main(int argc, char *args[])
 {
@@ -32,13 +38,52 @@ int main(int argc, char *args[])
 
     loadMedia(renderer, gridTiles, &tiles, playerRect, &playerText, &cursor);
 
+
     SDL_Point playerRotationPoint = {20, 32};
+
+    //Network
+    UDPsocket sd;
+    IPaddress srvadd;
+    UDPpacket *p;
+
+    //SDLNetInit(&sd, srvadd, p);
+    if (SDLNet_Init() < 0)
+    {
+        fprintf(stderr, "SDLNet_Init: %s\n", SDLNet_GetError());
+        exit(EXIT_FAILURE);
+    }
+
+    if (!(sd = SDLNet_UDP_Open(0)))
+    {
+        fprintf(stderr, "SDLNet_UDP_Open: %s\n", SDLNet_GetError());
+        exit(EXIT_FAILURE);
+    }
+
+    if (SDLNet_ResolveHost(&srvadd, "127.0.0.1", 2000) == -1)
+    {
+        fprintf(stderr, "SDLNet_AllocPacket: %s\n", SDLNet_GetError());
+        exit(EXIT_FAILURE);
+    }
+
+    if (!(p = SDLNet_AllocPacket(512)))
+    {
+        fprintf(stderr, "SDLNet_AllocPacket: %s\n", SDLNet_GetError());
+        exit(EXIT_FAILURE);
+    }
 
     while (isPlaying)
     {
         handleEvents(&event, &up, &down, &right, &left, &isPlaying, &mouseX, &mouseY);
 
         movePlayer(player1, up, down, right, left, mouseX, mouseY);
+
+        //netTest(&sd, &srvadd, p);
+
+        sprintf((char*)p->data, "%f %f %f\n", 10.0f, 10.0f, -90.0f);
+        p->address.host = srvadd.host;
+        p->address.port = srvadd.port;
+        p->len = strlen((char*)p->data) + 1;
+        SDLNet_UDP_Send(sd, -1, p);
 
         SDL_RenderClear(renderer);
 
@@ -55,21 +100,50 @@ int main(int argc, char *args[])
     //SDL_DestroyWindow(window); // beh�vs denna?
     SDL_Quit();
 
-    //Network
-    if (SDL_Init(0) == -1)
-    {
-        printf("SDL_Init: %s\n", SDL_GetError());
-        exit(1);
-    }
 
-    if (SDLNet_Init() == -1)
-    {
-        printf("SDLNet_init: %s", SDLNet_GetError());
-        exit(2);
-    }
 
     return 0;
 }
+
+/*void netTest(UDPsocket *sd, IPaddress srvadd, UDPpacket *p)
+{
+    fprintf((char*)p->data, "%f %f %f\n", 10.0f, 10.0f, -90.0f);
+    p->address.host = srvadd.host;
+    p->address.port = srvadd.port;
+    p->len = strlen((char*)p->data) + 1;
+    SDLNet_UDP_Send(*sd, -1, p);
+}*/
+
+/*void SDLNetInit(UDPsocket *sd, IPaddress *srvadd, UDPpacket *p)
+{
+    
+
+    if(SDLNet_Init() < 0)
+    {
+        fprintf(stderr, "SDLNet_Init: %s\n", SDLNet_GetError());
+        exit(EXIT_FAILURE);
+    }
+
+    if (!(*sd = SDLNet_UDP_Open(0)))
+    {
+        fprintf(stderr, "SDLNet_UDP_Open: %s\n", SDLNet_GetError());
+        exit(EXIT_FAILURE);
+    }
+
+    if (SDLNet_ResolveHost(srvadd, "127.0.0.1", 2000) == -1)
+    {
+        fprintf(stderr, "SDLNet_AllocPacket: %s\n", SDLNet_GetError());
+        exit(EXIT_FAILURE);
+    }
+
+    if (!(p = SDLNet_AllocPacket(512)))
+    {
+        fprintf(stderr, "SDLNet_AllocPacket: %s\n", SDLNet_GetError());
+        exit(EXIT_FAILURE);
+    }
+}*/
+
+
 
 
 void loadMedia(SDL_Renderer *renderer, SDL_Rect gTiles[], SDL_Texture **tiles, SDL_Rect playerRect[], SDL_Texture **pTexture, SDL_Cursor **cursor)
