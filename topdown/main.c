@@ -3,96 +3,189 @@
 #include <stdio.h>
 #include "sdlinclude.h"
 #include <stdbool.h>
+#include <stdlib.h>
 #include "player.h"
 #include "world.h"
+#include "bullet.h"
+#include "server.h"
+#include "server.h"
 
-#define EXIT_FAILURE "could not run"
+bool init(SDL_Renderer** renderer);
+void handleEvents(SDL_Event* event, int* up, int* down, int* right, int* left, bool* isPlaying, int* mouseX, int* mouseY, bool* shooting);
+void renderBackground(SDL_Renderer* gRenderer, SDL_Texture* mTiles, SDL_Rect gTiles[]);
+void loadMedia(SDL_Renderer* renderer, SDL_Rect gTiles[], SDL_Texture** tiles, SDL_Rect playerRect[], SDL_Texture** pTexture, SDL_Cursor** cursor);
+bool rectCollisionTest(SDL_Rect* a, SDL_Rect* b);
+void initClient(UDPsocket* sd, IPaddress* srvadd, UDPpacket** p, UDPpacket** p2, char* ip);
+static void TestThread(Server* server);
 
-bool init(SDL_Renderer **renderer);
-void handleEvents(SDL_Event *event, int* up, int *down, int *right, int *left, bool *isPlaying, int *mouseX, int *mouseY);
-void renderBackground(SDL_Renderer *gRenderer, SDL_Texture *mTiles, SDL_Rect gTiles[]);
-void loadMedia(SDL_Renderer *renderer, SDL_Rect gTiles[], SDL_Texture **tiles, SDL_Rect playerRect[], SDL_Texture **pTexture, SDL_Cursor **cursor);
-//void netTest(UDPsocket* sd, IPaddress* srvadd, UDPpacket* p);
-//void SDLNetInit(UDPsocket* sd, IPaddress* srvadd, UDPpacket* p);
-
-int main(int argc, char *args[])
+int main(int argc, char* args[])
 {
     SDL_Event event;
-    SDL_Renderer *renderer = NULL;
+    SDL_Renderer* renderer = NULL;
     if (!init(&renderer)) return 1;
 
-    SDL_Cursor *cursor = NULL;
+    SDL_Cursor* cursor = NULL;
 
     // Player
-    Player player1 = createPlayer(0, 0);
-    SDL_Texture *playerText;
+    Player players[MAX_PLAYERS];
+    for (int i = 0; i < MAX_PLAYERS; i++)
+    {
+        players[i] = createPlayer(200, 200, i);
+    }
+    //Player player1 = createPlayer(200, 200);
+    SDL_Texture* playerText;
     SDL_Rect playerRect[4];
     int mouseX = 0, mouseY = 0;
 
-    bool isPlaying = true;
+    //Player dummy = createPlayer(100, 100);
+
+
+    // Bullet
+    Bullet bullets[MAX_BULLETS];
+    for (int i = 0; i < MAX_BULLETS; i++)
+    {
+        bullets[i] = createBullet();
+    }
+    SDL_Surface* bulletSurface = IMG_Load("resources/bullet.png");
+    SDL_Texture* bulletTexture = SDL_CreateTextureFromSurface(renderer, bulletSurface);
+
+    bool isPlaying = true, shooting = false;
     int up = 0, down = 0, left = 0, right = 0;
 
     // Background
-    SDL_Texture *tiles = NULL;
+    SDL_Texture* tiles = NULL;
     SDL_Rect gridTiles[900];   // Kommer innehålla alla 900 rutor från bakgrundsbilden, kan optmiseras.
+
+
+
+
+    // Netinit
+    UDPsocket sd;
+    IPaddress srvadd;
+    UDPpacket* p;
+    UDPpacket* p2;
+    Server server = NULL;
+    bool host = false;
+    int oldPlayerX = 0, oldPlayerY = 0;
+    int playerID;
+    int sendDelay = 0;
+    printf("PlayerID: ");
+
+    scanf(" %d", &playerID);
+    printf("palyerid är :%d\n", playerID);
+    printf("Host(h) or client(c): ");
+    char input;
+    scanf(" %c", &input);
+    if (strcmp(&input, "h") == 1)
+    {
+        server = createServer(server);
+        printf("hosted!\n");
+        host = true;
+    }
+
+    // Thread
+    if (host)
+    {
+        SDL_Thread* serverThread;
+        serverThread = SDL_CreateThread(TestThread, "TestThread", &server);
+
+    }
+
+    initClient(&sd, &srvadd, &p, &p2, ANDREAS_IP);
+
 
     loadMedia(renderer, gridTiles, &tiles, playerRect, &playerText, &cursor);
 
-
-    SDL_Point playerRotationPoint = {20, 32};
-
-    //Network
-    UDPsocket sd;
-    IPaddress srvadd;
-    UDPpacket *p;
-
-    //SDLNetInit(&sd, srvadd, p);
-    if (SDLNet_Init() < 0)
-    {
-        fprintf(stderr, "SDLNet_Init: %s\n", SDLNet_GetError());
-        exit(EXIT_FAILURE);
-    }
-
-    if (!(sd = SDLNet_UDP_Open(0)))
-    {
-        fprintf(stderr, "SDLNet_UDP_Open: %s\n", SDLNet_GetError());
-        exit(EXIT_FAILURE);
-    }
-
-    if (SDLNet_ResolveHost(&srvadd, "127.0.0.1", 2000) == -1)
-    {
-        fprintf(stderr, "SDLNet_AllocPacket: %s\n", SDLNet_GetError());
-        exit(EXIT_FAILURE);
-    }
-
-    if (!(p = SDLNet_AllocPacket(512)))
-    {
-        fprintf(stderr, "SDLNet_AllocPacket: %s\n", SDLNet_GetError());
-        exit(EXIT_FAILURE);
-    }
+    SDL_Point playerRotationPoint = { 20, 32 };
 
     while (isPlaying)
     {
-        handleEvents(&event, &up, &down, &right, &left, &isPlaying, &mouseX, &mouseY);
+        handleEvents(&event, &up, &down, &right, &left, &isPlaying, &mouseX, &mouseY, &shooting);
 
-        movePlayer(player1, up, down, right, left, mouseX, mouseY);
+        movePlayer(players[playerID], up, down, right, left, mouseX, mouseY);
+        if (shooting)
+        {
+            for (int i = 0; i < MAX_BULLETS; i++)
+            {
+                if (!isBulletActive(bullets[i]))
+                {
+                    spawnBullet(bullets[i], getPlayerX(players[playerID]), getPlayerY(players[playerID]), getPlayerDirection(players[playerID]));
+                    break;
+                }
+            }
+        }
+        for (int i = 0; i < MAX_BULLETS; i++)
+        {
+            if (isBulletActive(bullets[i]))
+            {
+                moveBullet(bullets[i]);
+                //if (rectCollisionTest(getBulletRect(bullets[i]), getPlayerRect(dummy)))
+                //{
+                //    freeBullet(bullets[i]);
+                //}
+            }
+        }
 
-        //netTest(&sd, &srvadd, p);
 
-        sprintf((char*)p->data, "%f %f %f\n", 10.0f, 10.0f, -90.0f);
-        p->address.host = srvadd.host;
-        p->address.port = srvadd.port;
-        p->len = strlen((char*)p->data) + 1;
-        SDLNet_UDP_Send(sd, -1, p);
 
         SDL_RenderClear(renderer);
 
         //Game renderer
         renderBackground(renderer, tiles, gridTiles);
-        SDL_RenderCopyEx(renderer, playerText, &playerRect[getPlayerFrame(player1)], getPlayerRect(player1), getPlayerDirection(player1), &playerRotationPoint, SDL_FLIP_NONE);
+
+        for (int i = 0; i < MAX_PLAYERS; i++)
+        {
+            if (i != playerID) moveOtherPlayers(players[i]);
+            SDL_RenderCopyEx(renderer, playerText, &playerRect[getPlayerFrame(players[i])], getPlayerRect(players[i]), getPlayerDirection(players[i]), &playerRotationPoint, SDL_FLIP_NONE);
+        }
+
+
+        for (int i = 0; i < MAX_BULLETS; i++)
+        {
+            if (isBulletActive(bullets[i]))
+            {
+                SDL_RenderCopy(renderer, bulletTexture, NULL, getBulletRect(bullets[i]));
+            }
+
+        }
+
+        if (sendDelay >= 5)
+        {
+            if (getPlayerX(players[playerID]) != oldPlayerX || getPlayerY(players[playerID]) != oldPlayerY)
+            {
+                sprintf((char*)p->data, "%d %d %d\n", getPlayerX(players[playerID]), getPlayerY(players[playerID]), getPlayerID(players[playerID]));
+                p->address.host = srvadd.host;
+                p->address.port = srvadd.port;
+                p->len = strlen((char*)p->data) + 1;
+                SDLNet_UDP_Send(sd, -1, p);
+                oldPlayerX = getPlayerX(players[playerID]);
+                oldPlayerY = getPlayerY(players[playerID]);
+                sendDelay = 0;
+            }
+        }
+        else
+        {
+            sendDelay++;
+        }
+
+
+
+
+        if (SDLNet_UDP_Recv(sd, p2)) {
+            int a, b, c;
+            sscanf((char*)p2->data, "%d %d %d\n", &a, &b, &c);
+            updatePlayerPosition(players[c], a, b);
+
+            //printf("UDP Packet incoming %d %d %d\n", a, b, c);
+        }
+
+        //if(host) refreshServer(server);
+
+
         SDL_RenderPresent(renderer);
-        
+
         SDL_Delay(1000 / 60);
+
     }
 
 
@@ -100,53 +193,10 @@ int main(int argc, char *args[])
     //SDL_DestroyWindow(window); // beh�vs denna?
     SDL_Quit();
 
-
-
     return 0;
 }
 
-/*void netTest(UDPsocket *sd, IPaddress srvadd, UDPpacket *p)
-{
-    fprintf((char*)p->data, "%f %f %f\n", 10.0f, 10.0f, -90.0f);
-    p->address.host = srvadd.host;
-    p->address.port = srvadd.port;
-    p->len = strlen((char*)p->data) + 1;
-    SDLNet_UDP_Send(*sd, -1, p);
-}*/
-
-/*void SDLNetInit(UDPsocket *sd, IPaddress *srvadd, UDPpacket *p)
-{
-    
-
-    if(SDLNet_Init() < 0)
-    {
-        fprintf(stderr, "SDLNet_Init: %s\n", SDLNet_GetError());
-        exit(EXIT_FAILURE);
-    }
-
-    if (!(*sd = SDLNet_UDP_Open(0)))
-    {
-        fprintf(stderr, "SDLNet_UDP_Open: %s\n", SDLNet_GetError());
-        exit(EXIT_FAILURE);
-    }
-
-    if (SDLNet_ResolveHost(srvadd, "127.0.0.1", 2000) == -1)
-    {
-        fprintf(stderr, "SDLNet_AllocPacket: %s\n", SDLNet_GetError());
-        exit(EXIT_FAILURE);
-    }
-
-    if (!(p = SDLNet_AllocPacket(512)))
-    {
-        fprintf(stderr, "SDLNet_AllocPacket: %s\n", SDLNet_GetError());
-        exit(EXIT_FAILURE);
-    }
-}*/
-
-
-
-
-void loadMedia(SDL_Renderer *renderer, SDL_Rect gTiles[], SDL_Texture **tiles, SDL_Rect playerRect[], SDL_Texture **pTexture, SDL_Cursor **cursor)
+void loadMedia(SDL_Renderer* renderer, SDL_Rect gTiles[], SDL_Texture** tiles, SDL_Rect playerRect[], SDL_Texture** pTexture, SDL_Cursor** cursor)
 {
     SDL_Surface* gTilesSurface = IMG_Load("resources/tilemap.png");
     *tiles = SDL_CreateTextureFromSurface(renderer, gTilesSurface);
@@ -162,17 +212,17 @@ void loadMedia(SDL_Renderer *renderer, SDL_Rect gTiles[], SDL_Texture **tiles, S
         }
 
     }
-    SDL_Surface *playerSurface = IMG_Load("resources/playerRifle.png");
+    SDL_Surface* playerSurface = IMG_Load("resources/playerRifle.png");
     *pTexture = SDL_CreateTextureFromSurface(renderer, playerSurface);
     SDL_FreeSurface(playerSurface);
-    for(int n = 0; n < 4; n++)
+    for (int n = 0; n < 4; n++)
     {
-        playerRect[n].x = 0 + (n*64);
+        playerRect[n].x = 0 + (n * 64);
         playerRect[n].y = 0;
         playerRect[n].h = 64;
         playerRect[n].w = 64;
     }
-    SDL_Surface *cursorSurface = IMG_Load("resources/crosshair161.png");
+    SDL_Surface* cursorSurface = IMG_Load("resources/crosshair161.png");
     *cursor = SDL_CreateColorCursor(cursorSurface, 36, 36);
     SDL_FreeSurface(cursorSurface);
     SDL_SetCursor(*cursor);
@@ -197,9 +247,14 @@ void renderBackground(SDL_Renderer* gRenderer, SDL_Texture* mTiles, SDL_Rect gTi
     }
 }
 
+bool rectCollisionTest(SDL_Rect* a, SDL_Rect* b)
+{
+    if ((a->x) > (b->x) && (a->x) < ((b->x) + (b->w)) && (a->y) > (b->y) && (a->y) < ((b->y) + (b->h)))
+        return true;
+    return false;
+}
 
-
-bool init(SDL_Renderer **renderer)
+bool init(SDL_Renderer** renderer)
 {
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0)
     {
@@ -226,63 +281,117 @@ bool init(SDL_Renderer **renderer)
     return true;
 }
 
-void handleEvents(SDL_Event *event, int* up, int* down, int* right, int* left, bool* isPlaying, int *mouseX, int *mouseY)
+void handleEvents(SDL_Event* event, int* up, int* down, int* right, int* left, bool* isPlaying, int* mouseX, int* mouseY, bool* shooting)
 {
     SDL_GetMouseState(mouseX, mouseY);
     while (SDL_PollEvent(event))
     {
         switch (event->type)
         {
-            case SDL_QUIT:
-                *isPlaying = false;
+        case SDL_QUIT:
+            *isPlaying = false;
+            break;
+        case SDL_KEYDOWN:
+            switch (event->key.keysym.scancode)
+            {
+            case SDL_SCANCODE_W:
+            case SDL_SCANCODE_UP:
+                *up = 1;
                 break;
-            case SDL_KEYDOWN:
-                switch (event->key.keysym.scancode)
-                {
-                    case SDL_SCANCODE_W:
-                    case SDL_SCANCODE_UP:
-                        *up = 1;
-                        break;
-                    case SDL_SCANCODE_A:
-                    case SDL_SCANCODE_LEFT:
-                        *left = 1;
-                        break;
-                    case SDL_SCANCODE_S:
-                    case SDL_SCANCODE_DOWN:
-                        *down = 1;
-                        break;
-                    case SDL_SCANCODE_D:
-                    case SDL_SCANCODE_RIGHT:
-                        *right = 1;
-                        break;
-                    default:
-                        break;
-                }
+            case SDL_SCANCODE_A:
+            case SDL_SCANCODE_LEFT:
+                *left = 1;
                 break;
-            case SDL_KEYUP:
-                switch (event->key.keysym.scancode)
-                {
-                    case SDL_SCANCODE_W:
-                    case SDL_SCANCODE_UP:
-                        *up = 0;
-                        break;
-                    case SDL_SCANCODE_A:
-                    case SDL_SCANCODE_LEFT:
-                        *left = 0;
-                        break;
-                    case SDL_SCANCODE_S:
-                    case SDL_SCANCODE_DOWN:
-                        *down = 0;
-                        break;
-                    case SDL_SCANCODE_D:
-                    case SDL_SCANCODE_RIGHT:
-                        *right = 0;
-                        break;
-                    default:
-                        break;
-                }
+            case SDL_SCANCODE_S:
+            case SDL_SCANCODE_DOWN:
+                *down = 1;
                 break;
+            case SDL_SCANCODE_D:
+            case SDL_SCANCODE_RIGHT:
+                *right = 1;
+                break;
+            default:
+                break;
+            }
+            break;
+        case SDL_KEYUP:
+            switch (event->key.keysym.scancode)
+            {
+            case SDL_SCANCODE_W:
+            case SDL_SCANCODE_UP:
+                *up = 0;
+                break;
+            case SDL_SCANCODE_A:
+            case SDL_SCANCODE_LEFT:
+                *left = 0;
+                break;
+            case SDL_SCANCODE_S:
+            case SDL_SCANCODE_DOWN:
+                *down = 0;
+                break;
+            case SDL_SCANCODE_D:
+            case SDL_SCANCODE_RIGHT:
+                *right = 0;
+                break;
+            default:
+                break;
+            }
+            break;
+
+
+        case SDL_MOUSEBUTTONDOWN: //KP
+
+            *shooting = true;
+            break;
+
+        case SDL_MOUSEBUTTONUP: //KP
+            *shooting = false;
+            break;
+
         }
+
     }
     return;
+}
+
+void initClient(UDPsocket* sd, IPaddress* srvadd, UDPpacket** p, UDPpacket** p2, char* ip)
+{
+    if (SDLNet_Init() < 0)
+    {
+        fprintf(stderr, "SDLNet_Init: %s\n", SDLNet_GetError());
+        exit(EXIT_FAILURE);
+    }
+
+    if (!(*sd = SDLNet_UDP_Open(0)))
+    {
+        fprintf(stderr, "SDLNet_UDP_Open: %s\n", SDLNet_GetError());
+        exit(EXIT_FAILURE);
+    }
+
+    // Resolve server name  
+    if (SDLNet_ResolveHost(srvadd, ip, 2000) == -1)
+    {
+        fprintf(stderr, "SDLNet_ResolveHost(192.0.0.1 2000): %s\n", SDLNet_GetError());
+        exit(EXIT_FAILURE);
+    }
+
+    printf("Connected to : %s\n", ip);
+
+    if (!((*p = SDLNet_AllocPacket(512)) && (*p2 = SDLNet_AllocPacket(512))))
+    {
+        fprintf(stderr, "SDLNet_AllocPacket: %s\n", SDLNet_GetError());
+        exit(EXIT_FAILURE);
+    }
+}
+
+
+static void TestThread(Server* server)
+{
+    //Uppdatera servern 300ggr / sekunden
+    while (true)
+    {
+        refreshServer(*server);
+        SDL_Delay(3);
+    }
+
 }
