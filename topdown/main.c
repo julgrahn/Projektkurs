@@ -147,7 +147,7 @@ int main(int argc, char* args[])
             
         }
 
-        if (sendDelay >= 20)
+        if (sendDelay >= 5)
         {
             if (getPlayerX(players[playerID]) != oldPlayerX || getPlayerY(players[playerID]) != oldPlayerY)
             {

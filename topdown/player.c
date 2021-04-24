@@ -42,6 +42,8 @@ PUBLIC Player createPlayer(int x, int y, int id)
     a->pDimensions.y = y;
     a->pDimensions.w = 64;
     a->pDimensions.h = 64;
+    a->newX = x;
+    a->newY = y;
     a->active = false;
     a->id = id;
     return a;
@@ -155,6 +157,19 @@ PUBLIC void moveOtherPlayers(Player p)
     x_vel = delta_x * SPEED / distance;
     y_vel = delta_y * SPEED / distance;
 
-    p->pDimensions.x += x_vel;
-    p->pDimensions.y += y_vel;
+    if (distance < 1)
+    {
+        x_vel = y_vel = 0;
+    }
+    else
+    {
+        p->pDimensions.x += x_vel;
+        p->pDimensions.y += y_vel;
+    }
+
+
+    // printf("%.2f %.2f %.2f %.2f\n", p->posX, p->posY, p->speed, p->diaSpeed);
+    // Set new pixel pos of player
+   
+    
 }
