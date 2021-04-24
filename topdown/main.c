@@ -6,7 +6,7 @@
 #include "world.h"
 #include "bullet.h"
 #include "server.h"
-
+#include "server.h"
 
 bool init(SDL_Renderer** renderer);
 void handleEvents(SDL_Event* event, int* up, int* down, int* right, int* left, bool* isPlaying, int* mouseX, int* mouseY, bool* shooting);
@@ -14,7 +14,7 @@ void renderBackground(SDL_Renderer* gRenderer, SDL_Texture* mTiles, SDL_Rect gTi
 void loadMedia(SDL_Renderer* renderer, SDL_Rect gTiles[], SDL_Texture** tiles, SDL_Rect playerRect[], SDL_Texture** pTexture, SDL_Cursor** cursor);
 bool rectCollisionTest(SDL_Rect* a, SDL_Rect* b);
 void initClient(UDPsocket *sd, IPaddress *srvadd, UDPpacket **p, UDPpacket **p2, char* ip);
-
+static void TestThread(Server *server);
 
 int main(int argc, char* args[])
 {
@@ -54,6 +54,9 @@ int main(int argc, char* args[])
     SDL_Texture* tiles = NULL;
     SDL_Rect gridTiles[900];   // Kommer innehålla alla 900 rutor från bakgrundsbilden, kan optmiseras.
 
+
+    
+
     // Netinit
     UDPsocket sd;
     IPaddress srvadd;
@@ -63,6 +66,7 @@ int main(int argc, char* args[])
     bool host = false;
     int oldPlayerX = 0, oldPlayerY = 0;
     int playerID;
+    int sendDelay = 0;
     printf("PlayerID: ");
     
     scanf(" %d", &playerID);
@@ -76,6 +80,15 @@ int main(int argc, char* args[])
         printf("hosted!\n");
         host = true;
     }
+
+    // Thread
+    if (host)
+    {
+        SDL_Thread* serverThread;
+        serverThread = SDL_CreateThread(TestThread, "TestThread", &server);
+
+    }
+    
     initClient(&sd, &srvadd, &p, &p2, ANDREAS_IP);
     
 
@@ -120,6 +133,7 @@ int main(int argc, char* args[])
 
         for (int i = 0; i < MAX_PLAYERS; i++)
         {
+            if(i!=playerID) moveOtherPlayers(players[i]);          
             SDL_RenderCopyEx(renderer, playerText, &playerRect[getPlayerFrame(players[i])], getPlayerRect(players[i]), getPlayerDirection(players[i]), &playerRotationPoint, SDL_FLIP_NONE);
         }
         
@@ -133,16 +147,26 @@ int main(int argc, char* args[])
             
         }
 
-        if (getPlayerX(players[playerID]) != oldPlayerX || getPlayerY(players[playerID]) != oldPlayerY)
+        if (sendDelay >= 5)
         {
-            sprintf((char*)p->data, "%d %d %d\n", getPlayerX(players[playerID]), getPlayerY(players[playerID]), getPlayerID(players[playerID]));
-            p->address.host = srvadd.host;
-            p->address.port = srvadd.port;
-            p->len = strlen((char*)p->data) + 1;
-            SDLNet_UDP_Send(sd, -1, p);
-            oldPlayerX = getPlayerX(players[playerID]);
-            oldPlayerY = getPlayerY(players[playerID]);
+            if (getPlayerX(players[playerID]) != oldPlayerX || getPlayerY(players[playerID]) != oldPlayerY)
+            {
+                sprintf((char*)p->data, "%d %d %d\n", getPlayerX(players[playerID]), getPlayerY(players[playerID]), getPlayerID(players[playerID]));
+                p->address.host = srvadd.host;
+                p->address.port = srvadd.port;
+                p->len = strlen((char*)p->data) + 1;
+                SDLNet_UDP_Send(sd, -1, p);
+                oldPlayerX = getPlayerX(players[playerID]);
+                oldPlayerY = getPlayerY(players[playerID]);
+                sendDelay = 0;
+            }
         }
+        else
+        {
+            sendDelay++;
+        }
+        
+           
         
 
          if (SDLNet_UDP_Recv(sd, p2)){
@@ -150,10 +174,10 @@ int main(int argc, char* args[])
             sscanf((char * )p2->data, "%d %d %d\n", &a, &b, &c);
             updatePlayerPosition(players[c], a, b);
 
-            // printf("UDP Packet incoming %d %d %d\n", a, b, c);
+            //printf("UDP Packet incoming %d %d %d\n", a, b, c);
         }
    
-        if(host) refreshServer(server);
+        //if(host) refreshServer(server);
         
         
         SDL_RenderPresent(renderer);
@@ -356,4 +380,16 @@ void initClient(UDPsocket* sd, IPaddress* srvadd, UDPpacket** p, UDPpacket** p2,
         fprintf(stderr, "SDLNet_AllocPacket: %s\n", SDLNet_GetError());
         exit(EXIT_FAILURE);
     }
+}
+
+
+static void TestThread(Server *server)
+{
+    //Uppdatera servern 300ggr / sekunden
+    while (true)
+    {
+        refreshServer(*server);
+        SDL_Delay(3);
+    }
+    
 }

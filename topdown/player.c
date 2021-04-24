@@ -20,6 +20,8 @@ struct Player_type {
     double direction;
     bool active;
     int id;
+    int newX;
+    int newY;
 };
 
 //int SDL_RenderDrawRect(SDL_Renderer* renderer, SDL_Rect NULL);
@@ -40,6 +42,8 @@ PUBLIC Player createPlayer(int x, int y, int id)
     a->pDimensions.y = y;
     a->pDimensions.w = 64;
     a->pDimensions.h = 64;
+    a->newX = x;
+    a->newY = y;
     a->active = false;
     a->id = id;
     return a;
@@ -138,6 +142,34 @@ PUBLIC int getPlayerID(Player p)
 
 PUBLIC void updatePlayerPosition(Player p, int x, int y)
 {
-    p->pDimensions.x = x;
-    p->pDimensions.y = y;
+
+    p->newX = x;
+    p->newY = y;
+}
+
+PUBLIC void moveOtherPlayers(Player p)
+{
+    float x_vel;
+    float y_vel;
+    float delta_x = p->newX - p->pDimensions.x;
+    float delta_y = p->newY - p->pDimensions.y;
+    float distance = sqrt(delta_x * delta_x + delta_y * delta_y);
+    x_vel = delta_x * SPEED / distance;
+    y_vel = delta_y * SPEED / distance;
+
+    if (distance < 1)
+    {
+        x_vel = y_vel = 0;
+    }
+    else
+    {
+        p->pDimensions.x += x_vel;
+        p->pDimensions.y += y_vel;
+    }
+
+
+    // printf("%.2f %.2f %.2f %.2f\n", p->posX, p->posY, p->speed, p->diaSpeed);
+    // Set new pixel pos of player
+   
+    
 }

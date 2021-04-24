@@ -16,5 +16,6 @@ int getPlayerID(Player p);
 void activatePlayer(Player p);
 void playerHealth(Player p, int health);
 void updatePlayerPosition(Player p, int x, int y);
+void moveOtherPlayers(Player p);
 
 #endif

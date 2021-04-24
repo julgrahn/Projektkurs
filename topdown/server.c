@@ -98,7 +98,7 @@ PUBLIC void refreshServer(Server server)
                         server->pSent->address.host = server->IPclients[j];	// Set the destination host 
                         server->pSent->address.port = server->portClients[j];
                         sscanf((char*)server->pRecive->data, "%d %d %d\n", &a, &b, &c);
-                        printf("%d %d\n", a, b);
+                        //printf("%d %d\n", a, b);
                         sprintf((char*)server->pSent->data, "%d %d %d\n", a, b, c);
                         server->pSent->len = strlen((char*)server->pSent->data) + 1;
                         SDLNet_UDP_Send(server->sd, -1, server->pSent);

@@ -14,7 +14,8 @@
 #define WINDOWWIDTH 704
 #define WINDOWHEIGHT 704
 #define MAX_BULLETS 100
-#define ANDREAS_IP "178.78.213.173"
+#define ANDREAS_IP "78.71.16.247"
+#define ALEX_IP "178.78.213.173"
 #define MAX_PLAYERS 5
 
 #endif
