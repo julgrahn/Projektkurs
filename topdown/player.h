@@ -9,6 +9,7 @@ struct Player_type {
     double speed;
     double diaSpeed;
     double posX, posY;
+    int oldPosX, oldPosY;
     SDL_Rect pDimensions;
     int frame;
     int frameCounter;

@@ -1,10 +1,10 @@
 #include "sdlinclude.h"
 #include "player.h"
 
-void netInit(IPaddress *srvadd, UDPsocket *sd, UDPpacket *p);
-void netTest(IPaddress *srvadd, UDPsocket *sd, UDPpacket *p);
+void netInit(IPaddress *srvadd, UDPsocket *sd, UDPpacket *p, UDPpacket *p2);
+void netTest(IPaddress *srvadd, UDPsocket *sd, UDPpacket *p, UDPpacket *p2, Player player1, Player player2);
 
-void netInit(IPaddress *srvadd, UDPsocket *sd, UDPpacket *p)
+void netInit(IPaddress *srvadd, UDPsocket *sd, UDPpacket *p, UDPpacket *p2)
 {
     if (SDLNet_Init() < 0)
     {
@@ -32,11 +32,25 @@ void netInit(IPaddress *srvadd, UDPsocket *sd, UDPpacket *p)
     }
 
 }
-void netTest(IPaddress *srvadd, UDPsocket *sd, UDPpacket *p){
-
-    sprintf((char *)p->data, "%d %d\n", 100, 200);
-    p->address.host = (*srvadd).host;	/* Set the destination host */
-    p->address.port = (*srvadd).port;	/* And destination port */
-    p->len = strlen((char *)p->data) + 1;
-    SDLNet_UDP_Send(*sd, -1, p);
+void netTest(IPaddress *srvadd, UDPsocket *sd, UDPpacket *p, UDPpacket *p2, Player player1, Player player2)
+{
+    if(player1->oldPosX != player1->pDimensions.x || player1->oldPosY != player1->pDimensions.y)
+    {
+        sprintf((char *)p->data, "%d %d\n", (int) player1->pDimensions.x, (int) player1->pDimensions.y);
+        p->address.host = srvadd->host;
+        p->address.port = srvadd->port;
+        p->len = strlen((char *)p->data) + 1;
+        SDLNet_UDP_Send(*sd, -1, p);
+        player1->oldPosX = player1->pDimensions.x;
+        player1->oldPosY = player1->pDimensions.y;
+    }
+    
+    if (SDLNet_UDP_Recv(*sd, p2))
+    {
+        int a, b; 
+        sscanf((char * )p2->data, "%d %d\n", &a, &b);
+        player2->pDimensions.x = a;
+        player2->pDimensions.y = b;
+        printf("UDP Packet incoming %d %d\n", a, b);
+    }
 }

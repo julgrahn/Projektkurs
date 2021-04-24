@@ -4,9 +4,7 @@
 #include "sdlinclude.h"
 #include "player.h"
 
-void netInit(IPaddress *srvadd, UDPsocket *sd, UDPpacket *p);
-void netTest(IPaddress *srvadd, UDPsocket *sd, UDPpacket *p);
-
-// void netUpdate(int &x_posOld, int &y_posOld, int &x_pos, int &y_pos);
+void netInit(IPaddress *srvadd, UDPsocket *sd, UDPpacket *p, UDPpacket *p2);
+void netTest(IPaddress *srvadd, UDPsocket *sd, UDPpacket *p, UDPpacket *p2, Player player1, Player player2);
 
 #endif

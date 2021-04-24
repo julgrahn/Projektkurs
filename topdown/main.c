@@ -23,7 +23,7 @@ int main(int argc, char* args[])
     SDL_Texture *playerText;
     SDL_Rect playerRect[4];
     int mouseX = 0, mouseY = 0;
-    int oldPosX = player1->pDimensions.x, oldPosY = player1->pDimensions.y;
+    // int oldPosX = player1->pDimensions.x, oldPosY = player1->pDimensions.y;
     // Player2
     Player player2 = createPlayer(0, 0);
 
@@ -78,24 +78,24 @@ int main(int argc, char* args[])
 
         movePlayer(player1, up, down, right, left, mouseX, mouseY);
 
-        //netTest(&srvadd, &sd, p);
-        if(oldPosX != player1->pDimensions.x || oldPosY != player1->pDimensions.y){
-            sprintf((char *)p->data, "%d %d\n", (int) player1->pDimensions.x, (int) player1->pDimensions.y);
-            p->address.host = srvadd.host;	/* Set the destination host */
-            p->address.port = srvadd.port;	/* And destination port */
-            p->len = strlen((char *)p->data) + 1;
-            SDLNet_UDP_Send(sd, -1, p);
-            oldPosX = player1->pDimensions.x;
-            oldPosY = player1->pDimensions.y;
-        }
+        netTest(&srvadd, &sd, p, p2, player1, player2);
+        // if(player1->oldPosX != player1->pDimensions.x || player1->oldPosY != player1->pDimensions.y){
+        //     sprintf((char *)p->data, "%d %d\n", (int) player1->pDimensions.x, (int) player1->pDimensions.y);
+        //     p->address.host = srvadd.host;
+        //     p->address.port = srvadd.port;
+        //     p->len = strlen((char *)p->data) + 1;
+        //     SDLNet_UDP_Send(sd, -1, p);
+        //     player1->oldPosX = player1->pDimensions.x;
+        //     player1->oldPosY = player1->pDimensions.y;
+        // }
 
-        if (SDLNet_UDP_Recv(sd, p2)){
-            int a, b; 
-            sscanf((char * )p2->data, "%d %d\n", &a, &b);
-            player2->pDimensions.x = a;
-            player2->pDimensions.y = b;
-            printf("UDP Packet incoming %d %d\n", a, b);
-        }
+        // if (SDLNet_UDP_Recv(sd, p2)){
+        //     int a, b; 
+        //     sscanf((char * )p2->data, "%d %d\n", &a, &b);
+        //     player2->pDimensions.x = a;
+        //     player2->pDimensions.y = b;
+        //     printf("UDP Packet incoming %d %d\n", a, b);
+        // }
 
         SDL_RenderClear(renderer);
 

@@ -35,10 +35,13 @@ PUBLIC Player createPlayer(int x, int y)
     a->direction = 0;
     a->posX = (WINDOWWIDTH - 64) / 2;
     a->posY = (WINDOWHEIGTH - 64) / 2;
+    a->oldPosX = (WINDOWWIDTH - 64) / 2;
+    a->oldPosY = (WINDOWHEIGTH - 64) / 2;
     a->pDimensions.x = (WINDOWWIDTH - 64) / 2;
     a->pDimensions.y = (WINDOWHEIGTH - 64) / 2;
     a->pDimensions.w = 64;
     a->pDimensions.h = 64;
+    
     return a;
 }
 
