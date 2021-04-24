@@ -4,6 +4,18 @@
 
 typedef struct Player_type* Player;
 
+struct Player_type {
+    int health;
+    double speed;
+    double diaSpeed;
+    double posX, posY;
+    SDL_Rect pDimensions;
+    int frame;
+    int frameCounter;
+    int isMoving;
+    double direction;
+};
+
 
 Player createPlayer(int x, int y);
 void movePlayer(Player p, int up, int down, int right, int left, int mouseX, int mouseY);

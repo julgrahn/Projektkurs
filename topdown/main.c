@@ -23,7 +23,9 @@ int main(int argc, char* args[])
     SDL_Texture *playerText;
     SDL_Rect playerRect[4];
     int mouseX = 0, mouseY = 0;
-
+    int oldPosX = player1->pDimensions.x, oldPosY = player1->pDimensions.y;
+    // Player2
+    Player player2 = createPlayer(0, 0);
 
     bool isPlaying = true;
     int up = 0, down = 0, left = 0, right = 0;
@@ -36,6 +38,8 @@ int main(int argc, char* args[])
     UDPsocket sd;
     IPaddress srvadd;
     UDPpacket *p;
+    UDPpacket *p2;
+
     if (SDLNet_Init() < 0)
     {
         fprintf(stderr, "SDLNet_Init: %s\n", SDLNet_GetError());
@@ -55,13 +59,14 @@ int main(int argc, char* args[])
         exit(EXIT_FAILURE);
     }
 
-    if (!((p = SDLNet_AllocPacket(512))))
+    if (!((p = SDLNet_AllocPacket(512))&& (p2 = SDLNet_AllocPacket(512))))
     {
         fprintf(stderr, "SDLNet_AllocPacket: %s\n", SDLNet_GetError());
         exit(EXIT_FAILURE);
     }
 
     //netInit(&srvadd, &sd, p);
+    
 
     loadMedia(renderer, gridTiles, &tiles, playerRect, &playerText, &cursor);
 
@@ -74,17 +79,30 @@ int main(int argc, char* args[])
         movePlayer(player1, up, down, right, left, mouseX, mouseY);
 
         //netTest(&srvadd, &sd, p);
-        sprintf((char *)p->data, "%d %d\n", (int)100, (int)200);
-        p->address.host = srvadd.host;	/* Set the destination host */
-        p->address.port = srvadd.port;	/* And destination port */
-        p->len = strlen((char *)p->data) + 1;
-        SDLNet_UDP_Send(sd, -1, p);
+        if(oldPosX != player1->pDimensions.x || oldPosY != player1->pDimensions.y){
+            sprintf((char *)p->data, "%d %d\n", (int) player1->pDimensions.x, (int) player1->pDimensions.y);
+            p->address.host = srvadd.host;	/* Set the destination host */
+            p->address.port = srvadd.port;	/* And destination port */
+            p->len = strlen((char *)p->data) + 1;
+            SDLNet_UDP_Send(sd, -1, p);
+            oldPosX = player1->pDimensions.x;
+            oldPosY = player1->pDimensions.y;
+        }
+
+        if (SDLNet_UDP_Recv(sd, p2)){
+            int a, b; 
+            sscanf((char * )p2->data, "%d %d\n", &a, &b);
+            player2->pDimensions.x = a;
+            player2->pDimensions.y = b;
+            printf("UDP Packet incoming %d %d\n", a, b);
+        }
 
         SDL_RenderClear(renderer);
 
         //Game renderer
         renderBackground(renderer, tiles, gridTiles);
         SDL_RenderCopyEx(renderer, playerText, &playerRect[getPlayerFrame(player1)], getPlayerRect(player1), getPlayerDirection(player1), &playerRotationPoint, SDL_FLIP_NONE);
+        SDL_RenderCopyEx(renderer, playerText, &playerRect[getPlayerFrame(player2)], getPlayerRect(player2), getPlayerDirection(player2), &playerRotationPoint, SDL_FLIP_NONE);
         SDL_RenderPresent(renderer);
         
         SDL_Delay(1000 / 60);

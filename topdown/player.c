@@ -9,17 +9,17 @@
 #define WINDOWHEIGTH 704
 #define WINDOWWIDTH 704
 
-struct Player_type {
-    int health;
-    double speed;
-    double diaSpeed;
-    double posX, posY;
-    SDL_Rect pDimensions;
-    int frame;
-    int frameCounter;
-    int isMoving;
-    double direction;
-};
+// struct Player_type {
+//     int health;
+//     double speed;
+//     double diaSpeed;
+//     double posX, posY;
+//     SDL_Rect pDimensions;
+//     int frame;
+//     int frameCounter;
+//     int isMoving;
+//     double direction;
+// };
 
 //int SDL_RenderDrawRect(SDL_Renderer* renderer, SDL_Rect NULL);
 
