@@ -30,12 +30,13 @@ PUBLIC Bullet createBullet()
     return b;
 }
 
-PUBLIC void spawnBullet(Bullet bullet, int x, int y, int direction)
+PUBLIC void spawnBullet(Bullet bullet, int x, int y, int direction, int owner)
 {
 	bullet->active = 1;
 	bullet->xPos = x + 20;
 	bullet->yPos = y + 32;	
 	bullet->direction = direction * M_PI / 180;
+	bullet->owner = owner;
 
 	//printf("xSpeed: %d\n", bullet->xSpeed);
 	//printf("ySpeed: %d\n", bullet->ySpeed);
@@ -52,8 +53,6 @@ PUBLIC bool isBulletActive(Bullet bullet)
 
 PUBLIC void moveBullet(Bullet bullet)
 {
-	
-
 	bullet->xPos += bullet->xSpeed;
 	bullet->yPos += bullet->ySpeed;
 
@@ -65,4 +64,22 @@ PUBLIC void moveBullet(Bullet bullet)
 		bullet->dimensions.y < 0 ||
 		bullet->dimensions.y > WINDOWHEIGHT) bullet->active = false;
 
+<<<<<<< Updated upstream
+=======
+}
+
+SDL_Rect* getBulletRect(Bullet bullet)
+{
+	return &bullet->dimensions;
+}
+
+void freeBullet(Bullet a)
+{
+	a->active = false;
+}
+
+int getBulletOwner(Bullet b)
+{
+	return b->owner;
+>>>>>>> Stashed changes
 }
