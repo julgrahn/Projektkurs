@@ -64,8 +64,6 @@ PUBLIC void moveBullet(Bullet bullet)
 		bullet->dimensions.y < 0 ||
 		bullet->dimensions.y > WINDOWHEIGHT) bullet->active = false;
 
-<<<<<<< Updated upstream
-=======
 }
 
 SDL_Rect* getBulletRect(Bullet bullet)
@@ -81,5 +79,4 @@ void freeBullet(Bullet a)
 int getBulletOwner(Bullet b)
 {
 	return b->owner;
->>>>>>> Stashed changes
 }

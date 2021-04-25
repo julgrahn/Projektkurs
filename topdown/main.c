@@ -1,22 +1,16 @@
 ﻿#include <stdio.h>
 #include "sdlinclude.h"
 #include <stdbool.h>
+#include <stdlib.h>
 #include "player.h"
 #include "world.h"
 #include "bullet.h"
-<<<<<<< Updated upstream
-
-
-=======
 #include "server.h"
->>>>>>> Stashed changes
 
 bool initSDL(SDL_Renderer** renderer);
 void handleEvents(SDL_Event* event, int* up, int* down, int* right, int* left, bool* isPlaying, int* mouseX, int* mouseY, bool* shooting);
 void renderGame(SDL_Renderer* renderer, SDL_Texture* mTiles, SDL_Rect gTiles[], Bullet bullets[], SDL_Texture* bulletTexture, Player players[], SDL_Texture* playerText, SDL_Rect playerRect[], SDL_Point* playerRotationPoint);
 void loadMedia(SDL_Renderer* renderer, SDL_Rect gTiles[], SDL_Texture** tiles, SDL_Rect playerRect[], SDL_Texture** pTexture, SDL_Cursor** cursor);
-<<<<<<< Updated upstream
-=======
 bool rectCollisionTest(SDL_Rect* a, SDL_Rect* b);
 void initClient(UDPsocket *sd, IPaddress *srvadd, UDPpacket **p, UDPpacket **p2, char* ip);
 void initGameObjects(Player players[], Bullet bullets[]);
@@ -25,44 +19,12 @@ void startPrompt(int *playerID, Server *server, bool *host);
 void fire(Bullet bullets[], Player *p, int *playerID);
 void playerBulletCollisionCheck(Bullet bullets[], Player players[]);
 void sendReceivePackets(int *sendDelay, int *playerID, int *oldPlayerX, int *oldPlayerY, Player players[], UDPsocket* sd, IPaddress* srvadd, UDPpacket** p, UDPpacket** p2);
->>>>>>> Stashed changes
 
 int main(int argc, char* args[])
 {
     // Variables
     SDL_Event event;
     SDL_Renderer* renderer = NULL;
-<<<<<<< Updated upstream
-    if (!init(&renderer)) return 1;
-
-    SDL_Cursor* cursor = NULL;
-
-    // Player
-    Player player1 = createPlayer(0, 0);
-    SDL_Texture* playerText;
-    SDL_Rect playerRect[4];
-    int mouseX = 0, mouseY = 0;
-
-    // Bullet
-    Bullet bullets[MAX_BULLETS];
-    for (int i = 0; i < MAX_BULLETS; i++)
-    {
-        bullets[i] = createBullet();
-    }
-    SDL_Surface* bulletSurface = IMG_Load("resources/bullet.png");
-    SDL_Texture* bulletTexture = SDL_CreateTextureFromSurface(renderer, bulletSurface);
-
-    bool isPlaying = true, shooting = false;
-    int up = 0, down = 0, left = 0, right = 0;
-
-    // Background
-    SDL_Texture* tiles = NULL;
-    SDL_Rect gridTiles[900];   // Kommer innehålla alla 900 rutor från bakgrundsbilden, kan optmiseras.
-
-    loadMedia(renderer, gridTiles, &tiles, playerRect, &playerText, &cursor);
-
-    SDL_Point playerRotationPoint = { 20, 32 };
-=======
     UDPsocket sd;
     IPaddress srvadd;
     UDPpacket* p;
@@ -91,50 +53,12 @@ int main(int argc, char* args[])
     startPrompt(&playerID, &server, &host);
     initClient(&sd, &srvadd, &p, &p2, ANDREAS_IP);
     loadMedia(renderer, gridTiles, &tiles, playerRect, &playerText, &cursor, &bulletTexture);
->>>>>>> Stashed changes
 
     // Main loop
     while (isPlaying)
     {
         handleEvents(&event, &up, &down, &right, &left, &isPlaying, &mouseX, &mouseY, &shooting);
 
-<<<<<<< Updated upstream
-        movePlayer(player1, up, down, right, left, mouseX, mouseY);
-        if (shooting)
-        {
-            for (int i = 0; i < MAX_BULLETS; i++)
-            {
-                if (!isBulletActive(bullets[i]))
-                {
-                    spawnBullet(bullets[i], getPlayerX(player1), getPlayerY(player1), getPlayerDirection(player1));
-                    break;
-                }
-            }
-        }
-        for (int i = 0; i < MAX_BULLETS; i++)
-        {
-            if (isBulletActive(bullets[i]))
-            {
-                moveBullet(bullets[i]);
-            }
-        }
-        
-        SDL_RenderClear(renderer);
-
-        //Game renderer
-        renderBackground(renderer, tiles, gridTiles);
-        SDL_RenderCopyEx(renderer, playerText, &playerRect[getPlayerFrame(player1)], getPlayerRect(player1), getPlayerDirection(player1), &playerRotationPoint, SDL_FLIP_NONE);
-        for (int i = 0; i < MAX_BULLETS; i++)
-        {
-            if (isBulletActive(bullets[i]))
-            {
-                SDL_RenderCopy(renderer, bulletTexture, NULL, bullets[i]);
-            }
-            
-        }
-        
-        SDL_RenderPresent(renderer);
-=======
         movePlayer(players[playerID], up, down, right, left, mouseX, mouseY);
 
         //Flytta på alla andra spelare
@@ -148,7 +72,6 @@ int main(int argc, char* args[])
         playerBulletCollisionCheck(bullets, players);
         
         renderGame(renderer, tiles, gridTiles, bullets, bulletTexture, players, playerText, playerRect, &playerRotationPoint);
->>>>>>> Stashed changes
 
         sendReceivePackets(&sendDelay, &playerID, &oldPlayerX, &oldPlayerY, players, &sd, &srvadd, &p, &p2);
       
@@ -236,13 +159,14 @@ void renderGame(SDL_Renderer* renderer, SDL_Texture* mTiles, SDL_Rect gTiles[], 
     SDL_RenderPresent(renderer);
 }
 
+bool rectCollisionTest(SDL_Rect* a, SDL_Rect* b)
+{
+    if((a->x)>(b->x) && (a->x)<((b->x)+(b->w)) && (a->y) > (b->y) && (a->y) < ((b->y) + (b->h)))
+        return true;
+    return false;
+}
 
-<<<<<<< Updated upstream
-
-bool init(SDL_Renderer** renderer)
-=======
 bool initSDL(SDL_Renderer **renderer)
->>>>>>> Stashed changes
 {
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0)
     {
@@ -276,70 +200,70 @@ void handleEvents(SDL_Event* event, int* up, int* down, int* right, int* left, b
     {
         switch (event->type)
         {
-        case SDL_QUIT:
-            *isPlaying = false;
-            break;
-        case SDL_KEYDOWN:
-            switch (event->key.keysym.scancode)
-            {
-            case SDL_SCANCODE_W:
-            case SDL_SCANCODE_UP:
-                *up = 1;
+            case SDL_QUIT:
+                *isPlaying = false;
                 break;
-            case SDL_SCANCODE_A:
-            case SDL_SCANCODE_LEFT:
-                *left = 1;
+            case SDL_KEYDOWN:
+                switch (event->key.keysym.scancode)
+                {
+                    case SDL_SCANCODE_W:
+                    case SDL_SCANCODE_UP:
+                        *up = 1;
+                        break;
+                    case SDL_SCANCODE_A:
+                    case SDL_SCANCODE_LEFT:
+                        *left = 1;
+                        break;
+                    case SDL_SCANCODE_S:
+                    case SDL_SCANCODE_DOWN:
+                        *down = 1;
+                        break;
+                    case SDL_SCANCODE_D:
+                    case SDL_SCANCODE_RIGHT:
+                        *right = 1;
+                        break;
+                    default:
+                        break;
+                }
                 break;
-            case SDL_SCANCODE_S:
-            case SDL_SCANCODE_DOWN:
-                *down = 1;
+            case SDL_KEYUP:
+                switch (event->key.keysym.scancode)
+                {
+                    case SDL_SCANCODE_W:
+                    case SDL_SCANCODE_UP:
+                        *up = 0;
+                        break;
+                    case SDL_SCANCODE_A:
+                    case SDL_SCANCODE_LEFT:
+                        *left = 0;
+                        break;
+                    case SDL_SCANCODE_S:
+                    case SDL_SCANCODE_DOWN:
+                        *down = 0;
+                        break;
+                    case SDL_SCANCODE_D:
+                    case SDL_SCANCODE_RIGHT:
+                        *right = 0;
+                        break;
+                    default:
+                        break;
+                }
                 break;
-            case SDL_SCANCODE_D:
-            case SDL_SCANCODE_RIGHT:
-                *right = 1;
-                break;
-            default:
-                break;
-            }
-            break;
-        case SDL_KEYUP:
-            switch (event->key.keysym.scancode)
-            {
-            case SDL_SCANCODE_W:
-            case SDL_SCANCODE_UP:
-                *up = 0;
-                break;
-            case SDL_SCANCODE_A:
-            case SDL_SCANCODE_LEFT:
-                *left = 0;
-                break;
-            case SDL_SCANCODE_S:
-            case SDL_SCANCODE_DOWN:
-                *down = 0;
-                break;
-            case SDL_SCANCODE_D:
-            case SDL_SCANCODE_RIGHT:
-                *right = 0;
-                break;
-            default:
-                break;
-            }
-            break;
-        case SDL_MOUSEBUTTONDOWN: //KP
-           
-            *shooting = true;           
-             break;           
             
-        case SDL_MOUSEBUTTONUP: //KP
-                *shooting = false;
-                break;
+          
+            case SDL_MOUSEBUTTONDOWN: //KP
+           
+                *shooting = true;           
+                 break;           
+            
+            case SDL_MOUSEBUTTONUP: //KP
+                    *shooting = false;
+                    break;
 
         }
         
     }
     return;
-<<<<<<< Updated upstream
-=======
 }
 
 void initClient(UDPsocket* sd, IPaddress* srvadd, UDPpacket** p, UDPpacket** p2, char* ip)
@@ -476,5 +400,4 @@ void sendReceivePackets(int* sendDelay, int* playerID, int* oldPlayerX, int* old
          updatePlayerPosition(players[c], a, b);
      }
     
->>>>>>> Stashed changes
 }

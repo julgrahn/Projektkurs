@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include "player.h"
 #include <math.h>
+#include <stdbool.h>
 
 #define PUBLIC
 #define SPEED 2
@@ -17,11 +18,15 @@ struct Player_type {
     int frameCounter;
     int isMoving;
     double direction;
+    bool active;
+    int id;
+    int newX;
+    int newY;
 };
 
 //int SDL_RenderDrawRect(SDL_Renderer* renderer, SDL_Rect NULL);
 
-PUBLIC Player createPlayer(int x, int y)
+PUBLIC Player createPlayer(int x, int y, int id)
 {
     Player a = malloc(sizeof(struct Player_type));
     a->health = HEALTH;
@@ -31,12 +36,16 @@ PUBLIC Player createPlayer(int x, int y)
     a->isMoving = 0;
     a->frameCounter = 0;
     a->direction = 0;
-    a->posX = (WINDOWWIDTH - 64) / 2;
-    a->posY = (WINDOWHEIGHT - 64) / 2;
-    a->pDimensions.x = (WINDOWWIDTH - 64) / 2;
-    a->pDimensions.y = (WINDOWHEIGHT - 64) / 2;
+    a->posX = x;
+    a->posY = y;
+    a->pDimensions.x = x;
+    a->pDimensions.y = y;
     a->pDimensions.w = 64;
     a->pDimensions.h = 64;
+    a->newX = x;
+    a->newY = y;
+    a->active = false;
+    a->id = id;
     return a;
 }
 
@@ -68,6 +77,12 @@ PUBLIC void movePlayer(Player p, int up, int down, int right, int left, int mous
     // Rotate player
     p->direction = (atan2(mouseY - p->pDimensions.y - 34, mouseX - p->pDimensions.x - 18) * 180 / M_PI) - 6;
 
+    // Update player sprite frame
+    p->frameCounter = (p->frameCounter+p->isMoving)%(ANIMATIONSPEED+1);
+    p->frame = (p->frame+((p->frameCounter/ANIMATIONSPEED)*p->isMoving))%4;
+    // Rotate player
+    p->direction = atan2(mouseY-p->pDimensions.y-34, mouseX-p->pDimensions.x-18)*180/M_PI;
+    
     // Collision detection with window
     if (p->pDimensions.y <= 0) p->pDimensions.y = p->posY = 0;
     if (p->pDimensions.y >= WINDOWHEIGHT - p->pDimensions.h) p->pDimensions.y = p->posY = WINDOWHEIGHT - p->pDimensions.h;
@@ -114,3 +129,47 @@ PUBLIC int getPlayerY(Player p)
         }
     }
 }*/
+
+PUBLIC void activatePlayer(Player p)
+{
+    p->active = true;
+}
+
+PUBLIC int getPlayerID(Player p)
+{
+    return p->id;
+}
+
+PUBLIC void updatePlayerPosition(Player p, int x, int y)
+{
+
+    p->newX = x;
+    p->newY = y;
+}
+
+PUBLIC void moveOtherPlayers(Player p)
+{
+    float x_vel;
+    float y_vel;
+    float delta_x = p->newX - p->pDimensions.x;
+    float delta_y = p->newY - p->pDimensions.y;
+    float distance = sqrt(delta_x * delta_x + delta_y * delta_y);
+    x_vel = delta_x * SPEED / distance;
+    y_vel = delta_y * SPEED / distance;
+
+    if (distance < 1)
+    {
+        x_vel = y_vel = 0;
+    }
+    else
+    {
+        p->pDimensions.x += x_vel;
+        p->pDimensions.y += y_vel;
+    }
+
+
+    // printf("%.2f %.2f %.2f %.2f\n", p->posX, p->posY, p->speed, p->diaSpeed);
+    // Set new pixel pos of player
+   
+    
+}
