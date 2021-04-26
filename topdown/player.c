@@ -22,6 +22,7 @@ struct Player_type {
     int id;
     int newX;
     int newY;
+    double xSpeed, ySpeed;
 };
 
 //int SDL_RenderDrawRect(SDL_Renderer* renderer, SDL_Rect NULL);
@@ -46,6 +47,7 @@ PUBLIC Player createPlayer(int x, int y, int id)
     a->newY = y;
     a->active = false;
     a->id = id;
+    a->xSpeed = a->ySpeed = 0;
     return a;
 }
 
@@ -132,36 +134,74 @@ PUBLIC int getPlayerID(Player p)
     return p->id;
 }
 
-PUBLIC void updatePlayerPosition(Player p, int x, int y)
+PUBLIC void updatePlayerPosition(Player p, int x, int y, int direction)
 {
 
     p->newX = x;
     p->newY = y;
+    p->direction = direction;
 }
+
+// PUBLIC void moveOtherPlayers(Player p)
+// {
+//     float x_vel;
+//     float y_vel;
+//     float delta_x = p->newX - p->pDimensions.x;
+//     float delta_y = p->newY - p->pDimensions.y;
+//     float distance = sqrt(delta_x * delta_x + delta_y * delta_y);
+//     x_vel = delta_x * SPEED / distance;
+//     y_vel = delta_y * SPEED / distance;
+
+
+//     // p->posX += x_vel;
+//     // p->posY += y_vel;
+
+//     // p->pDimensions.x += round(p->posX);
+//     // p->pDimensions.y += round(p->posY);
+
+//     if (distance < 1)
+//     {
+//         x_vel = y_vel = 0;
+//     }
+//     else
+//     {
+//         p->pDimensions.x += x_vel;
+//         p->pDimensions.y += y_vel;
+//     }
+
+
+//     // printf("%.2f %.2f %.2f %.2f\n", p->posX, p->posY, p->speed, p->diaSpeed);
+//     // Set new pixel pos of player
+   
+    
+// }
 
 PUBLIC void moveOtherPlayers(Player p)
 {
-    float x_vel;
-    float y_vel;
-    float delta_x = p->newX - p->pDimensions.x;
-    float delta_y = p->newY - p->pDimensions.y;
-    float distance = sqrt(delta_x * delta_x + delta_y * delta_y);
-    x_vel = delta_x * SPEED / distance;
-    y_vel = delta_y * SPEED / distance;
-
-    if (distance < 1)
+    int xDelta = p->newX - p->pDimensions.x;
+    int yDelta = p->newY - p->pDimensions.y;
+    double distance = sqrt(xDelta*xDelta + yDelta*yDelta);
+    double scaling = p->speed/(distance*(distance >= 1)+(distance < 1));
+    // if(xDelta > 1 || xDelta < -1 || yDelta > 1 || yDelta < -1)
+    if(distance > 1)
     {
-        x_vel = y_vel = 0;
-    }
-    else
-    {
-        p->pDimensions.x += x_vel;
-        p->pDimensions.y += y_vel;
-    }
+        // if(distance >= 0) scaling = p->speed/distance
+        // scaling = p->speed/(distance*(distance >= 1)+(distance < 1));
+        p->xSpeed = scaling*xDelta;
+        p->ySpeed = scaling*yDelta;
 
+        p->posX += p->xSpeed;
+        p->posY += p->ySpeed;
 
-    // printf("%.2f %.2f %.2f %.2f\n", p->posX, p->posY, p->speed, p->diaSpeed);
-    // Set new pixel pos of player
-   
-    
+        p->pDimensions.x = round(p->posX);
+        p->pDimensions.y = round(p->posY);
+        p->frameCounter = (p->frameCounter + 1) % (ANIMATIONSPEED + 1);
+        p->frame = (p->frame + ((p->frameCounter / ANIMATIONSPEED))) % 4;
+        // printf("%d %d\n", p->pDimensions.x, p->pDimensions.y);
+    }
+    // else
+    // {
+    //     p->pDimensions.x = p->posX = p->newX;
+    //     p->pDimensions.y = p->posY = p->newY;
+    // }
 }
