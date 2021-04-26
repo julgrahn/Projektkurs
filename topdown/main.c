@@ -10,13 +10,13 @@
 bool initSDL(SDL_Renderer** renderer);
 void handleEvents(SDL_Event* event, int* up, int* down, int* right, int* left, bool* isPlaying, int* mouseX, int* mouseY, bool* shooting);
 void renderGame(SDL_Renderer* renderer, SDL_Texture* mTiles, SDL_Rect gTiles[], Bullet bullets[], SDL_Texture* bulletTexture, Player players[], SDL_Texture* playerText, SDL_Rect playerRect[], SDL_Point* playerRotationPoint);
-void loadMedia(SDL_Renderer* renderer, SDL_Rect gTiles[], SDL_Texture** tiles, SDL_Rect playerRect[], SDL_Texture** pTexture, SDL_Cursor** cursor);
+void loadMedia(SDL_Renderer* renderer, SDL_Rect gTiles[], SDL_Texture** tiles, SDL_Rect playerRect[], SDL_Texture** pTexture, SDL_Cursor** cursor, SDL_Texture **bulletTexture);
 bool rectCollisionTest(SDL_Rect* a, SDL_Rect* b);
 void initClient(UDPsocket *sd, IPaddress *srvadd, UDPpacket **p, UDPpacket **p2, char* ip);
 void initGameObjects(Player players[], Bullet bullets[]);
 static void TestThread(Server *server);
 void startPrompt(int *playerID, Server *server, bool *host);
-void fire(Bullet bullets[], Player *p, int *playerID);
+void fire(Bullet bullets[], Player *p, int *playerID, int xTarget, int yTarget);
 void playerBulletCollisionCheck(Bullet bullets[], Player players[]);
 void sendReceivePackets(int *sendDelay, int *playerID, int *oldPlayerX, int *oldPlayerY, Player players[], UDPsocket* sd, IPaddress* srvadd, UDPpacket** p, UDPpacket** p2);
 
@@ -46,7 +46,6 @@ int main(int argc, char* args[])
     int up = 0, down = 0, left = 0, right = 0;
     SDL_Point playerRotationPoint = { 20, 32 };
 
-
     // Init functions
     if (!initSDL(&renderer)) return 1;
     initGameObjects(players, bullets);
@@ -67,7 +66,7 @@ int main(int argc, char* args[])
             if (i != playerID) moveOtherPlayers(players[i]);
         }
 
-        if (shooting) fire(bullets, &players[playerID], &playerID);
+        if (shooting) fire(bullets, &players[playerID], &playerID, mouseX, mouseY);
 
         playerBulletCollisionCheck(bullets, players);
         
@@ -337,13 +336,13 @@ static void TestThread(Server *server)
     
 }
 
-void fire(Bullet bullets[], Player *p, int *playerID)
+void fire(Bullet bullets[], Player *p, int *playerID, int xTarget, int yTarget)
 {
     for (int i = 0; i < MAX_BULLETS; i++)
     {
         if (!isBulletActive(bullets[i]))
         {
-            spawnBullet(bullets[i], getPlayerX(*p), getPlayerY(*p), getPlayerDirection(*p), *playerID);
+            spawnBullet(bullets[i], getPlayerX(*p), getPlayerY(*p), xTarget, yTarget, *playerID);
             break;
         }
     }
