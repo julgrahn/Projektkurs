@@ -16,7 +16,7 @@ void loadMedia(SDL_Renderer* renderer, SDL_Rect gTiles[], SDL_Texture** tiles, S
 bool rectCollisionTest(SDL_Rect* a, SDL_Rect* b);
 void initClient(UDPsocket *sd, IPaddress *srvadd, UDPpacket **p, UDPpacket **p2, char* ip);
 void initGameObjects(Player players[], Bullet bullets[]);
-static void TestThread(Server *server);
+static int TestThread(void *server);
 void startPrompt(int *playerID, Server *server, bool *host);
 void fire(Bullet bullets[], Player *p, int *playerID, int xTarget, int yTarget);
 void playerBulletCollisionCheck(Bullet bullets[], Player players[]);
@@ -34,7 +34,6 @@ int main(int argc, char* args[])
     Server server = NULL;
     int oldPlayerX = 0, oldPlayerY = 0;
     int playerID;
-    // const int sendDelay = TICKRATE;
     SDL_Cursor* cursor = NULL;
     Player players[MAX_PLAYERS]; 
     SDL_Texture* playerText;
@@ -48,7 +47,7 @@ int main(int argc, char* args[])
     int up = 0, down = 0, left = 0, right = 0;
     SDL_Point playerRotationPoint = { 20, 32 };
 
-    Uint32 fpsTimerStart;
+    Uint32 fpsTimerStart, frameTicks, test;
     // Init functions
     if (!initSDL(&renderer)) return 1;
     initGameObjects(players, bullets);
@@ -59,6 +58,7 @@ int main(int argc, char* args[])
     // Main loop
     while (isPlaying)
     {
+        test = fpsTimerStart = SDL_GetTicks();
         handleEvents(&event, &up, &down, &right, &left, &isPlaying, &mouseX, &mouseY, &shooting);
 
         movePlayer(players[playerID], up, down, right, left, mouseX, mouseY);
@@ -73,12 +73,17 @@ int main(int argc, char* args[])
 
         playerBulletCollisionCheck(bullets, players);
         
+
         renderGame(renderer, tiles, gridTiles, bullets, bulletTexture, players, playerText, playerRect, &playerRotationPoint);
 
         sendReceivePackets(TICKRATE, &playerID, &oldPlayerX, &oldPlayerY, players, &sd, &srvadd, &p, &p2);
-      
-        SDL_Delay(1000 / 60);
-        
+        frameTicks = SDL_GetTicks() - fpsTimerStart;
+        if(frameTicks < (1000/60))
+        {
+            SDL_Delay((1000/60) - frameTicks);
+        }
+        frameTicks = SDL_GetTicks() - test;
+        // printf("%u\n", frameTicks);
     }
 
     SDL_DestroyRenderer(renderer);
@@ -183,7 +188,6 @@ bool initSDL(SDL_Renderer **renderer)
         return false;
     }
     Uint32 renderFlags = SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC;
-
     *renderer = SDL_CreateRenderer(window, -1, renderFlags);
     if (renderer == NULL)
     {
@@ -321,7 +325,7 @@ void startPrompt(int* playerID, Server* server, bool* host)
     scanf(" %c", &input);
     if(input=='h')
     {
-        *server = createServer(*server);
+        *server = createServer();
         printf("hosted!\n");
         *host = true;
         SDL_Thread* serverThread;
@@ -329,15 +333,14 @@ void startPrompt(int* playerID, Server* server, bool* host)
     }
 }
 
-static void TestThread(Server *server)
+static int TestThread(void *server)
 {
     //Uppdatera servern 300ggr / sekunden
     while (true)
     {
-        refreshServer(*server);
+        refreshServer(*(Server*)server);
         SDL_Delay(3);
     }
-    
 }
 
 void fire(Bullet bullets[], Player *p, int *playerID, int xTarget, int yTarget)
@@ -382,7 +385,6 @@ void sendReceivePackets(int sendDelay, int* playerID, int* oldPlayerX, int* oldP
     {           
         if (getPlayerX(players[*playerID]) != *oldPlayerX || getPlayerY(players[*playerID]) != *oldPlayerY)
         {
-            
             sprintf((char*)(*p)->data, "%d %d %d %lf\n", getPlayerX(players[*playerID]), getPlayerY(players[*playerID]), getPlayerID(players[*playerID]), getPlayerDirection(players[*playerID]));
             (*p)->address.host = srvadd->host;
             (*p)->address.port = srvadd->port;

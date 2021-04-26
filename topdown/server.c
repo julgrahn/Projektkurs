@@ -15,18 +15,19 @@ struct Server_type {
     Uint32 IPclients[MAX_PLAYERS];
     Uint32 portClients[MAX_PLAYERS];
     int noOfPlayers;
+    int xPos[MAX_PLAYERS], yPos[MAX_PLAYERS], pID[MAX_PLAYERS];
+    double pDirection[MAX_PLAYERS];
 };
 
 PUBLIC Server createServer()
 {
+    
     Server server = malloc(sizeof(struct Server_type));
-
     for (int i = 0; i < MAX_PLAYERS; i++)
     {
         server->IPclients[i] = 0;
         server->portClients[i] = 0;
     }
-
     server->noOfPlayers = 0;
 
     //Initialize SDL_net 
@@ -35,14 +36,12 @@ PUBLIC Server createServer()
         fprintf(stderr, "SDLNet_Init: %s\n", SDLNet_GetError());
         exit(EXIT_FAILURE);
     }
-
     // Open a socket 
     if (!(server->sd = SDLNet_UDP_Open(2000)))
     {
         fprintf(stderr, "SDLNet_UDP_Open: %s\n", SDLNet_GetError());
         exit(EXIT_FAILURE);
     }
-
     // Make space for the packet 
     if (!((server->pSent = SDLNet_AllocPacket(512)) && (server->pRecive = SDLNet_AllocPacket(512))))
     {
