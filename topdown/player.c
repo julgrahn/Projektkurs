@@ -129,3 +129,47 @@ PUBLIC int getPlayerY(Player p)
         }
     }
 }*/
+
+PUBLIC void activatePlayer(Player p)
+{
+    p->active = true;
+}
+
+PUBLIC int getPlayerID(Player p)
+{
+    return p->id;
+}
+
+PUBLIC void updatePlayerPosition(Player p, int x, int y)
+{
+
+    p->newX = x;
+    p->newY = y;
+}
+
+PUBLIC void moveOtherPlayers(Player p)
+{
+    float x_vel;
+    float y_vel;
+    float delta_x = p->newX - p->pDimensions.x;
+    float delta_y = p->newY - p->pDimensions.y;
+    float distance = sqrt(delta_x * delta_x + delta_y * delta_y);
+    x_vel = delta_x * SPEED / distance;
+    y_vel = delta_y * SPEED / distance;
+
+    if (distance < 1)
+    {
+        x_vel = y_vel = 0;
+    }
+    else
+    {
+        p->pDimensions.x += x_vel;
+        p->pDimensions.y += y_vel;
+    }
+
+
+    // printf("%.2f %.2f %.2f %.2f\n", p->posX, p->posY, p->speed, p->diaSpeed);
+    // Set new pixel pos of player
+   
+    
+}

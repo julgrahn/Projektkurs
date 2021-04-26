@@ -1,14 +1,23 @@
 #Compile SDL project
 
 
-theGame: main.o player.o world.o
-	gcc -o theGame main.o player.o world.o -lSDL2 -lSDL2_image
+theGame: main.o player.o world.o net.o bullet.o server.o
+	gcc -o theGame main.o player.o world.o net.o bullet.o server.o -lSDL2 -lSDL2_image -lSDL2_net -g
 	
 main.o: main.c
-	gcc -c main.c
+	gcc -c main.c -g
 
 player.o: player.c
-	gcc -c player.c
+	gcc -c player.c -g
 
 world.o: world.c
-	gcc -c world.c
+	gcc -c world.c -g
+
+net.o: net.c
+	gcc -c net.c -g
+
+bullet.o: bullet.c
+	gcc -c bullet.c -g
+
+server.o: server.c
+	gcc -c server.c -g

@@ -12,6 +12,13 @@ void handleEvents(SDL_Event* event, int* up, int* down, int* right, int* left, b
 void renderGame(SDL_Renderer* renderer, SDL_Texture* mTiles, SDL_Rect gTiles[], Bullet bullets[], SDL_Texture* bulletTexture, Player players[], SDL_Texture* playerText, SDL_Rect playerRect[], SDL_Point* playerRotationPoint);
 void loadMedia(SDL_Renderer* renderer, SDL_Rect gTiles[], SDL_Texture** tiles, SDL_Rect playerRect[], SDL_Texture** pTexture, SDL_Cursor** cursor);
 bool rectCollisionTest(SDL_Rect* a, SDL_Rect* b);
+void initClient(UDPsocket *sd, IPaddress *srvadd, UDPpacket **p, UDPpacket **p2, char* ip);
+void initGameObjects(Player players[], Bullet bullets[]);
+static void TestThread(Server *server);
+void startPrompt(int *playerID, Server *server, bool *host);
+void fire(Bullet bullets[], Player *p, int *playerID);
+void playerBulletCollisionCheck(Bullet bullets[], Player players[]);
+void sendReceivePackets(int *sendDelay, int *playerID, int *oldPlayerX, int *oldPlayerY, Player players[], UDPsocket* sd, IPaddress* srvadd, UDPpacket** p, UDPpacket** p2);
 
 int main(int argc, char* args[])
 {
@@ -59,39 +66,10 @@ int main(int argc, char* args[])
     {
         handleEvents(&event, &up, &down, &right, &left, &isPlaying, &mouseX, &mouseY, &shooting);
 
-        movePlayer(player1, up, down, right, left, mouseX, mouseY);
-        if (shooting)
-        {
-            for (int i = 0; i < MAX_BULLETS; i++)
-            {
-                if (!isBulletActive(bullets[i]))
-                {
-                    spawnBullet(bullets[i], getPlayerX(player1), getPlayerY(player1), getPlayerDirection(player1));
-                    break;
-                }
-            }
-        }
-        for (int i = 0; i < MAX_BULLETS; i++)
-        {
-            if (isBulletActive(bullets[i]))
-            {
-                moveBullet(bullets[i]);
-                if (rectCollisionTest(getBulletRect(bullets[i]), getPlayerRect(dummy)))
-                {
-                    freeBullet(bullets[i]);
-                }
-            }
-        }
+        movePlayer(players[playerID], up, down, right, left, mouseX, mouseY);
 
-        
-        
-        SDL_RenderClear(renderer);
-
-        //Game renderer
-        renderBackground(renderer, tiles, gridTiles);
-        SDL_RenderCopyEx(renderer, playerText, &playerRect[getPlayerFrame(player1)], getPlayerRect(player1), getPlayerDirection(player1), &playerRotationPoint, SDL_FLIP_NONE);
-        SDL_RenderCopyEx(renderer, playerText, &playerRect[getPlayerFrame(dummy)], getPlayerRect(dummy), getPlayerDirection(dummy), &playerRotationPoint, SDL_FLIP_NONE);
-        for (int i = 0; i < MAX_BULLETS; i++)
+        //Flytta på alla andra spelare
+        for (int i = 0; i < MAX_PLAYERS; i++)
         {
             if (isBulletActive(bullets[i]))
             {
@@ -134,7 +112,6 @@ void loadMedia(SDL_Renderer* renderer, SDL_Rect gTiles[], SDL_Texture** tiles, S
         }
 
     }
-
     SDL_Surface* playerSurface = IMG_Load("resources/playerRifle.png");
     *pTexture = SDL_CreateTextureFromSurface(renderer, playerSurface);
     SDL_FreeSurface(playerSurface);
@@ -145,7 +122,6 @@ void loadMedia(SDL_Renderer* renderer, SDL_Rect gTiles[], SDL_Texture** tiles, S
         playerRect[n].h = 64;
         playerRect[n].w = 64;
     }
-
     SDL_Surface* cursorSurface = IMG_Load("resources/crosshair161.png");
     *cursor = SDL_CreateColorCursor(cursorSurface, 36, 36);
     SDL_FreeSurface(cursorSurface);
@@ -199,7 +175,7 @@ bool rectCollisionTest(SDL_Rect* a, SDL_Rect* b)
     return false;
 }
 
-bool init(SDL_Renderer **renderer)
+bool initSDL(SDL_Renderer **renderer)
 {
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0)
     {
@@ -400,6 +376,7 @@ void playerBulletCollisionCheck(Bullet bullets[], Player players[])
             
             
         }
+        
     }
 }
 

@@ -9,6 +9,10 @@
 //.vscode
 *.exe
 *.dll
+*.main.o
+*.player.o
+*.world.o
+*.theGame
 *.vcxproj
 *.filters
 *.user
@@ -21,3 +25,4 @@
 *.sln
 *.ilk
 *.enc
+*.main.exe
