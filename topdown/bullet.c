@@ -21,20 +21,20 @@ struct Bullet_type {
 
 PUBLIC Bullet createBullet()
 {
-    Bullet b = malloc(sizeof(struct Bullet_type));
+	Bullet b = malloc(sizeof(struct Bullet_type));
 	b->active = false;
 	b->dimensions.w = 4;
 	b->dimensions.h = 4;
 	b->speed = BULLET_SPEED;
-  
-    return b;
+
+	return b;
 }
 
 PUBLIC void spawnBullet(Bullet bullet, int x, int y, int direction, int owner)
 {
 	bullet->active = 1;
 	bullet->xPos = x + 20;
-	bullet->yPos = y + 32;	
+	bullet->yPos = y + 32;
 	bullet->direction = direction * M_PI / 180;
 	bullet->owner = owner;
 
@@ -74,4 +74,9 @@ SDL_Rect* getBulletRect(Bullet bullet)
 void freeBullet(Bullet a)
 {
 	a->active = false;
+}
+
+int getBulletOwner(Bullet b)
+{
+	return b->owner;
 }
