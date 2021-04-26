@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include "player.h"
 #include <math.h>
+#include <stdbool.h>
 
 #define PUBLIC
 #define SPEED 2
@@ -17,11 +18,15 @@ struct Player_type {
     int frameCounter;
     int isMoving;
     double direction;
+    bool active;
+    int id;
+    int newX;
+    int newY;
 };
 
 //int SDL_RenderDrawRect(SDL_Renderer* renderer, SDL_Rect NULL);
 
-PUBLIC Player createPlayer(int x, int y)
+PUBLIC Player createPlayer(int x, int y, int id)
 {
     Player a = malloc(sizeof(struct Player_type));
     a->health = HEALTH;
@@ -37,6 +42,10 @@ PUBLIC Player createPlayer(int x, int y)
     a->pDimensions.y = y;
     a->pDimensions.w = 64;
     a->pDimensions.h = 64;
+    a->newX = x;
+    a->newY = y;
+    a->active = false;
+    a->id = id;
     return a;
 }
 
