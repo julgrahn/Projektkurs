@@ -21,7 +21,6 @@ PUBLIC Server createServer()
 {
     Server server = malloc(sizeof(struct Server_type));
 
-
     for (int i = 0; i < MAX_PLAYERS; i++)
     {
         server->IPclients[i] = 0;
@@ -62,12 +61,7 @@ PUBLIC void refreshServer(Server server)
     /* Wait a packet. UDP_Recv returns != 0 if a packet is coming */
     if (SDLNet_UDP_Recv(server->sd, server->pRecive))
     {
-        // printf("UDP Packet incoming\n");
-         //printf("\tData:    %s\n", (char *)server->pRecive->data);
-        // printf("\tAddress: %x %x\n", server->pRecive->address.host, server->pRecive->address.port);
-
-        
-
+        // Om en ny klient ansluter
         for (int i = server->noOfPlayers; i < MAX_PLAYERS; i++)
         {
             if (server->IPclients[i] == 0 && server->portClients[i] == 0
@@ -78,13 +72,13 @@ PUBLIC void refreshServer(Server server)
                 && server->pRecive->address.port != server->portClients[4])
             {
                 server->noOfPlayers++;
-                //printf("Client %d\n", server->noOfPlayers);
                 server->IPclients[i] = server->pRecive->address.host;
                 server->portClients[i] = server->pRecive->address.port;
                 break;
             }
         }
 
+        // Hanterandet av paket
         // i �r den som skickar
         // j �r den som tar emot
         for (int i = 0; i < server->noOfPlayers+1; i++)
@@ -98,7 +92,6 @@ PUBLIC void refreshServer(Server server)
                         server->pSent->address.host = server->IPclients[j];	// Set the destination host 
                         server->pSent->address.port = server->portClients[j];
                         sscanf((char*)server->pRecive->data, "%d %d %d\n", &a, &b, &c);
-                        //printf("%d %d\n", a, b);
                         sprintf((char*)server->pSent->data, "%d %d %d\n", a, b, c);
                         server->pSent->len = strlen((char*)server->pSent->data) + 1;
                         SDLNet_UDP_Send(server->sd, -1, server->pSent);
@@ -107,11 +100,5 @@ PUBLIC void refreshServer(Server server)
                 }
             }
         }
-
-        
-
-
-        /* Quit if packet contains "quit" */
-        //if (strcmp((char*)server->pSent->data, "quit") == 0) return false;
     }
 }
