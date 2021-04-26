@@ -30,7 +30,7 @@ PUBLIC Bullet createBullet()
     return b;
 }
 
-PUBLIC void spawnBullet(Bullet a, int xOrigin, int yOrigin, SDL_Point target)
+PUBLIC void spawnBullet(Bullet a, int xOrigin, int yOrigin, SDL_Point target, int owner)
 {
 	a->active = 1;
 	a->xPos = xOrigin + 20;
@@ -38,6 +38,7 @@ PUBLIC void spawnBullet(Bullet a, int xOrigin, int yOrigin, SDL_Point target)
 	a->direction = atan2(target.y - (a->yPos+(a->dimensions.h/2)), target.x - (a->xPos+(a->dimensions.w/2)));
 	a->xSpeed = a->speed * cos(a->direction);
 	a->ySpeed = a->speed * sin(a->direction);
+	a->owner = owner;
 }
 
 // PUBLIC void spawnBullet(Bullet bullet, int x, int y, double direction)
@@ -62,8 +63,6 @@ PUBLIC bool isBulletActive(Bullet bullet)
 
 PUBLIC void moveBullet(Bullet bullet)
 {
-	
-
 	bullet->xPos += bullet->xSpeed;
 	bullet->yPos += bullet->ySpeed;
 
@@ -90,4 +89,9 @@ PUBLIC void freeBullet(Bullet a)
 PUBLIC double getBulletDirection(Bullet a)
 {
 	return a->direction;
+}
+
+int getBulletOwner(Bullet b)
+{
+	return b->owner;
 }
