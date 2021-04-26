@@ -43,7 +43,7 @@ PUBLIC int getPlayerFrame(Player p)
     return p->frame;
 }
 
-PUBLIC void movePlayer(Player p, int up, int down, int right, int left, int mouseX, int mouseY)
+PUBLIC void movePlayer(Player p, int up, int down, int right, int left, SDL_Point mouseXY)
 {
     int newX = 0, newY = 0, diagonal;
     p->isMoving=0;
@@ -65,7 +65,7 @@ PUBLIC void movePlayer(Player p, int up, int down, int right, int left, int mous
     p->frameCounter = (p->frameCounter + p->isMoving) % (ANIMATIONSPEED + 1);
     p->frame = (p->frame + ((p->frameCounter / ANIMATIONSPEED) * p->isMoving)) % 4;
     // Rotate player
-    p->direction = (atan2(mouseY - p->pDimensions.y - 34, mouseX - p->pDimensions.x - 18) * 180 / M_PI) - 6;
+    p->direction = (atan2(mouseXY.y - p->pDimensions.y - 34, mouseXY.x - p->pDimensions.x - 18) * 180 / M_PI) - 6;
     
     // Collision detection with window
     if (p->pDimensions.y <= 0) p->pDimensions.y = p->posY = 0;
@@ -74,7 +74,7 @@ PUBLIC void movePlayer(Player p, int up, int down, int right, int left, int mous
     if (p->pDimensions.x >= WINDOWWIDTH - p->pDimensions.w) p->pDimensions.x = p->posX = WINDOWWIDTH - p->pDimensions.w;
 }
 
-PUBLIC int getPlayerDirection(Player p)
+PUBLIC double getPlayerDirection(Player p)
 {
     return p->direction;
 }
@@ -98,15 +98,3 @@ PUBLIC int getPlayerY(Player p)
 {
     return p->pDimensions.y;
 }
-
-/*PUBLIC void shoot(Player p, Bullet bullets[])
-{
-    for (int i = 0; i < MAX_BULLETS; i++)
-    {
-        if (!isBulletActive(bullets[i]))
-        {
-            spawnBullet(p, bullets[i]);
-            return;
-        }
-    }
-}*/

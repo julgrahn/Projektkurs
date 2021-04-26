@@ -8,10 +8,13 @@
 
 
 bool init(SDL_Renderer** renderer);
-void handleEvents(SDL_Event* event, int* up, int* down, int* right, int* left, bool* isPlaying, int* mouseX, int* mouseY, bool* shooting);
+// void handleEvents(SDL_Event* event, int* up, int* down, int* right, int* left, bool* isPlaying, int* mouseX, int* mouseY, bool* shooting);
 void renderBackground(SDL_Renderer* gRenderer, SDL_Texture* mTiles, SDL_Rect gTiles[]);
 void loadMedia(SDL_Renderer* renderer, SDL_Rect gTiles[], SDL_Texture** tiles, SDL_Rect playerRect[], SDL_Texture** pTexture, SDL_Cursor** cursor);
 bool rectCollisionTest(SDL_Rect* a, SDL_Rect* b);
+void createTexture(SDL_Renderer *renderer, char png[], SDL_Rect *rect, SDL_Texture **texture, int columns, int rows, int height, int width);
+void handleEvents(SDL_Event* event, int* up, int* down, int* right, int* left, bool* isPlaying, SDL_Point *mouseXY, bool* shooting);
+
 
 int main(int argc, char* args[])
 {
@@ -25,10 +28,9 @@ int main(int argc, char* args[])
     Player player1 = createPlayer(200, 200);
     SDL_Texture* playerText;
     SDL_Rect playerRect[4];
-    int mouseX = 0, mouseY = 0;
-
+    SDL_Point mouseXY = {0,0};
+    // int mouseX = 0, mouseY = 0;
     Player dummy = createPlayer(100, 100);
-    
 
     // Bullet
     Bullet bullets[MAX_BULLETS];
@@ -38,7 +40,7 @@ int main(int argc, char* args[])
     }
     SDL_Surface* bulletSurface = IMG_Load("resources/bullet.png");
     SDL_Texture* bulletTexture = SDL_CreateTextureFromSurface(renderer, bulletSurface);
-
+    SDL_FreeSurface(bulletSurface);
     bool isPlaying = true, shooting = false;
     int up = 0, down = 0, left = 0, right = 0;
 
@@ -52,16 +54,18 @@ int main(int argc, char* args[])
 
     while (isPlaying)
     {
-        handleEvents(&event, &up, &down, &right, &left, &isPlaying, &mouseX, &mouseY, &shooting);
+        handleEvents(&event, &up, &down, &right, &left, &isPlaying, &mouseXY, &shooting);
 
-        movePlayer(player1, up, down, right, left, mouseX, mouseY);
+        movePlayer(player1, up, down, right, left, mouseXY);
         if (shooting)
         {
             for (int i = 0; i < MAX_BULLETS; i++)
             {
                 if (!isBulletActive(bullets[i]))
                 {
-                    spawnBullet(bullets[i], getPlayerX(player1), getPlayerY(player1), getPlayerDirection(player1));
+                    spawnBullet(bullets[i], getPlayerX(player1), getPlayerY(player1), mouseXY);
+                    // spawnBullet(bullets[i], getPlayerX(player1), getPlayerY(player1), getPlayerDirection(player1));
+                    printf("%f\t%f\n", getPlayerDirection(player1), getBulletDirection(bullets[i])*180/M_PI);
                     break;
                 }
             }
@@ -109,32 +113,48 @@ int main(int argc, char* args[])
     return 0;
 }
 
+void createTexture(SDL_Renderer *renderer, char png[], SDL_Rect *rect, SDL_Texture **texture, int columns, int rows, int height, int width)
+{
+    SDL_Surface *surface = IMG_Load(png);
+    *texture = SDL_CreateTextureFromSurface(renderer, surface);
+    SDL_FreeSurface(surface);
+    for(int i = 0; i < rows; i++)
+        for(int j = 0; j < columns; j++)
+        {
+            rect[i * columns + j].x = width*j;
+            rect[i * columns + j].y = height*i;
+            rect[i * columns + j].w = width;
+            rect[i * columns + j].h = height;
+        }
+}
+
 void loadMedia(SDL_Renderer* renderer, SDL_Rect gTiles[], SDL_Texture** tiles, SDL_Rect playerRect[], SDL_Texture** pTexture, SDL_Cursor** cursor)
 {
-    SDL_Surface* gTilesSurface = IMG_Load("resources/tilemap.png");
-    *tiles = SDL_CreateTextureFromSurface(renderer, gTilesSurface);
-    SDL_FreeSurface(gTilesSurface);
-    for (int i = 0; i < 30; i++)
-    {
-        for (int j = 0; j < 30; j++)
-        {
-            gTiles[i * 30 + j].x = j * getTileWidth();
-            gTiles[i * 30 + j].y = i * getTileHeight();
-            gTiles[i * 30 + j].w = getTileWidth();
-            gTiles[i * 30 + j].h = getTileHeight();
-        }
-
-    }
-    SDL_Surface* playerSurface = IMG_Load("resources/playerRifle.png");
-    *pTexture = SDL_CreateTextureFromSurface(renderer, playerSurface);
-    SDL_FreeSurface(playerSurface);
-    for (int n = 0; n < 4; n++)
-    {
-        playerRect[n].x = 0 + (n * 64);
-        playerRect[n].y = 0;
-        playerRect[n].h = 64;
-        playerRect[n].w = 64;
-    }
+    // SDL_Surface* gTilesSurface = IMG_Load("resources/tilemap.png");
+    // *tiles = SDL_CreateTextureFromSurface(renderer, gTilesSurface);
+    // SDL_FreeSurface(gTilesSurface);
+    // for (int i = 0; i < 30; i++)
+    // {
+    //     for (int j = 0; j < 30; j++)
+    //     {
+    //         gTiles[i * 30 + j].x = j * getTileWidth();
+    //         gTiles[i * 30 + j].y = i * getTileHeight();
+    //         gTiles[i * 30 + j].w = getTileWidth();
+    //         gTiles[i * 30 + j].h = getTileHeight();
+    //     }
+    // }
+    createTexture(renderer, "resources/tilemap.png", gTiles, tiles, 30, 30, getTileHeight(), getTileWidth());
+    createTexture(renderer, "resources/playerRifle.png", playerRect, pTexture, 4, 1, 64, 64);
+    // SDL_Surface* playerSurface = IMG_Load("resources/playerRifle.png");
+    // *pTexture = SDL_CreateTextureFromSurface(renderer, playerSurface);
+    // SDL_FreeSurface(playerSurface);
+    // for (int n = 0; n < 4; n++)
+    // {
+    //     playerRect[n].x = 0 + (n * 64);
+    //     playerRect[n].y = 0;
+    //     playerRect[n].h = 64;
+    //     playerRect[n].w = 64;
+    // }
     SDL_Surface* cursorSurface = IMG_Load("resources/crosshair161.png");
     *cursor = SDL_CreateColorCursor(cursorSurface, 36, 36);
     SDL_FreeSurface(cursorSurface);
@@ -194,9 +214,9 @@ bool init(SDL_Renderer **renderer)
     return true;
 }
 
-void handleEvents(SDL_Event* event, int* up, int* down, int* right, int* left, bool* isPlaying, int* mouseX, int* mouseY, bool* shooting)
+void handleEvents(SDL_Event* event, int* up, int* down, int* right, int* left, bool* isPlaying, SDL_Point *mouseXY, bool* shooting)
 {
-    SDL_GetMouseState(mouseX, mouseY);
+    SDL_GetMouseState(&mouseXY->x, &mouseXY->y);
     while (SDL_PollEvent(event))
     {
         switch (event->type)

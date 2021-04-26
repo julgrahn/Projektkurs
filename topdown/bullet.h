@@ -6,7 +6,9 @@
 typedef struct Bullet_type* Bullet;
 
 Bullet createBullet();
-void spawnBullet(Bullet bullet, int x, int y, int direction);
+// void spawnBullet(Bullet bullet, int x, int y, double direction);
+void spawnBullet(Bullet a, int xOrigin, int yOrigin, SDL_Point target);
+double getBulletDirection(Bullet a);
 bool isBulletActive(Bullet bullet);
 void moveBullet(Bullet bullet);
 SDL_Rect* getBulletRect(Bullet bullet);
