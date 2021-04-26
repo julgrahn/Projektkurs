@@ -56,17 +56,18 @@ PUBLIC int getPlayerFrame(Player p)
 
 PUBLIC void movePlayer(Player p, int up, int down, int right, int left, int mouseX, int mouseY)
 {
-    double newX = 0, newY = 0;
-    p->isMoving = 0;
-    if (up && !down) { newY -= p->speed; p->isMoving = 1; }
-    if (down && !up) { newY += p->speed; p->isMoving = 1; }
-    if (left && !right) { newX -= p->speed; p->isMoving = 1; }
-    if (right && !left) { newX += p->speed; p->isMoving = 1; }
-    // Calc player absolute pos accounting for diagonal movement scaling
-    p->posX += (p->diaSpeed * (newX > 0) + p->diaSpeed * (newX < 0) * (-1)) * (newX != 0 && newY != 0) + newX * !(newX != 0 && newY != 0);
-    p->posY += (p->diaSpeed * (newY > 0) + p->diaSpeed * (newY < 0) * (-1)) * (newX != 0 && newY != 0) + newY * !(newX != 0 && newY != 0);
+    int newX = 0, newY = 0, diagonal;
+    p->isMoving=0;
 
-    // printf("%.2f %.2f %.2f %.2f\n", p->posX, p->posY, p->speed, p->diaSpeed);
+    if (up && !down) {newY--;p->isMoving=1;}
+    if (down && !up) {newY++;p->isMoving=1;}
+    if (left && !right) {newX--;p->isMoving=1;}
+    if (right && !left) {newX++;p->isMoving=1;}
+    diagonal = (newX!=0 && newY!=0);
+    // Set player absolute pos
+    p->posX += p->diaSpeed*diagonal*newX + p->speed*!diagonal*newX;
+    p->posY += p->diaSpeed*diagonal*newY + p->speed*!diagonal*newY;
+
     // Set new pixel pos of player
     p->pDimensions.x = round(p->posX);
     p->pDimensions.y = round(p->posY);
@@ -77,23 +78,14 @@ PUBLIC void movePlayer(Player p, int up, int down, int right, int left, int mous
     // Rotate player
     p->direction = (atan2(mouseY - p->pDimensions.y - 34, mouseX - p->pDimensions.x - 18) * 180 / M_PI) - 6;
 
-    // Update player sprite frame
-    p->frameCounter = (p->frameCounter+p->isMoving)%(ANIMATIONSPEED+1);
-    p->frame = (p->frame+((p->frameCounter/ANIMATIONSPEED)*p->isMoving))%4;
-    // Rotate player
-    p->direction = atan2(mouseY-p->pDimensions.y-34, mouseX-p->pDimensions.x-18)*180/M_PI;
-    
     // Collision detection with window
     if (p->pDimensions.y <= 0) p->pDimensions.y = p->posY = 0;
     if (p->pDimensions.y >= WINDOWHEIGHT - p->pDimensions.h) p->pDimensions.y = p->posY = WINDOWHEIGHT - p->pDimensions.h;
     if (p->pDimensions.x <= 0) p->pDimensions.x = p->posX = 0;
     if (p->pDimensions.x >= WINDOWWIDTH - p->pDimensions.w) p->pDimensions.x = p->posX = WINDOWWIDTH - p->pDimensions.w;
-
-  
-
 }
 
-PUBLIC int getPlayerDirection(Player p)
+PUBLIC double getPlayerDirection(Player p)
 {
     return p->direction;
 }
