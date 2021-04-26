@@ -314,7 +314,7 @@ void startPrompt(int* playerID, Server* server, bool* host)
     printf("Host(h) or client(c): ");
     char input;
     scanf(" %c", &input);
-    if (strcmp(&input, "h") == 1)
+    if (input == 'h')
     {
         *server = createServer(*server);
         printf("hosted!\n");
