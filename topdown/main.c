@@ -7,22 +7,20 @@
 #include "bullet.h"
 #include "server.h"
 
+#define TICKRATE 2  // Number of frames per network-packet
+
 bool initSDL(SDL_Renderer** renderer);
 void handleEvents(SDL_Event* event, int* up, int* down, int* right, int* left, bool* isPlaying, int* mouseX, int* mouseY, bool* shooting);
 void renderGame(SDL_Renderer* renderer, SDL_Texture* mTiles, SDL_Rect gTiles[], Bullet bullets[], SDL_Texture* bulletTexture, Player players[], SDL_Texture* playerText, SDL_Rect playerRect[], SDL_Point* playerRotationPoint);
-void loadMedia(SDL_Renderer* renderer, SDL_Rect gTiles[], SDL_Texture** tiles, SDL_Rect playerRect[], SDL_Texture** pTexture, SDL_Cursor** cursor);
+void loadMedia(SDL_Renderer* renderer, SDL_Rect gTiles[], SDL_Texture** tiles, SDL_Rect playerRect[], SDL_Texture** pTexture, SDL_Cursor** cursor, SDL_Texture **bulletTexture);
 bool rectCollisionTest(SDL_Rect* a, SDL_Rect* b);
 void initClient(UDPsocket *sd, IPaddress *srvadd, UDPpacket **p, UDPpacket **p2, char* ip);
 void initGameObjects(Player players[], Bullet bullets[]);
 static void TestThread(Server *server);
 void startPrompt(int *playerID, Server *server, bool *host);
-void fire(Bullet bullets[], Player *p, int *playerID);
+void fire(Bullet bullets[], Player *p, int *playerID, int xTarget, int yTarget);
 void playerBulletCollisionCheck(Bullet bullets[], Player players[]);
-<<<<<<< Updated upstream
-void sendReceivePackets(int *sendDelay, int *playerID, int *oldPlayerX, int *oldPlayerY, Player players[], UDPsocket* sd, IPaddress* srvadd, UDPpacket** p, UDPpacket** p2);
-=======
 void sendReceivePackets(int sendDelay, int *playerID, int *oldPlayerX, int *oldPlayerY, Player players[], UDPsocket* sd, IPaddress* srvadd, UDPpacket** p, UDPpacket** p2, bool firstPacket[]);
->>>>>>> Stashed changes
 
 int main(int argc, char* args[])
 {
@@ -35,13 +33,8 @@ int main(int argc, char* args[])
     UDPpacket* p2;
     Server server = NULL;
     int oldPlayerX = 0, oldPlayerY = 0;
-<<<<<<< Updated upstream
-    int playerID;
-    int sendDelay = 0;
-=======
     int playerID = 0;
     // const int sendDelay = TICKRATE;
->>>>>>> Stashed changes
     SDL_Cursor* cursor = NULL;
     Player players[MAX_PLAYERS]; 
     SDL_Texture* playerText;
@@ -61,7 +54,7 @@ int main(int argc, char* args[])
         firstPacket[i] = false;
     }
 
-
+    Uint32 fpsTimerStart;
     // Init functions
     if (!initSDL(&renderer)) return 1;
     initGameObjects(players, bullets);
@@ -82,17 +75,13 @@ int main(int argc, char* args[])
             if (i != playerID) moveOtherPlayers(players[i]);
         }
 
-        if (shooting) fire(bullets, &players[playerID], &playerID);
+        if (shooting) fire(bullets, &players[playerID], &playerID, mouseX, mouseY);
 
         playerBulletCollisionCheck(bullets, players);
         
         renderGame(renderer, tiles, gridTiles, bullets, bulletTexture, players, playerText, playerRect, &playerRotationPoint);
 
-<<<<<<< Updated upstream
-        sendReceivePackets(&sendDelay, &playerID, &oldPlayerX, &oldPlayerY, players, &sd, &srvadd, &p, &p2);
-=======
         sendReceivePackets(TICKRATE, &playerID, &oldPlayerX, &oldPlayerY, players, &sd, &srvadd, &p, &p2, firstPacket);
->>>>>>> Stashed changes
       
         SDL_Delay(1000 / 60);
         
@@ -336,7 +325,7 @@ void startPrompt(int* playerID, Server* server, bool* host)
     printf("Host(h) or client(c): ");
     char input;
     scanf(" %c", &input);
-    if (strcmp(&input, "h") == 1)
+    if(input=='h')
     {
         *server = createServer(*server);
         printf("hosted!\n");
@@ -345,6 +334,7 @@ void startPrompt(int* playerID, Server* server, bool* host)
         serverThread = SDL_CreateThread(TestThread, "TestThread", server);
     }
 }
+
 static void TestThread(Server *server)
 {
     //Uppdatera servern 300ggr / sekunden
@@ -356,13 +346,13 @@ static void TestThread(Server *server)
     
 }
 
-void fire(Bullet bullets[], Player *p, int *playerID)
+void fire(Bullet bullets[], Player *p, int *playerID, int xTarget, int yTarget)
 {
     for (int i = 0; i < MAX_BULLETS; i++)
     {
         if (!isBulletActive(bullets[i]))
         {
-            spawnBullet(bullets[i], getPlayerX(*p), getPlayerY(*p), getPlayerDirection(*p), *playerID);
+            spawnBullet(bullets[i], getPlayerX(*p), getPlayerY(*p), xTarget, yTarget, *playerID);
             break;
         }
     }
@@ -389,37 +379,6 @@ void playerBulletCollisionCheck(Bullet bullets[], Player players[])
     }
 }
 
-<<<<<<< Updated upstream
-void sendReceivePackets(int* sendDelay, int* playerID, int* oldPlayerX, int* oldPlayerY, Player players[], UDPsocket* sd, IPaddress* srvadd, UDPpacket** p, UDPpacket** p2)
-{
-     // Send
-     if (*sendDelay >= 5) // Skickar paket högst var femte frame
-        {           
-            if (getPlayerX(players[*playerID]) != *oldPlayerX || getPlayerY(players[*playerID]) != *oldPlayerY)
-            {
-                
-                sprintf((char*)(*p)->data, "%d %d %d\n", getPlayerX(players[*playerID]), getPlayerY(players[*playerID]), getPlayerID(players[*playerID]));
-                (*p)->address.host = srvadd->host;
-                (*p)->address.port = srvadd->port;
-                (*p)->len = strlen((char*)(*p)->data) + 1;
-                SDLNet_UDP_Send(*sd, -1, *p);
-                *oldPlayerX = getPlayerX(players[*playerID]);
-                *oldPlayerY = getPlayerY(players[*playerID]);
-            }
-            *sendDelay = 0;
-        }
-        else
-        {
-            (*sendDelay)++;
-        }    
-
-     // Receive
-     if (SDLNet_UDP_Recv(*sd, *p2)) {
-         int a, b, c;
-         sscanf((char*)(*p2)->data, "%d %d %d\n", &a, &b, &c);
-         updatePlayerPosition(players[c], a, b);
-     }
-=======
 void sendReceivePackets(int sendDelay, int* playerID, int* oldPlayerX, int* oldPlayerY, Player players[], UDPsocket* sd, IPaddress* srvadd, UDPpacket** p, UDPpacket** p2, bool firstPacket[])
 {
     // Send
@@ -457,6 +416,5 @@ void sendReceivePackets(int sendDelay, int* playerID, int* oldPlayerX, int* oldP
         }
         
     }
->>>>>>> Stashed changes
     
 }
