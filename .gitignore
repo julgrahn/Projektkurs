@@ -30,3 +30,4 @@ topdown/x64/Release/TopDown.iobj
 *.txt
 *.iobj
 x64/Release/SDL2.lib
+topdown/.idea/.name
