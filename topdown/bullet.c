@@ -90,8 +90,7 @@ PUBLIC double getBulletDirection(Bullet a)
 {
 	return a->direction;
 }
-
-int getBulletOwner(Bullet b)
+PUBLIC int getBulletOwner(Bullet b)
 {
 	return b->owner;
 }
