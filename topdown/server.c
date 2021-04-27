@@ -57,6 +57,7 @@ PUBLIC void refreshServer(Server server)
     int a = 0; // Spelar-X
     int b = 0; // Spelar-Y
     int c = 0; // SpelarID
+    double d = 0; // Player rotation
 
     /* Wait a packet. UDP_Recv returns != 0 if a packet is coming */
     if (SDLNet_UDP_Recv(server->sd, server->pRecive))
@@ -91,8 +92,8 @@ PUBLIC void refreshServer(Server server)
                     {
                         server->pSent->address.host = server->IPclients[j];	// Set the destination host 
                         server->pSent->address.port = server->portClients[j];
-                        sscanf((char*)server->pRecive->data, "%d %d %d\n", &a, &b, &c);
-                        sprintf((char*)server->pSent->data, "%d %d %d\n", a, b, c);
+                        sscanf((char*)server->pRecive->data, "%d %d %d %lf\n", &a, &b, &c, &d);
+                        sprintf((char*)server->pSent->data, "%d %d %d %lf\n", a, b, c, d);
                         server->pSent->len = strlen((char*)server->pSent->data) + 1;
                         SDLNet_UDP_Send(server->sd, -1, server->pSent);
                         //printf("Client %d skickar till Client %d\n", i+1, j+1);
