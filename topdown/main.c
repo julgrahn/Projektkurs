@@ -1,4 +1,6 @@
-﻿#include <stdio.h>
+﻿#pragma warning(disable : 4996)
+
+#include <stdio.h>
 #include "sdlinclude.h"
 #include <stdbool.h>
 #include <stdlib.h>
@@ -52,7 +54,7 @@ int main(int argc, char* args[])
     if (!initSDL(&renderer)) return 1;
     initGameObjects(players, bullets);
     startPrompt(&playerID, &server, &host);
-    initClient(&sd, &srvadd, &p, &p2, LOCAL_IP);
+    initClient(&sd, &srvadd, &p, &p2, ALEX_IP);
     loadMedia(renderer, gridTiles, &tiles, playerRect, &playerText, &cursor, &bulletTexture);
 
     // Main loop
@@ -323,9 +325,9 @@ void startPrompt(int* playerID, Server* server, bool* host)
     printf("Host(h) or client(c): ");
     char input;
     scanf(" %c", &input);
-    if(input=='h')
+    if(input== 'h')
     {
-        *server = createServer();
+        *server = createServer(*server);
         printf("hosted!\n");
         *host = true;
         SDL_Thread* serverThread;

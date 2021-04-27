@@ -21,13 +21,13 @@ struct Bullet_type {
 
 PUBLIC Bullet createBullet()
 {
-    Bullet b = malloc(sizeof(struct Bullet_type));
+	Bullet b = malloc(sizeof(struct Bullet_type));
 	b->active = false;
 	b->dimensions.w = 4;
 	b->dimensions.h = 4;
 	b->speed = BULLET_SPEED;
   
-    return b;
+	return b;
 }
 
 PUBLIC void spawnBullet(Bullet a, int xOrigin, int yOrigin, int xTarget, int yTarget, int owner)
