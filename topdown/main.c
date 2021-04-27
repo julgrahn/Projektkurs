@@ -18,11 +18,11 @@ void loadMedia(SDL_Renderer* renderer, SDL_Rect gTiles[], SDL_Texture** tiles, S
 bool rectCollisionTest(SDL_Rect* a, SDL_Rect* b);
 void initClient(UDPsocket *sd, IPaddress *srvadd, UDPpacket **p, UDPpacket **p2, char* ip);
 void initGameObjects(Player players[], Bullet bullets[]);
-static int TestThread(void *server);
+static void TestThread(Server *server);
 void startPrompt(int *playerID, Server *server, bool *host);
 void fire(Bullet bullets[], Player *p, int *playerID, int xTarget, int yTarget);
 void playerBulletCollisionCheck(Bullet bullets[], Player players[]);
-void sendReceivePackets(int sendDelay, int *playerID, int *oldPlayerX, int *oldPlayerY, Player players[], UDPsocket* sd, IPaddress* srvadd, UDPpacket** p, UDPpacket** p2);
+void sendReceivePackets(int sendDelay, int *playerID, int *oldPlayerX, int *oldPlayerY, Player players[], UDPsocket* sd, IPaddress* srvadd, UDPpacket** p, UDPpacket** p2, bool firstPacket[]);
 
 int main(int argc, char* args[])
 {
@@ -35,7 +35,8 @@ int main(int argc, char* args[])
     UDPpacket* p2;
     Server server = NULL;
     int oldPlayerX = 0, oldPlayerY = 0;
-    int playerID;
+    int playerID = 0;
+    // const int sendDelay = TICKRATE;
     SDL_Cursor* cursor = NULL;
     Player players[MAX_PLAYERS]; 
     SDL_Texture* playerText;
@@ -48,8 +49,14 @@ int main(int argc, char* args[])
     SDL_Texture* bulletTexture = NULL;
     int up = 0, down = 0, left = 0, right = 0;
     SDL_Point playerRotationPoint = { 20, 32 };
+    bool firstPacket[MAX_PLAYERS];
 
-    Uint32 fpsTimerStart, frameTicks, test;
+    for (int i = 0; i < MAX_PLAYERS; i++)
+    {
+        firstPacket[i] = false;
+    }
+
+    Uint32 fpsTimerStart;
     // Init functions
     if (!initSDL(&renderer)) return 1;
     initGameObjects(players, bullets);
@@ -60,7 +67,6 @@ int main(int argc, char* args[])
     // Main loop
     while (isPlaying)
     {
-        test = fpsTimerStart = SDL_GetTicks();
         handleEvents(&event, &up, &down, &right, &left, &isPlaying, &mouseX, &mouseY, &shooting);
 
         movePlayer(players[playerID], up, down, right, left, mouseX, mouseY);
@@ -75,17 +81,12 @@ int main(int argc, char* args[])
 
         playerBulletCollisionCheck(bullets, players);
         
-
         renderGame(renderer, tiles, gridTiles, bullets, bulletTexture, players, playerText, playerRect, &playerRotationPoint);
 
-        sendReceivePackets(TICKRATE, &playerID, &oldPlayerX, &oldPlayerY, players, &sd, &srvadd, &p, &p2);
-        frameTicks = SDL_GetTicks() - fpsTimerStart;
-        if(frameTicks < (1000/60))
-        {
-            SDL_Delay((1000/60) - frameTicks);
-        }
-        frameTicks = SDL_GetTicks() - test;
-        // printf("%u\n", frameTicks);
+        sendReceivePackets(TICKRATE, &playerID, &oldPlayerX, &oldPlayerY, players, &sd, &srvadd, &p, &p2, firstPacket);
+      
+        SDL_Delay(1000 / 60);
+        
     }
 
     SDL_DestroyRenderer(renderer);
@@ -190,6 +191,7 @@ bool initSDL(SDL_Renderer **renderer)
         return false;
     }
     Uint32 renderFlags = SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC;
+
     *renderer = SDL_CreateRenderer(window, -1, renderFlags);
     if (renderer == NULL)
     {
@@ -318,31 +320,32 @@ void initGameObjects(Player players[], Bullet bullets[])
 
 void startPrompt(int* playerID, Server* server, bool* host)
 {
-    printf("PlayerID: ");
-    scanf(" %d", playerID);
-    printf("PlayerID is :%d\n", *playerID);
+    //printf("PlayerID: ");
+    //scanf(" %d", playerID);
+    //printf("playerid är :%d\n", *playerID);
 
     printf("Host(h) or client(c): ");
     char input;
     scanf(" %c", &input);
-    if(input == 'h')
+    if(input=='h')
     {
         *server = createServer(*server);
-        printf("Hosted!\n");
+        printf("hosted!\n");
         *host = true;
         SDL_Thread* serverThread;
         serverThread = SDL_CreateThread(TestThread, "TestThread", server);
     }
 }
 
-static int TestThread(void *server)
+static void TestThread(Server *server)
 {
     //Uppdatera servern 300ggr / sekunden
     while (true)
     {
-        refreshServer(*(Server*)server);
+        refreshServer(*server);
         SDL_Delay(3);
     }
+    
 }
 
 void fire(Bullet bullets[], Player *p, int *playerID, int xTarget, int yTarget)
@@ -378,16 +381,16 @@ void playerBulletCollisionCheck(Bullet bullets[], Player players[])
     }
 }
 
-void sendReceivePackets(int sendDelay, int* playerID, int* oldPlayerX, int* oldPlayerY, Player players[], UDPsocket* sd, IPaddress* srvadd, UDPpacket** p, UDPpacket** p2)
+void sendReceivePackets(int sendDelay, int* playerID, int* oldPlayerX, int* oldPlayerY, Player players[], UDPsocket* sd, IPaddress* srvadd, UDPpacket** p, UDPpacket** p2, bool firstPacket[])
 {
     // Send
     static int send = 0;
     if(sendDelay) send = (send+1)%sendDelay;
     if(!send) // Skickar paket 30/sek
     {           
-        if (getPlayerX(players[*playerID]) != *oldPlayerX || getPlayerY(players[*playerID]) != *oldPlayerY)
-        {
-            sprintf((char*)(*p)->data, "%d %d %d %lf\n", getPlayerX(players[*playerID]), getPlayerY(players[*playerID]), getPlayerID(players[*playerID]), getPlayerDirection(players[*playerID]));
+        if (true)//(getPlayerX(players[*playerID]) != *oldPlayerX || getPlayerY(players[*playerID]) != *oldPlayerY)
+        {         
+            sprintf((char*)(*p)->data, "%d %d %lf\n", getPlayerX(players[*playerID]), getPlayerY(players[*playerID]), getPlayerDirection(players[*playerID]));
             (*p)->address.host = srvadd->host;
             (*p)->address.port = srvadd->port;
             (*p)->len = strlen((char*)(*p)->data) + 1;
@@ -403,7 +406,17 @@ void sendReceivePackets(int sendDelay, int* playerID, int* oldPlayerX, int* oldP
         int a, b, c;
         double d;
         sscanf((char*)(*p2)->data, "%d %d %d %lf\n", &a, &b, &c, &d);
-        updatePlayerPosition(players[c], a, b, d);
+
+        if (a == -1) // om a är -1 så betyder det att c är det tilldelade spelarID från servern
+        {
+            *playerID = c;
+        }
+        else // Första gången man får ett paket från en klient så ska den spelaren snappas till rätt position istället för att gå
+        {
+            updatePlayerPosition(players[c], a, b, d, firstPacket[c]);
+            firstPacket[c] = true;
+        }
+        
     }
     
 }

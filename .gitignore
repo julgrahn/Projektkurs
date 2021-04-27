@@ -3,9 +3,9 @@
 ################################################################################
 
 /.vs
-*.DS_Store
-*.out
-*.o
+.DS_Store
+.out
+.o
 //.vscode
 *.exe
 *.dll
@@ -18,16 +18,9 @@
 *.tlog
 *.idb
 *.pdb
+*.enc
 *.sln
 *.ilk
-*.enc
-*.xml
-*.iml
-topdown/theGame
-topdown/x64/Debug/TopDown.vcxproj.FileListAbsolute.txt
-topdown/x64/Release/TopDown.iobj
-*.ipdb
-*.txt
-*.iobj
-x64/Release/SDL2.lib
 topdown/.idea/.name
+topdown/.idea/vcs.xml
+topdown/.idea/workspace.xml
