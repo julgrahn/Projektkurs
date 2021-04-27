@@ -1,5 +1,3 @@
-#pragma warning(disable : 4996)
-
 #include <stdlib.h>
 #include "sdlinclude.h"
 #include "bullet.h"
@@ -28,24 +26,35 @@ PUBLIC Bullet createBullet()
 	b->dimensions.w = 4;
 	b->dimensions.h = 4;
 	b->speed = BULLET_SPEED;
-  
+
 	return b;
 }
 
-PUBLIC void spawnBullet(Bullet bullet, int x, int y, int direction)
+PUBLIC void spawnBullet(Bullet a, int xOrigin, int yOrigin, int xTarget, int yTarget, int owner)
 {
-	bullet->active = 1;
-	bullet->xPos = x + 20;
-	bullet->yPos = y + 32;
-	bullet->direction = direction * M_PI / 180;
-
-	//printf("xSpeed: %d\n", bullet->xSpeed);
-	//printf("ySpeed: %d\n", bullet->ySpeed);
-
-	bullet->xSpeed = bullet->speed * cos(bullet->direction);
-	bullet->ySpeed = bullet->speed * sin(bullet->direction);
-
+	a->active = 1;
+	a->xPos = xOrigin + 20;
+	a->yPos = yOrigin + 32;
+	a->direction = atan2(yTarget - (a->yPos + (a->dimensions.h / 2)), xTarget - (a->xPos + (a->dimensions.w / 2)));
+	a->xSpeed = a->speed * cos(a->direction);
+	a->ySpeed = a->speed * sin(a->direction);
+	a->owner = owner;
 }
+
+// PUBLIC void spawnBullet(Bullet bullet, int x, int y, double direction)
+// {
+// 	bullet->active = 1;
+// 	bullet->xPos = x + 20;
+// 	bullet->yPos = y + 32;	
+// 	bullet->direction = direction * M_PI / 180;
+
+// 	//printf("xSpeed: %d\n", bullet->xSpeed);
+// 	//printf("ySpeed: %d\n", bullet->ySpeed);
+
+// 	bullet->xSpeed = bullet->speed * cos(bullet->direction);
+// 	bullet->ySpeed = bullet->speed * sin(bullet->direction);
+
+// }
 
 PUBLIC bool isBulletActive(Bullet bullet)
 {
@@ -54,8 +63,6 @@ PUBLIC bool isBulletActive(Bullet bullet)
 
 PUBLIC void moveBullet(Bullet bullet)
 {
-
-
 	bullet->xPos += bullet->xSpeed;
 	bullet->yPos += bullet->ySpeed;
 
@@ -69,12 +76,21 @@ PUBLIC void moveBullet(Bullet bullet)
 
 }
 
-SDL_Rect* getBulletRect(Bullet bullet)
+PUBLIC SDL_Rect* getBulletRect(Bullet bullet)
 {
 	return &bullet->dimensions;
 }
 
-void freeBullet(Bullet a)
+PUBLIC void freeBullet(Bullet a)
 {
 	a->active = false;
+}
+
+PUBLIC double getBulletDirection(Bullet a)
+{
+	return a->direction;
+}
+PUBLIC int getBulletOwner(Bullet b)
+{
+	return b->owner;
 }

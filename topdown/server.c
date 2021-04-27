@@ -1,9 +1,12 @@
-﻿#include <stdio.h>
+﻿#pragma warning(disable : 4996)
+
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 
 #include "server.h"
-#include <stdbool.h>
+
 
 #define PUBLIC /* empty */
 #define PRIVATE static
