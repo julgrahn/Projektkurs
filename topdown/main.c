@@ -78,9 +78,9 @@ int main(int argc, char* args[])
         else
         {
             SDL_Delay(1000);
-        }       
+        }
     }
-    
+
 
     // Main loop
     while (isPlaying)
@@ -313,7 +313,7 @@ void initClient(UDPsocket* sd, IPaddress* srvadd, UDPpacket** p, UDPpacket** p2,
         exit(EXIT_FAILURE);
     }
 
-    // Resolve server name  
+    // Resolve server name
     if (SDLNet_ResolveHost(srvadd, ip, 2000) == -1)
     {
         fprintf(stderr, "SDLNet_ResolveHost(192.0.0.1 2000): %s\n", SDLNet_GetError());
@@ -452,5 +452,5 @@ void sendReceivePackets(int sendDelay, int* playerID, int* oldPlayerX, int* oldP
         // printf("%d\n", (*p2)->len);
         updatePlayerPosition(players[c], a, b, d);
     }
-    
+
 }

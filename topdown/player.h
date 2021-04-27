@@ -1,6 +1,7 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 #include "sdlinclude.h"
+#include <stdbool.h>
 
 typedef struct Player_type* Player;
 
@@ -15,7 +16,7 @@ int getPlayerY(Player p);
 int getPlayerID(Player p);
 void activatePlayer(Player p);
 void playerHealth(Player p, int health);
-void updatePlayerPosition(Player p, int x, int y, int rotation);
+void updatePlayerPosition(Player p, int x, int y, int rotation, bool firstMove);
 void moveOtherPlayers(Player p);
 void snapPlayer(Player p, int x, int y);
 
