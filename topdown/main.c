@@ -7,7 +7,7 @@
 #include "bullet.h"
 #include "server.h"
 
-#define TICKRATE 2  // Number of frames per network-packet
+#define TICKRATE 2 // Number of frames per network-packet
 
 bool initSDL(SDL_Renderer** renderer);
 void handleEvents(SDL_Event* event, int* up, int* down, int* right, int* left, bool* isPlaying, int* mouseX, int* mouseY, bool* shooting);
@@ -383,12 +383,26 @@ void sendReceivePackets(int sendDelay, int* playerID, int* oldPlayerX, int* oldP
     if(sendDelay) send = (send+1)%sendDelay;
     if(!send) // Skickar paket 30/sek
     {           
-        if (getPlayerX(players[*playerID]) != *oldPlayerX || getPlayerY(players[*playerID]) != *oldPlayerY)
+        // if (getPlayerX(players[*playerID]) != *oldPlayerX || getPlayerY(players[*playerID]) != *oldPlayerY)
+        if(1)
         {
-            sprintf((char*)(*p)->data, "%d %d %d %lf\n", getPlayerX(players[*playerID]), getPlayerY(players[*playerID]), getPlayerID(players[*playerID]), getPlayerDirection(players[*playerID]));
+            // Uint32 data;
+            // int inverted = 0;
+            // data=(getPlayerID(players[*playerID])<<29);
+            // data=data | (getPlayerX(players[*playerID])<<19);
+            // data=data | (getPlayerY(players[*playerID])<<9);
+            // int temp = getPlayerDirection(players[*playerID]);
+            // if(temp<0) {temp *=(-1);inverted=1;}
+            // data = data | (inverted<<8);
+            // data = data | temp;
+            // printf("%d %d\n", temp, (int)getPlayerDirection(players[*playerID]));
+            // printf("%d\n", data);
+            sprintf((char*)(*p)->data, "%d %d %d %d\n", getPlayerX(players[*playerID]), getPlayerY(players[*playerID]), getPlayerID(players[*playerID]), (int)getPlayerDirection(players[*playerID]));
+            // sprintf((char*)(*p)->data, "%d\n", data);
             (*p)->address.host = srvadd->host;
             (*p)->address.port = srvadd->port;
             (*p)->len = strlen((char*)(*p)->data) + 1;
+            // printf("%d\n", (*p2)->len);
             SDLNet_UDP_Send(*sd, -1, *p);
             *oldPlayerX = getPlayerX(players[*playerID]);
             *oldPlayerY = getPlayerY(players[*playerID]);
@@ -399,9 +413,23 @@ void sendReceivePackets(int sendDelay, int* playerID, int* oldPlayerX, int* oldP
     if (SDLNet_UDP_Recv(*sd, *p2))
     {
         int a, b, c;
-        double d;
-        sscanf((char*)(*p2)->data, "%d %d %d %lf\n", &a, &b, &c, &d);
+        int d;
+        // printf("%lu\n", sizeof (*p2)->data);
+        sscanf((char*)(*p2)->data, "%d %d %d %d\n", &a, &b, &c, &d);
+        printf("%d %d %d %d\n", a, b, c, d);
+        // printf("%d\n", (*p2)->len);
         updatePlayerPosition(players[c], a, b, d);
     }
-    
+    // if (SDLNet_UDP_Recv(*sd, *p2))
+    // {
+    //     Uint32 data;
+    //     int rotation;
+    //     sscanf((char*)(*p2)->data, "%d\n", &data);
+    //     // printf("%d\n", (*p2)->len);
+    //     // printf("%lu\n", sizeof (*p2)->data);
+    //     rotation = data&0xFF;
+    //     if(((data>>8)&1)==1) rotation *= -1;
+    //     // printf("%d %d %d %d\n", data>>29, (data>>19)&0x3FF, (data>>9)&0x3FF, rotation);
+    //     updatePlayerPosition(players[data>>29], (data>>19)&0x3FF, (data>>9)&0x3FF, rotation);
+    // }
 }
