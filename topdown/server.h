@@ -5,7 +5,7 @@
 
 typedef struct Server_type* Server;
 
-Server createServer(Server server);
+Server createServer();
 void refreshServer(Server server);
 
 
