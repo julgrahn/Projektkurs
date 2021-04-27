@@ -9,7 +9,7 @@
 #include "bullet.h"
 #include "server.h"
 
-#define TICKRATE 2  // Number of frames per network-packet
+#define TICKRATE 30  // Number of frames per network-packet
 
 bool initSDL(SDL_Renderer** renderer);
 void handleEvents(SDL_Event* event, int* up, int* down, int* right, int* left, bool* isPlaying, int* mouseX, int* mouseY, bool* shooting);
@@ -175,7 +175,6 @@ bool rectCollisionTest(SDL_Rect* a, SDL_Rect* b)
         return true;
     return false;
 }
-
 bool initSDL(SDL_Renderer **renderer)
 {
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0)
@@ -358,7 +357,7 @@ void fire(Bullet bullets[], Player *p, int *playerID, int xTarget, int yTarget)
             break;
         }
     }
-}
+} 
 
 void playerBulletCollisionCheck(Bullet bullets[], Player players[])
 {

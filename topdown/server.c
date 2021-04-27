@@ -79,8 +79,6 @@ PUBLIC void refreshServer(Server server)
                 server->IPclients[i] = server->pRecive->address.host;
                 server->portClients[i] = server->pRecive->address.port;
 
-                
-
                 break;
             }
         }
