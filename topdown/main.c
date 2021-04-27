@@ -1,6 +1,4 @@
-﻿#pragma warning(disable : 4996)
-
-#include <stdio.h>
+﻿#include <stdio.h>
 #include "sdlinclude.h"
 #include <stdbool.h>
 #include <stdlib.h>
@@ -9,20 +7,20 @@
 #include "bullet.h"
 #include "server.h"
 
-#define TICKRATE 2  // Number of frames per network-packet
+#define TICKRATE 2 // Number of frames per network-packet
 
 bool initSDL(SDL_Renderer** renderer);
 void handleEvents(SDL_Event* event, int* up, int* down, int* right, int* left, bool* isPlaying, int* mouseX, int* mouseY, bool* shooting);
 void renderGame(SDL_Renderer* renderer, SDL_Texture* mTiles, SDL_Rect gTiles[], Bullet bullets[], SDL_Texture* bulletTexture, Player players[], SDL_Texture* playerText, SDL_Rect playerRect[], SDL_Point* playerRotationPoint);
-void loadMedia(SDL_Renderer* renderer, SDL_Rect gTiles[], SDL_Texture** tiles, SDL_Rect playerRect[], SDL_Texture** pTexture, SDL_Cursor** cursor, SDL_Texture **bulletTexture);
+void loadMedia(SDL_Renderer* renderer, SDL_Rect gTiles[], SDL_Texture** tiles, SDL_Rect playerRect[], SDL_Texture** pTexture, SDL_Cursor** cursor, SDL_Texture** bulletTexture);
 bool rectCollisionTest(SDL_Rect* a, SDL_Rect* b);
-void initClient(UDPsocket *sd, IPaddress *srvadd, UDPpacket **p, UDPpacket **p2, char* ip);
+void initClient(UDPsocket* sd, IPaddress* srvadd, UDPpacket** p, UDPpacket** p2, char* ip, TCPsocket* tcpsock);
 void initGameObjects(Player players[], Bullet bullets[]);
-static void TestThread(Server *server);
-void startPrompt(int *playerID, Server *server, bool *host);
-void fire(Bullet bullets[], Player *p, int *playerID, int xTarget, int yTarget);
+static int TestThread(void* server);
+void startPrompt(int* playerID, Server* server, bool* host);
+void fire(Bullet bullets[], Player* p, int* playerID, int xTarget, int yTarget);
 void playerBulletCollisionCheck(Bullet bullets[], Player players[]);
-void sendReceivePackets(int sendDelay, int *playerID, int *oldPlayerX, int *oldPlayerY, Player players[], UDPsocket* sd, IPaddress* srvadd, UDPpacket** p, UDPpacket** p2, bool firstPacket[]);
+void sendReceivePackets(int sendDelay, int* playerID, int* oldPlayerX, int* oldPlayerY, Player players[], UDPsocket* sd, IPaddress* srvadd, UDPpacket** p, UDPpacket** p2, TCPsocket* tcpsock);
 
 int main(int argc, char* args[])
 {
@@ -30,15 +28,15 @@ int main(int argc, char* args[])
     SDL_Event event;
     SDL_Renderer* renderer = NULL;
     UDPsocket sd;
+    TCPsocket tcpsock = NULL;
     IPaddress srvadd;
     UDPpacket* p;
     UDPpacket* p2;
     Server server = NULL;
     int oldPlayerX = 0, oldPlayerY = 0;
-    int playerID = 0;
-    // const int sendDelay = TICKRATE;
+    int playerID;
     SDL_Cursor* cursor = NULL;
-    Player players[MAX_PLAYERS]; 
+    Player players[MAX_PLAYERS];
     SDL_Texture* playerText;
     SDL_Rect playerRect[4];
     int mouseX = 0, mouseY = 0;
@@ -49,24 +47,45 @@ int main(int argc, char* args[])
     SDL_Texture* bulletTexture = NULL;
     int up = 0, down = 0, left = 0, right = 0;
     SDL_Point playerRotationPoint = { 20, 32 };
-    bool firstPacket[MAX_PLAYERS];
 
-    for (int i = 0; i < MAX_PLAYERS; i++)
-    {
-        firstPacket[i] = false;
-    }
-
-    Uint32 fpsTimerStart;
+    Uint32 fpsTimerStart, frameTicks, test;
     // Init functions
     if (!initSDL(&renderer)) return 1;
     initGameObjects(players, bullets);
     startPrompt(&playerID, &server, &host);
-    initClient(&sd, &srvadd, &p, &p2, ANDREAS_IP);
+    initClient(&sd, &srvadd, &p, &p2, LOCAL_IP, &tcpsock);
     loadMedia(renderer, gridTiles, &tiles, playerRect, &playerText, &cursor, &bulletTexture);
+
+    // TCP för programstart. Man kan inte lämna loopen förrän man har anslutit till servern
+    bool connected = false;
+    int connectionAttempt = 1;
+    char msg[1024];
+    while (!connected)
+    {
+        printf("Connecting, attempt %d", connectionAttempt);
+        if (SDLNet_TCP_Recv(tcpsock, msg, 1024))
+        {
+            int p0x, p0y, p1x, p1y, p2x, p2y, p3x, p3y, p4x, p4y;
+            sscanf((char*)msg, "%d %d %d %d %d %d %d %d %d %d %d\n", &playerID, &p0x, &p0y, &p1x, &p1y, &p2x, &p2y, &p3x, &p3y, &p4x, &p4y);
+            printf("\nConnected with playerID: %d!\n", playerID);
+            snapPlayer(players[0], p0x, p0y);
+            snapPlayer(players[1], p1x, p1y);
+            snapPlayer(players[2], p2x, p2y);
+            snapPlayer(players[3], p3x, p3y);
+            snapPlayer(players[4], p4x, p4y);
+            connected = true;
+        }
+        else
+        {
+            SDL_Delay(1000);
+        }       
+    }
+    
 
     // Main loop
     while (isPlaying)
     {
+        test = fpsTimerStart = SDL_GetTicks();
         handleEvents(&event, &up, &down, &right, &left, &isPlaying, &mouseX, &mouseY, &shooting);
 
         movePlayer(players[playerID], up, down, right, left, mouseX, mouseY);
@@ -80,13 +99,18 @@ int main(int argc, char* args[])
         if (shooting) fire(bullets, &players[playerID], &playerID, mouseX, mouseY);
 
         playerBulletCollisionCheck(bullets, players);
-        
+
+
         renderGame(renderer, tiles, gridTiles, bullets, bulletTexture, players, playerText, playerRect, &playerRotationPoint);
 
-        sendReceivePackets(TICKRATE, &playerID, &oldPlayerX, &oldPlayerY, players, &sd, &srvadd, &p, &p2, firstPacket);
-      
-        SDL_Delay(1000 / 60);
-        
+        sendReceivePackets(TICKRATE, &playerID, &oldPlayerX, &oldPlayerY, players, &sd, &srvadd, &p, &p2, &tcpsock);
+        frameTicks = SDL_GetTicks() - fpsTimerStart;
+        if (frameTicks < (1000 / 60))
+        {
+            SDL_Delay((1000 / 60) - frameTicks);
+        }
+        frameTicks = SDL_GetTicks() - test;
+        // printf("%u\n", frameTicks);
     }
 
     SDL_DestroyRenderer(renderer);
@@ -171,12 +195,12 @@ void renderGame(SDL_Renderer* renderer, SDL_Texture* mTiles, SDL_Rect gTiles[], 
 
 bool rectCollisionTest(SDL_Rect* a, SDL_Rect* b)
 {
-    if((a->x)>(b->x) && (a->x)<((b->x)+(b->w)) && (a->y) > (b->y) && (a->y) < ((b->y) + (b->h)))
+    if ((a->x) > (b->x) && (a->x) < ((b->x) + (b->w)) && (a->y) > (b->y) && (a->y) < ((b->y) + (b->h)))
         return true;
     return false;
 }
 
-bool initSDL(SDL_Renderer **renderer)
+bool initSDL(SDL_Renderer** renderer)
 {
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0)
     {
@@ -191,7 +215,6 @@ bool initSDL(SDL_Renderer **renderer)
         return false;
     }
     Uint32 renderFlags = SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC;
-
     *renderer = SDL_CreateRenderer(window, -1, renderFlags);
     if (renderer == NULL)
     {
@@ -210,73 +233,73 @@ void handleEvents(SDL_Event* event, int* up, int* down, int* right, int* left, b
     {
         switch (event->type)
         {
-            case SDL_QUIT:
-                *isPlaying = false;
+        case SDL_QUIT:
+            *isPlaying = false;
+            break;
+        case SDL_KEYDOWN:
+            switch (event->key.keysym.scancode)
+            {
+            case SDL_SCANCODE_W:
+            case SDL_SCANCODE_UP:
+                *up = 1;
                 break;
-            case SDL_KEYDOWN:
-                switch (event->key.keysym.scancode)
-                {
-                    case SDL_SCANCODE_W:
-                    case SDL_SCANCODE_UP:
-                        *up = 1;
-                        break;
-                    case SDL_SCANCODE_A:
-                    case SDL_SCANCODE_LEFT:
-                        *left = 1;
-                        break;
-                    case SDL_SCANCODE_S:
-                    case SDL_SCANCODE_DOWN:
-                        *down = 1;
-                        break;
-                    case SDL_SCANCODE_D:
-                    case SDL_SCANCODE_RIGHT:
-                        *right = 1;
-                        break;
-                    default:
-                        break;
-                }
+            case SDL_SCANCODE_A:
+            case SDL_SCANCODE_LEFT:
+                *left = 1;
                 break;
-            case SDL_KEYUP:
-                switch (event->key.keysym.scancode)
-                {
-                    case SDL_SCANCODE_W:
-                    case SDL_SCANCODE_UP:
-                        *up = 0;
-                        break;
-                    case SDL_SCANCODE_A:
-                    case SDL_SCANCODE_LEFT:
-                        *left = 0;
-                        break;
-                    case SDL_SCANCODE_S:
-                    case SDL_SCANCODE_DOWN:
-                        *down = 0;
-                        break;
-                    case SDL_SCANCODE_D:
-                    case SDL_SCANCODE_RIGHT:
-                        *right = 0;
-                        break;
-                    default:
-                        break;
-                }
+            case SDL_SCANCODE_S:
+            case SDL_SCANCODE_DOWN:
+                *down = 1;
                 break;
-            
-          
-            case SDL_MOUSEBUTTONDOWN: //KP
-           
-                *shooting = true;           
-                 break;           
-            
-            case SDL_MOUSEBUTTONUP: //KP
-                    *shooting = false;
-                    break;
+            case SDL_SCANCODE_D:
+            case SDL_SCANCODE_RIGHT:
+                *right = 1;
+                break;
+            default:
+                break;
+            }
+            break;
+        case SDL_KEYUP:
+            switch (event->key.keysym.scancode)
+            {
+            case SDL_SCANCODE_W:
+            case SDL_SCANCODE_UP:
+                *up = 0;
+                break;
+            case SDL_SCANCODE_A:
+            case SDL_SCANCODE_LEFT:
+                *left = 0;
+                break;
+            case SDL_SCANCODE_S:
+            case SDL_SCANCODE_DOWN:
+                *down = 0;
+                break;
+            case SDL_SCANCODE_D:
+            case SDL_SCANCODE_RIGHT:
+                *right = 0;
+                break;
+            default:
+                break;
+            }
+            break;
+
+
+        case SDL_MOUSEBUTTONDOWN: //KP
+
+            *shooting = true;
+            break;
+
+        case SDL_MOUSEBUTTONUP: //KP
+            *shooting = false;
+            break;
 
         }
-        
+
     }
     return;
 }
 
-void initClient(UDPsocket* sd, IPaddress* srvadd, UDPpacket** p, UDPpacket** p2, char* ip)
+void initClient(UDPsocket* sd, IPaddress* srvadd, UDPpacket** p, UDPpacket** p2, char* ip, TCPsocket* tcpsock)
 {
     if (SDLNet_Init() < 0)
     {
@@ -297,6 +320,8 @@ void initClient(UDPsocket* sd, IPaddress* srvadd, UDPpacket** p, UDPpacket** p2,
         exit(EXIT_FAILURE);
     }
 
+    *tcpsock = SDLNet_TCP_Open(srvadd);
+
     printf("Connected to : %s\n", ip);
 
     if (!((*p = SDLNet_AllocPacket(512)) && (*p2 = SDLNet_AllocPacket(512))))
@@ -304,6 +329,8 @@ void initClient(UDPsocket* sd, IPaddress* srvadd, UDPpacket** p, UDPpacket** p2,
         fprintf(stderr, "SDLNet_AllocPacket: %s\n", SDLNet_GetError());
         exit(EXIT_FAILURE);
     }
+
+
 }
 
 void initGameObjects(Player players[], Bullet bullets[])
@@ -327,9 +354,9 @@ void startPrompt(int* playerID, Server* server, bool* host)
     printf("Host(h) or client(c): ");
     char input;
     scanf(" %c", &input);
-    if(input=='h')
+    if (input == 'h')
     {
-        *server = createServer(*server);
+        *server = createServer(server);
         printf("hosted!\n");
         *host = true;
         SDL_Thread* serverThread;
@@ -337,18 +364,17 @@ void startPrompt(int* playerID, Server* server, bool* host)
     }
 }
 
-static void TestThread(Server *server)
+static int TestThread(void* server)
 {
     //Uppdatera servern 300ggr / sekunden
     while (true)
     {
-        refreshServer(*server);
+        refreshServer(*(Server*)server);
         SDL_Delay(3);
     }
-    
 }
 
-void fire(Bullet bullets[], Player *p, int *playerID, int xTarget, int yTarget)
+void fire(Bullet bullets[], Player* p, int* playerID, int xTarget, int yTarget)
 {
     for (int i = 0; i < MAX_BULLETS; i++)
     {
@@ -375,48 +401,56 @@ void playerBulletCollisionCheck(Bullet bullets[], Player players[])
                     freeBullet(bullets[i]);
                 }
             }
-            
-            
+
+
         }
     }
 }
 
-void sendReceivePackets(int sendDelay, int* playerID, int* oldPlayerX, int* oldPlayerY, Player players[], UDPsocket* sd, IPaddress* srvadd, UDPpacket** p, UDPpacket** p2, bool firstPacket[])
+void sendReceivePackets(int sendDelay, int* playerID, int* oldPlayerX, int* oldPlayerY, Player players[], UDPsocket* sd, IPaddress* srvadd, UDPpacket** p, UDPpacket** p2, TCPsocket* tcpsock)
 {
+
     // Send
     static int send = 0;
-    if(sendDelay) send = (send+1)%sendDelay;
-    if(!send) // Skickar paket 30/sek
-    {           
-        if (true)//(getPlayerX(players[*playerID]) != *oldPlayerX || getPlayerY(players[*playerID]) != *oldPlayerY)
-        {         
-            sprintf((char*)(*p)->data, "%d %d %lf\n", getPlayerX(players[*playerID]), getPlayerY(players[*playerID]), getPlayerDirection(players[*playerID]));
+    if (sendDelay) send = (send + 1) % sendDelay;
+    if (!send) // Skickar paket 30/sek
+    {
+        // if (getPlayerX(players[*playerID]) != *oldPlayerX || getPlayerY(players[*playerID]) != *oldPlayerY)
+        if (1)
+        {
+            // Uint32 data;
+            // int inverted = 0;
+            // data=(getPlayerID(players[*playerID])<<29);
+            // data=data | (getPlayerX(players[*playerID])<<19);
+            // data=data | (getPlayerY(players[*playerID])<<9);
+            // int temp = getPlayerDirection(players[*playerID]);
+            // if(temp<0) {temp *=(-1);inverted=1;}
+            // data = data | (inverted<<8);
+            // data = data | temp;
+            // printf("%d %d\n", temp, (int)getPlayerDirection(players[*playerID]));
+            // printf("%d\n", data);
+            sprintf((char*)(*p)->data, "%d %d %d %d\n", getPlayerX(players[*playerID]), getPlayerY(players[*playerID]), getPlayerID(players[*playerID]), (int)getPlayerDirection(players[*playerID]));
+            // sprintf((char*)(*p)->data, "%d\n", data);
             (*p)->address.host = srvadd->host;
             (*p)->address.port = srvadd->port;
             (*p)->len = strlen((char*)(*p)->data) + 1;
+            // printf("%d\n", (*p2)->len);
             SDLNet_UDP_Send(*sd, -1, *p);
             *oldPlayerX = getPlayerX(players[*playerID]);
             *oldPlayerY = getPlayerY(players[*playerID]);
         }
-    }   
+    }
 
     // Receive
     if (SDLNet_UDP_Recv(*sd, *p2))
     {
         int a, b, c;
-        double d;
-        sscanf((char*)(*p2)->data, "%d %d %d %lf\n", &a, &b, &c, &d);
-
-        if (a == -1) // om a är -1 så betyder det att c är det tilldelade spelarID från servern
-        {
-            *playerID = c;
-        }
-        else // Första gången man får ett paket från en klient så ska den spelaren snappas till rätt position istället för att gå
-        {
-            updatePlayerPosition(players[c], a, b, d, firstPacket[c]);
-            firstPacket[c] = true;
-        }
-        
+        int d;
+        // printf("%lu\n", sizeof (*p2)->data);
+        sscanf((char*)(*p2)->data, "%d %d %d %d\n", &a, &b, &c, &d);
+        //printf("%d %d %d %d\n", a, b, c, d);
+        // printf("%d\n", (*p2)->len);
+        updatePlayerPosition(players[c], a, b, d);
     }
     
 }

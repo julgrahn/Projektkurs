@@ -134,13 +134,8 @@ PUBLIC int getPlayerID(Player p)
     return p->id;
 }
 
-PUBLIC void updatePlayerPosition(Player p, int x, int y, int direction, bool firstMove)
+PUBLIC void updatePlayerPosition(Player p, int x, int y, int direction)
 {
-    if (!firstMove)
-    {
-        p->pDimensions.x = x;
-        p->pDimensions.y = y;
-    }
 
     p->newX = x;
     p->newY = y;
@@ -209,4 +204,14 @@ PUBLIC void moveOtherPlayers(Player p)
     //     p->pDimensions.x = p->posX = p->newX;
     //     p->pDimensions.y = p->posY = p->newY;
     // }
+}
+
+PUBLIC void snapPlayer(Player p, int x, int y)
+{
+    p->pDimensions.x = x;
+    p->pDimensions.y = y;
+    p->newX = x;
+    p->newY = y;
+    p->posX = x;
+    p->posY = y;
 }
