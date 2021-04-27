@@ -256,18 +256,27 @@ void handleEvents(SDL_Event* event, int* up, int* down, int* right, int* left, b
             }
             break;
 
+        case SDL_MOUSEBUTTONDOWN:
 
-        case SDL_MOUSEBUTTONDOWN: //KP
-
-            *shooting = true;
+            switch (event->button.button)
+            {
+            case SDL_BUTTON_LEFT:
+                *shooting = true;
+            default:
+                break;
+            }
             break;
+        case SDL_MOUSEBUTTONUP:
 
-        case SDL_MOUSEBUTTONUP: //KP
-            *shooting = false;
+            switch (event->button.button)
+            {
+            case SDL_BUTTON_LEFT:
+                *shooting = false;
+            default:
+                break;
+            }
             break;
-
         }
-
     }
     return;
 }
