@@ -1,4 +1,6 @@
-﻿#include <stdio.h>
+﻿#pragma warning(disable : 4996)
+
+#include <stdio.h>
 #include "sdlinclude.h"
 #include <stdbool.h>
 #include <stdlib.h>
