@@ -73,6 +73,7 @@ PUBLIC void refreshServer(Server server)
                 && server->pRecive->address.port != server->portClients[3]
                 && server->pRecive->address.port != server->portClients[4])
             {
+                printf("Client %d connected\n", i + 1);
                 server->noOfPlayers++;
                 server->IPclients[i] = server->pRecive->address.host;
                 server->portClients[i] = server->pRecive->address.port;

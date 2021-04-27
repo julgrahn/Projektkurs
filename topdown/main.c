@@ -320,15 +320,15 @@ void startPrompt(int* playerID, Server* server, bool* host)
 {
     printf("PlayerID: ");
     scanf(" %d", playerID);
-    printf("playerid är :%d\n", *playerID);
+    printf("PlayerID is :%d\n", *playerID);
 
     printf("Host(h) or client(c): ");
     char input;
     scanf(" %c", &input);
-    if(input== 'h')
+    if(input == 'h')
     {
         *server = createServer(*server);
-        printf("hosted!\n");
+        printf("Hosted!\n");
         *host = true;
         SDL_Thread* serverThread;
         serverThread = SDL_CreateThread(TestThread, "TestThread", server);
