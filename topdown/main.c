@@ -47,7 +47,7 @@ int main(int argc, char* args[])
     int up = 0, down = 0, left = 0, right = 0;
     SDL_Point playerRotationPoint = { 20, 32 };
 
-    Uint32 fpsTimerStart, frameTicks, test;
+    Uint32 fpsTimerStart, frameTicks;
     // Init functions
     if (!initSDL(&renderer)) return 1;
     initGameObjects(players, bullets);
@@ -58,7 +58,7 @@ int main(int argc, char* args[])
     // Main loop
     while (isPlaying)
     {
-        test = fpsTimerStart = SDL_GetTicks();
+        fpsTimerStart = SDL_GetTicks();
         handleEvents(&event, &up, &down, &right, &left, &isPlaying, &mouseX, &mouseY, &shooting);
 
         movePlayer(players[playerID], up, down, right, left, mouseX, mouseY);
@@ -82,7 +82,6 @@ int main(int argc, char* args[])
         {
             SDL_Delay((1000/60) - frameTicks);
         }
-        frameTicks = SDL_GetTicks() - test;
         // printf("%u\n", frameTicks);
     }
 
@@ -256,16 +255,22 @@ void handleEvents(SDL_Event* event, int* up, int* down, int* right, int* left, b
                 }
                 break;
             
-          
-            case SDL_MOUSEBUTTONDOWN: //KP
-           
-                *shooting = true;           
-                 break;           
-            
-            case SDL_MOUSEBUTTONUP: //KP
+            case SDL_MOUSEBUTTONDOWN: 
+                switch (event->button.button)
+                {
+                    case SDL_BUTTON_LEFT:
+                        *shooting = true; 
+                        break;
+                }
+                break;
+            case SDL_MOUSEBUTTONUP: 
+                switch (event->button.button)
+                {
+                    case SDL_BUTTON_LEFT:
                     *shooting = false;
-                    break;
-
+                        break;
+                }
+                break;
         }
         
     }
@@ -386,23 +391,10 @@ void sendReceivePackets(int sendDelay, int* playerID, int* oldPlayerX, int* oldP
         // if (getPlayerX(players[*playerID]) != *oldPlayerX || getPlayerY(players[*playerID]) != *oldPlayerY)
         if(1)
         {
-            // Uint32 data;
-            // int inverted = 0;
-            // data=(getPlayerID(players[*playerID])<<29);
-            // data=data | (getPlayerX(players[*playerID])<<19);
-            // data=data | (getPlayerY(players[*playerID])<<9);
-            // int temp = getPlayerDirection(players[*playerID]);
-            // if(temp<0) {temp *=(-1);inverted=1;}
-            // data = data | (inverted<<8);
-            // data = data | temp;
-            // printf("%d %d\n", temp, (int)getPlayerDirection(players[*playerID]));
-            // printf("%d\n", data);
             sprintf((char*)(*p)->data, "%d %d %d %d\n", getPlayerX(players[*playerID]), getPlayerY(players[*playerID]), getPlayerID(players[*playerID]), (int)getPlayerDirection(players[*playerID]));
-            // sprintf((char*)(*p)->data, "%d\n", data);
             (*p)->address.host = srvadd->host;
             (*p)->address.port = srvadd->port;
             (*p)->len = strlen((char*)(*p)->data) + 1;
-            // printf("%d\n", (*p2)->len);
             SDLNet_UDP_Send(*sd, -1, *p);
             *oldPlayerX = getPlayerX(players[*playerID]);
             *oldPlayerY = getPlayerY(players[*playerID]);
@@ -412,24 +404,9 @@ void sendReceivePackets(int sendDelay, int* playerID, int* oldPlayerX, int* oldP
     // Receive
     if (SDLNet_UDP_Recv(*sd, *p2))
     {
-        int a, b, c;
-        int d;
-        // printf("%lu\n", sizeof (*p2)->data);
+        int a, b, c, d;
         sscanf((char*)(*p2)->data, "%d %d %d %d\n", &a, &b, &c, &d);
         printf("%d %d %d %d\n", a, b, c, d);
-        // printf("%d\n", (*p2)->len);
         updatePlayerPosition(players[c], a, b, d);
     }
-    // if (SDLNet_UDP_Recv(*sd, *p2))
-    // {
-    //     Uint32 data;
-    //     int rotation;
-    //     sscanf((char*)(*p2)->data, "%d\n", &data);
-    //     // printf("%d\n", (*p2)->len);
-    //     // printf("%lu\n", sizeof (*p2)->data);
-    //     rotation = data&0xFF;
-    //     if(((data>>8)&1)==1) rotation *= -1;
-    //     // printf("%d %d %d %d\n", data>>29, (data>>19)&0x3FF, (data>>9)&0x3FF, rotation);
-    //     updatePlayerPosition(players[data>>29], (data>>19)&0x3FF, (data>>9)&0x3FF, rotation);
-    // }
 }

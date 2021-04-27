@@ -7,6 +7,7 @@
 #define SPEED 2
 #define ANIMATIONSPEED 8               //lower = faster
 #define HEALTH 100
+#define ROTATION_UPDATE_SPEED 5
 
 struct Player_type {
     int health;
@@ -23,6 +24,7 @@ struct Player_type {
     int newX;
     int newY;
     double xSpeed, ySpeed;
+    int newDirection;
 };
 
 //int SDL_RenderDrawRect(SDL_Renderer* renderer, SDL_Rect NULL);
@@ -48,6 +50,7 @@ PUBLIC Player createPlayer(int x, int y, int id)
     a->active = false;
     a->id = id;
     a->xSpeed = a->ySpeed = 0;
+    a->newDirection = 0;
     return a;
 }
 
@@ -136,36 +139,10 @@ PUBLIC int getPlayerID(Player p)
 
 PUBLIC void updatePlayerPosition(Player p, int x, int y, int direction)
 {
-
     p->newX = x;
     p->newY = y;
-    p->direction = direction;
+    p->newDirection = direction;
 }
-
-// PUBLIC void moveOtherPlayers(Player p)
-// {
-//     float x_vel;
-//     float y_vel;
-//     float delta_x = p->newX - p->pDimensions.x;
-//     float delta_y = p->newY - p->pDimensions.y;
-//     float distance = sqrt(delta_x * delta_x + delta_y * delta_y);
-//     x_vel = delta_x * SPEED / distance;
-//     y_vel = delta_y * SPEED / distance;
-
-//     if (distance < 1)
-//     {
-//         x_vel = y_vel = 0;
-//     }
-//     else
-//     {
-//         p->pDimensions.x += x_vel;
-//         p->pDimensions.y += y_vel;
-//     }
-
-
-//     // printf("%.2f %.2f %.2f %.2f\n", p->posX, p->posY, p->speed, p->diaSpeed);
-//     // Set new pixel pos of player
-// }
 
 PUBLIC void moveOtherPlayers(Player p)
 {
@@ -173,32 +150,64 @@ PUBLIC void moveOtherPlayers(Player p)
     int yDelta = p->newY - p->pDimensions.y;
     double distance = sqrt(xDelta*xDelta + yDelta*yDelta);
     double scaling = p->speed/(distance*(distance >= 1)+(distance < 1));
-    bool refresh = (xDelta > 1 || xDelta < -1 || yDelta > 1 || yDelta < -1);
-    
-    p->xSpeed = scaling*xDelta*refresh + p->xSpeed*!refresh;
-    p->ySpeed = scaling*yDelta*refresh + p->ySpeed*!refresh;
+    int old = p->direction + 180+5;
+    int new = p->newDirection + 180+5;
+    if(xDelta > 1 || xDelta < -1 || yDelta > 1 || yDelta < -1)
+    {
+        p->xSpeed = scaling*xDelta;
+        p->ySpeed = scaling*yDelta;
 
-    p->posX += p->xSpeed*refresh;
-    p->posY += p->ySpeed*refresh;
-    p->pDimensions.x = round(p->posX);
-    p->pDimensions.y = round(p->posY);
+        p->posX += p->xSpeed;
+        p->posY += p->ySpeed;
 
-    p->frameCounter = ((p->frameCounter + 1) % (ANIMATIONSPEED + 1))*refresh + p->frameCounter*!refresh;
-    p->frame = ((p->frame + ((p->frameCounter / ANIMATIONSPEED))) % 4)*refresh + p->frame*!refresh;
+        p->pDimensions.x = round(p->posX);
+        p->pDimensions.y = round(p->posY);
+        p->frameCounter = (p->frameCounter + 1) % (ANIMATIONSPEED + 1);
+        p->frame = (p->frame + ((p->frameCounter / ANIMATIONSPEED))) % 4;
+    }
+    if(p->direction != p->newDirection)
+    {
+        if(new - old < 180 && new - old > 0)
+        {
+            old += ROTATION_UPDATE_SPEED;
+        }
+        else if(new - old > -180 && new - old < 0)
+        {
+            old -= ROTATION_UPDATE_SPEED;
+        }
+        else if(new - old < -180)
+        {
+                old += ROTATION_UPDATE_SPEED;
+            if(old > 360)
+            {
+                old -= 360;
+            }
+        }
+        else if(new - old > 180)
+        {
+            old -= ROTATION_UPDATE_SPEED;
+            if(old < 0)
+            {
+                old += 360;
+            }
+            // if(new - old < ROTATION_UPDATE_SPEED) old = new;
+        }
+        old -= (180+5);
+        p->direction = old;
+    }
 
-    // if(xDelta > 1 || xDelta < -1 || yDelta > 1 || yDelta < -1)
-    // {
-    //     // if(distance >= 0) scaling = p->speed/distance
-    //     // scaling = p->speed/(distance*(distance >= 1)+(distance < 1));
-    //     p->xSpeed = scaling*xDelta;
-    //     p->ySpeed = scaling*yDelta;
-
-    //     p->posX += p->xSpeed;
-    //     p->posY += p->ySpeed;
-
-    //     p->pDimensions.x = round(p->posX);
-    //     p->pDimensions.y = round(p->posY);
-    //     p->frameCounter = (p->frameCounter + 1) % (ANIMATIONSPEED + 1);
-    //     p->frame = (p->frame + ((p->frameCounter / ANIMATIONSPEED))) % 4;
-    // }
 }
+
+
+// bool refresh = (xDelta > 1 || xDelta < -1 || yDelta > 1 || yDelta < -1);
+    
+    // p->xSpeed = scaling*xDelta*refresh + p->xSpeed*!refresh;
+    // p->ySpeed = scaling*yDelta*refresh + p->ySpeed*!refresh;
+
+    // p->posX += p->xSpeed*refresh;
+    // p->posY += p->ySpeed*refresh;
+    // p->pDimensions.x = round(p->posX);
+    // p->pDimensions.y = round(p->posY);
+
+    // p->frameCounter = ((p->frameCounter + 1) % (ANIMATIONSPEED + 1))*refresh + p->frameCounter*!refresh;
+    // p->frame = ((p->frame + ((p->frameCounter / ANIMATIONSPEED))) % 4)*refresh + p->frame*!refresh;

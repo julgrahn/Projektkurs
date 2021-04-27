@@ -16,13 +16,8 @@ struct Server_type {
     Uint32 IPclients[MAX_PLAYERS];
     Uint32 portClients[MAX_PLAYERS];
     int noOfPlayers;
-    int xPos[MAX_PLAYERS], yPos[MAX_PLAYERS], pID[MAX_PLAYERS];
-    double pDirection[MAX_PLAYERS];
+    int xPos[MAX_PLAYERS], yPos[MAX_PLAYERS], ID[MAX_PLAYERS], direction[MAX_PLAYERS];
     int send;
-    int a[MAX_PLAYERS]; // Spelar-X
-    int b[MAX_PLAYERS]; // Spelar-Y
-    int c[MAX_PLAYERS]; // SpelarID
-    int d[MAX_PLAYERS]; // Player rotation
 };
 
 PUBLIC Server createServer()
@@ -38,10 +33,10 @@ PUBLIC Server createServer()
     server->noOfPlayers = 0;
     for(int i = 0; i < MAX_PLAYERS; i++)
     {
-        server->a[i] = 0; // Spelar-X
-        server->b[i] = 0; // Spelar-Y
-        server->c[i] = 0; // SpelarID
-        server->d[i] = 0; // Player rotation
+        server->xPos[i] = 0;
+        server->yPos[i] = 0;
+        server->ID[i] = 0;
+        server->direction[i] = 0;
     }
     //Initialize SDL_net 
     if (SDLNet_Init() < 0)
@@ -94,34 +89,11 @@ PUBLIC void refreshServer(Server server)
         
         for (int i = 0; i < server->noOfPlayers; i++)
         {
-            // if (server->pRecive->address.port == server->portClients[i])
             if (server->pRecive->address.port == server->portClients[i])
             {
-                sscanf((char*)server->pRecive->data, "%d %d %d %d\n", &server->a[i], &server->b[i], &server->c[i], &server->d[i]);
+                sscanf((char*)server->pRecive->data, "%d %d %d %d\n", &server->xPos[i], &server->yPos[i], &server->ID[i], &server->direction[i]);
             }
         }
-        
-        // for (int i = 0; i < server->noOfPlayers+1; i++)
-        // {
-        //     if (server->pRecive->address.port == server->portClients[i])
-        //     {
-        //         for (int j = 0; j < server->noOfPlayers; j++)
-        //         {
-        //             if (i != j)
-        //             {
-        //                 server->pSent->address.host = server->IPclients[j];	// Set the destination host 
-        //                 server->pSent->address.port = server->portClients[j];
-        //                 // sscanf((char*)server->pRecive->data, "%d %d %d %lf\n", &a, &b, &c, &d);
-        //                 // sprintf((char*)server->pSent->data, "%d %d %d %lf\n", a, b, c, d);
-        //                 sscanf((char*)server->pRecive->data, "%d\n", &data);
-        //                 sprintf((char*)server->pSent->data, "%d\n", data);
-        //                 server->pSent->len = strlen((char*)server->pSent->data) + 1;
-        //                 SDLNet_UDP_Send(server->sd, -1, server->pSent);
-        //                 //printf("Client %d skickar till Client %d\n", i+1, j+1);
-        //             }
-        //         }
-        //     }
-        // }
     }
     if(!server->send)
     {
@@ -133,10 +105,9 @@ PUBLIC void refreshServer(Server server)
                 {
                     server->pSent->address.host = server->IPclients[j];	// Set the destination host 
                     server->pSent->address.port = server->portClients[j];
-                    sprintf((char*)server->pSent->data, "%d %d %d %d\n", server->a[i], server->b[i], server->c[i], (int)server->d[i]);
+                    sprintf((char*)server->pSent->data, "%d %d %d %d\n", server->xPos[i], server->yPos[i], server->ID[i], server->direction[i]);
                     server->pSent->len = strlen((char*)server->pSent->data) + 1;
                     SDLNet_UDP_Send(server->sd, -1, server->pSent);
-                    // SDL_Delay(10);
                 }
             }
         }
