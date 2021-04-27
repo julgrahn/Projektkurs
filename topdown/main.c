@@ -83,7 +83,7 @@ int main(int argc, char* args[])
             SDL_Delay((1000/60) - frameTicks);
         }
         frameTicks = SDL_GetTicks() - test;
-        // printf("%u\n", frameTicks);
+        //printf("%u\n", frameTicks);
     }
 
     SDL_DestroyRenderer(renderer);
@@ -206,65 +206,65 @@ void handleEvents(SDL_Event* event, int* up, int* down, int* right, int* left, b
     {
         switch (event->type)
         {
-            case SDL_QUIT:
-                *isPlaying = false;
+        case SDL_QUIT:
+            *isPlaying = false;
+            break;
+        case SDL_KEYDOWN:
+            switch (event->key.keysym.scancode)
+            {
+            case SDL_SCANCODE_W:
+            case SDL_SCANCODE_UP:
+                *up = 1;
                 break;
-            case SDL_KEYDOWN:
-                switch (event->key.keysym.scancode)
-                {
-                    case SDL_SCANCODE_W:
-                    case SDL_SCANCODE_UP:
-                        *up = 1;
-                        break;
-                    case SDL_SCANCODE_A:
-                    case SDL_SCANCODE_LEFT:
-                        *left = 1;
-                        break;
-                    case SDL_SCANCODE_S:
-                    case SDL_SCANCODE_DOWN:
-                        *down = 1;
-                        break;
-                    case SDL_SCANCODE_D:
-                    case SDL_SCANCODE_RIGHT:
-                        *right = 1;
-                        break;
-                    default:
-                        break;
-                }
+            case SDL_SCANCODE_A:
+            case SDL_SCANCODE_LEFT:
+                *left = 1;
                 break;
-            case SDL_KEYUP:
-                switch (event->key.keysym.scancode)
-                {
-                    case SDL_SCANCODE_W:
-                    case SDL_SCANCODE_UP:
-                        *up = 0;
-                        break;
-                    case SDL_SCANCODE_A:
-                    case SDL_SCANCODE_LEFT:
-                        *left = 0;
-                        break;
-                    case SDL_SCANCODE_S:
-                    case SDL_SCANCODE_DOWN:
-                        *down = 0;
-                        break;
-                    case SDL_SCANCODE_D:
-                    case SDL_SCANCODE_RIGHT:
-                        *right = 0;
-                        break;
-                    default:
-                        break;
-                }
+            case SDL_SCANCODE_S:
+            case SDL_SCANCODE_DOWN:
+                *down = 1;
                 break;
-            
-          
-            case SDL_MOUSEBUTTONDOWN: //KP
-           
-                *shooting = true;           
-                 break;           
-            
-            case SDL_MOUSEBUTTONUP: //KP
-                    *shooting = false;
-                    break;
+            case SDL_SCANCODE_D:
+            case SDL_SCANCODE_RIGHT:
+                *right = 1;
+                break;
+            default:
+                break;
+            }
+            break;
+        case SDL_KEYUP:
+            switch (event->key.keysym.scancode)
+            {
+            case SDL_SCANCODE_W:
+            case SDL_SCANCODE_UP:
+                *up = 0;
+                break;
+            case SDL_SCANCODE_A:
+            case SDL_SCANCODE_LEFT:
+                *left = 0;
+                break;
+            case SDL_SCANCODE_S:
+            case SDL_SCANCODE_DOWN:
+                *down = 0;
+                break;
+            case SDL_SCANCODE_D:
+            case SDL_SCANCODE_RIGHT:
+                *right = 0;
+                break;
+            default:
+                break;
+            }
+            break;
+
+
+        case SDL_MOUSEBUTTONDOWN: //KP
+
+            *shooting = true;
+            break;
+
+        case SDL_MOUSEBUTTONUP: //KP
+            *shooting = false;
+            break;
 
         }
         
