@@ -98,6 +98,15 @@ int main(int argc, char* args[])
 
     SDL_Point playerRotationPoint = { 20, 32 };
 
+    Uint32 fpsTimerStart, frameTicks, test;
+    // Init functions
+    if (!initSDL(&renderer)) return 1;
+    initGameObjects(players, bullets);
+    startPrompt(&playerID, &server, &host);
+    initClient(&sd, &srvadd, &p, &p2, ALEX_IP);
+    loadMedia(renderer, gridTiles, &tiles, playerRect, &playerText, &cursor, &bulletTexture);
+
+    // Main loop
     while (isPlaying)
     {
         handleEvents(&event, &up, &down, &right, &left, &isPlaying, &mouseX, &mouseY, &shooting);

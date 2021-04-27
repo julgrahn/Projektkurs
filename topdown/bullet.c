@@ -1,3 +1,5 @@
+#pragma warning(disable : 4996)
+
 #include <stdlib.h>
 #include "sdlinclude.h"
 #include "bullet.h"
@@ -26,7 +28,7 @@ PUBLIC Bullet createBullet()
 	b->dimensions.w = 4;
 	b->dimensions.h = 4;
 	b->speed = BULLET_SPEED;
-
+  
 	return b;
 }
 

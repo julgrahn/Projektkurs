@@ -1,6 +1,4 @@
-﻿#pragma warning(disable : 4996)
-
-#include <stdio.h>
+﻿#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -79,6 +77,7 @@ PUBLIC void refreshServer(Server server)
                 && server->pRecive->address.port != server->portClients[3]
                 && server->pRecive->address.port != server->portClients[4])
             {
+                printf("Client %d connected\n", i + 1);
                 server->noOfPlayers++;
                 //printf("Client %d\n", server->noOfPlayers);
                 server->IPclients[i] = server->pRecive->address.host;
