@@ -18,7 +18,11 @@ static void TestThread(Server *server);
 void startPrompt(int *playerID, Server *server, bool *host);
 void fire(Bullet bullets[], Player *p, int *playerID);
 void playerBulletCollisionCheck(Bullet bullets[], Player players[]);
+<<<<<<< Updated upstream
 void sendReceivePackets(int *sendDelay, int *playerID, int *oldPlayerX, int *oldPlayerY, Player players[], UDPsocket* sd, IPaddress* srvadd, UDPpacket** p, UDPpacket** p2);
+=======
+void sendReceivePackets(int sendDelay, int *playerID, int *oldPlayerX, int *oldPlayerY, Player players[], UDPsocket* sd, IPaddress* srvadd, UDPpacket** p, UDPpacket** p2, bool firstPacket[]);
+>>>>>>> Stashed changes
 
 int main(int argc, char* args[])
 {
@@ -31,8 +35,13 @@ int main(int argc, char* args[])
     UDPpacket* p2;
     Server server = NULL;
     int oldPlayerX = 0, oldPlayerY = 0;
+<<<<<<< Updated upstream
     int playerID;
     int sendDelay = 0;
+=======
+    int playerID = 0;
+    // const int sendDelay = TICKRATE;
+>>>>>>> Stashed changes
     SDL_Cursor* cursor = NULL;
     Player players[MAX_PLAYERS]; 
     SDL_Texture* playerText;
@@ -45,6 +54,12 @@ int main(int argc, char* args[])
     SDL_Texture* bulletTexture = NULL;
     int up = 0, down = 0, left = 0, right = 0;
     SDL_Point playerRotationPoint = { 20, 32 };
+    bool firstPacket[MAX_PLAYERS];
+
+    for (int i = 0; i < MAX_PLAYERS; i++)
+    {
+        firstPacket[i] = false;
+    }
 
 
     // Init functions
@@ -73,7 +88,11 @@ int main(int argc, char* args[])
         
         renderGame(renderer, tiles, gridTiles, bullets, bulletTexture, players, playerText, playerRect, &playerRotationPoint);
 
+<<<<<<< Updated upstream
         sendReceivePackets(&sendDelay, &playerID, &oldPlayerX, &oldPlayerY, players, &sd, &srvadd, &p, &p2);
+=======
+        sendReceivePackets(TICKRATE, &playerID, &oldPlayerX, &oldPlayerY, players, &sd, &srvadd, &p, &p2, firstPacket);
+>>>>>>> Stashed changes
       
         SDL_Delay(1000 / 60);
         
@@ -310,9 +329,9 @@ void initGameObjects(Player players[], Bullet bullets[])
 
 void startPrompt(int* playerID, Server* server, bool* host)
 {
-    printf("PlayerID: ");
-    scanf(" %d", playerID);
-    printf("playerid är :%d\n", *playerID);
+    //printf("PlayerID: ");
+    //scanf(" %d", playerID);
+    //printf("playerid är :%d\n", *playerID);
 
     printf("Host(h) or client(c): ");
     char input;
@@ -370,6 +389,7 @@ void playerBulletCollisionCheck(Bullet bullets[], Player players[])
     }
 }
 
+<<<<<<< Updated upstream
 void sendReceivePackets(int* sendDelay, int* playerID, int* oldPlayerX, int* oldPlayerY, Player players[], UDPsocket* sd, IPaddress* srvadd, UDPpacket** p, UDPpacket** p2)
 {
      // Send
@@ -399,5 +419,44 @@ void sendReceivePackets(int* sendDelay, int* playerID, int* oldPlayerX, int* old
          sscanf((char*)(*p2)->data, "%d %d %d\n", &a, &b, &c);
          updatePlayerPosition(players[c], a, b);
      }
+=======
+void sendReceivePackets(int sendDelay, int* playerID, int* oldPlayerX, int* oldPlayerY, Player players[], UDPsocket* sd, IPaddress* srvadd, UDPpacket** p, UDPpacket** p2, bool firstPacket[])
+{
+    // Send
+    static int send = 0;
+    if(sendDelay) send = (send+1)%sendDelay;
+    if(!send) // Skickar paket 30/sek
+    {           
+        if (true)//(getPlayerX(players[*playerID]) != *oldPlayerX || getPlayerY(players[*playerID]) != *oldPlayerY)
+        {         
+            sprintf((char*)(*p)->data, "%d %d %lf\n", getPlayerX(players[*playerID]), getPlayerY(players[*playerID]), getPlayerDirection(players[*playerID]));
+            (*p)->address.host = srvadd->host;
+            (*p)->address.port = srvadd->port;
+            (*p)->len = strlen((char*)(*p)->data) + 1;
+            SDLNet_UDP_Send(*sd, -1, *p);
+            *oldPlayerX = getPlayerX(players[*playerID]);
+            *oldPlayerY = getPlayerY(players[*playerID]);
+        }
+    }   
+
+    // Receive
+    if (SDLNet_UDP_Recv(*sd, *p2))
+    {
+        int a, b, c;
+        double d;
+        sscanf((char*)(*p2)->data, "%d %d %d %lf\n", &a, &b, &c, &d);
+
+        if (a == -1) // om a är -1 så betyder det att c är det tilldelade spelarID från servern
+        {
+            *playerID = c;
+        }
+        else // Första gången man får ett paket från en klient så ska den spelaren snappas till rätt position istället för att gå
+        {
+            updatePlayerPosition(players[c], a, b, d, firstPacket[c]);
+            firstPacket[c] = true;
+        }
+        
+    }
+>>>>>>> Stashed changes
     
 }

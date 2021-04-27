@@ -1,9 +1,15 @@
 #ifndef SDLINCLUDE_H
 #define SDLINCLUDE_H
 
+<<<<<<< Updated upstream
  #include <SDL.h>
  #include <SDL_image.h>
  #include <SDL_timer.h>
+=======
+  #include <SDL.h>
+  #include <SDL_image.h>
+#include <SDL_timer.h>
+>>>>>>> Stashed changes
  #include <SDL_net.h>
 //#include <SDL2/SDL.h>
 //#include <SDL2/SDL_image.h>

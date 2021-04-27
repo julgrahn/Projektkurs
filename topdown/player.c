@@ -140,8 +140,17 @@ PUBLIC int getPlayerID(Player p)
     return p->id;
 }
 
+<<<<<<< Updated upstream
 PUBLIC void updatePlayerPosition(Player p, int x, int y)
+=======
+PUBLIC void updatePlayerPosition(Player p, int x, int y, int direction, bool firstMove)
+>>>>>>> Stashed changes
 {
+    if (!firstMove)
+    {
+        p->pDimensions.x = x;
+        p->pDimensions.y = y;
+    }
 
     p->newX = x;
     p->newY = y;
