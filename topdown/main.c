@@ -14,7 +14,7 @@ void handleEvents(SDL_Event* event, int* up, int* down, int* right, int* left, b
 void renderGame(SDL_Renderer* renderer, SDL_Texture* mTiles, SDL_Rect gTiles[], Bullet bullets[], SDL_Texture* bulletTexture, Player players[], SDL_Texture* playerText, SDL_Rect playerRect[], SDL_Point* playerRotationPoint);
 void loadMedia(SDL_Renderer* renderer, SDL_Rect gTiles[], SDL_Texture** tiles, SDL_Rect playerRect[], SDL_Texture** pTexture, SDL_Cursor** cursor, SDL_Texture** bulletTexture);
 bool rectCollisionTest(SDL_Rect* a, SDL_Rect* b);
-void initClient(UDPsocket* sd, IPaddress* srvadd, UDPpacket** p, UDPpacket** p2, char* ip, TCPsocket* tcpsock);
+void initClient(UDPsocket* sd, IPaddress* srvadd, UDPpacket** p, UDPpacket** p2, char* ip, TCPsocket* tcpsock, int* localPort);
 void initGameObjects(Player players[], Bullet bullets[]);
 static int TestThread(void* server);
 void startPrompt(int* playerID, Server* server, bool* host);
@@ -32,6 +32,7 @@ int main(int argc, char* args[])
     IPaddress srvadd;
     UDPpacket* p;
     UDPpacket* p2;
+    int localPort;
     Server server = NULL;
     int oldPlayerX = 0, oldPlayerY = 0;
     int playerID;
@@ -53,7 +54,7 @@ int main(int argc, char* args[])
     if (!initSDL(&renderer)) return 1;
     initGameObjects(players, bullets);
     startPrompt(&playerID, &server, &host);
-    initClient(&sd, &srvadd, &p, &p2, LOCAL_IP, &tcpsock);
+    initClient(&sd, &srvadd, &p, &p2, ANDREAS_IP, &tcpsock, &localPort);
     loadMedia(renderer, gridTiles, &tiles, playerRect, &playerText, &cursor, &bulletTexture);
 
     // TCP för programstart. Man kan inte lämna loopen förrän man har anslutit till servern
@@ -62,25 +63,30 @@ int main(int argc, char* args[])
     char msg[1024];
     while (!connected)
     {
-        printf("Connecting, attempt %d", connectionAttempt);
+        printf("Connecting, attempt %d\n", connectionAttempt);
         if (SDLNet_TCP_Recv(tcpsock, msg, 1024))
         {
             int p0x, p0y, p1x, p1y, p2x, p2y, p3x, p3y, p4x, p4y;
             sscanf((char*)msg, "%d %d %d %d %d %d %d %d %d %d %d\n", &playerID, &p0x, &p0y, &p1x, &p1y, &p2x, &p2y, &p3x, &p3y, &p4x, &p4y);
-            printf("\nConnected with playerID: %d!\n", playerID);
             snapPlayer(players[0], p0x, p0y);
             snapPlayer(players[1], p1x, p1y);
             snapPlayer(players[2], p2x, p2y);
             snapPlayer(players[3], p3x, p3y);
             snapPlayer(players[4], p4x, p4y);
+
+            sprintf(msg, "%d\n", SDLNet_UDP_GetPeerAddress(sd, -1)->port);
+            SDLNet_TCP_Send(tcpsock, msg, 1024);
+
+            printf("\nConnected with playerID: %d!\n", playerID);
+
             connected = true;
         }
         else
         {
             SDL_Delay(1000);
-        }
+        }       
     }
-
+    
 
     // Main loop
     while (isPlaying)
@@ -299,7 +305,7 @@ void handleEvents(SDL_Event* event, int* up, int* down, int* right, int* left, b
     return;
 }
 
-void initClient(UDPsocket* sd, IPaddress* srvadd, UDPpacket** p, UDPpacket** p2, char* ip, TCPsocket* tcpsock)
+void initClient(UDPsocket* sd, IPaddress* srvadd, UDPpacket** p, UDPpacket** p2, char* ip, TCPsocket* tcpsock, int* localPort)
 {
     if (SDLNet_Init() < 0)
     {
@@ -309,11 +315,11 @@ void initClient(UDPsocket* sd, IPaddress* srvadd, UDPpacket** p, UDPpacket** p2,
 
     if (!(*sd = SDLNet_UDP_Open(0)))
     {
-        fprintf(stderr, "SDLNet_UDP_Open: %s\n", SDLNet_GetError());
-        exit(EXIT_FAILURE);
+            fprintf(stderr, "SDLNet_UDP_Open: %s\n", SDLNet_GetError());
+            exit(EXIT_FAILURE);
     }
 
-    // Resolve server name
+    // Resolve server name  
     if (SDLNet_ResolveHost(srvadd, ip, 2000) == -1)
     {
         fprintf(stderr, "SDLNet_ResolveHost(192.0.0.1 2000): %s\n", SDLNet_GetError());
@@ -321,8 +327,6 @@ void initClient(UDPsocket* sd, IPaddress* srvadd, UDPpacket** p, UDPpacket** p2,
     }
 
     *tcpsock = SDLNet_TCP_Open(srvadd);
-
-    printf("Connected to : %s\n", ip);
 
     if (!((*p = SDLNet_AllocPacket(512)) && (*p2 = SDLNet_AllocPacket(512))))
     {
@@ -347,9 +351,6 @@ void initGameObjects(Player players[], Bullet bullets[])
 
 void startPrompt(int* playerID, Server* server, bool* host)
 {
-    //printf("PlayerID: ");
-    //scanf(" %d", playerID);
-    //printf("playerid är :%d\n", *playerID);
 
     printf("Host(h) or client(c): ");
     char input;
@@ -401,8 +402,6 @@ void playerBulletCollisionCheck(Bullet bullets[], Player players[])
                     freeBullet(bullets[i]);
                 }
             }
-
-
         }
     }
 }
@@ -418,23 +417,10 @@ void sendReceivePackets(int sendDelay, int* playerID, int* oldPlayerX, int* oldP
         // if (getPlayerX(players[*playerID]) != *oldPlayerX || getPlayerY(players[*playerID]) != *oldPlayerY)
         if (1)
         {
-            // Uint32 data;
-            // int inverted = 0;
-            // data=(getPlayerID(players[*playerID])<<29);
-            // data=data | (getPlayerX(players[*playerID])<<19);
-            // data=data | (getPlayerY(players[*playerID])<<9);
-            // int temp = getPlayerDirection(players[*playerID]);
-            // if(temp<0) {temp *=(-1);inverted=1;}
-            // data = data | (inverted<<8);
-            // data = data | temp;
-            // printf("%d %d\n", temp, (int)getPlayerDirection(players[*playerID]));
-            // printf("%d\n", data);
             sprintf((char*)(*p)->data, "%d %d %d %d\n", getPlayerX(players[*playerID]), getPlayerY(players[*playerID]), getPlayerID(players[*playerID]), (int)getPlayerDirection(players[*playerID]));
-            // sprintf((char*)(*p)->data, "%d\n", data);
             (*p)->address.host = srvadd->host;
             (*p)->address.port = srvadd->port;
             (*p)->len = strlen((char*)(*p)->data) + 1;
-            // printf("%d\n", (*p2)->len);
             SDLNet_UDP_Send(*sd, -1, *p);
             *oldPlayerX = getPlayerX(players[*playerID]);
             *oldPlayerY = getPlayerY(players[*playerID]);
@@ -443,14 +429,11 @@ void sendReceivePackets(int sendDelay, int* playerID, int* oldPlayerX, int* oldP
 
     // Receive
     if (SDLNet_UDP_Recv(*sd, *p2))
-    {
+    {     
         int a, b, c;
         int d;
-        // printf("%lu\n", sizeof (*p2)->data);
         sscanf((char*)(*p2)->data, "%d %d %d %d\n", &a, &b, &c, &d);
-        //printf("%d %d %d %d\n", a, b, c, d);
-        // printf("%d\n", (*p2)->len);
         updatePlayerPosition(players[c], a, b, d);
     }
-
+    
 }
