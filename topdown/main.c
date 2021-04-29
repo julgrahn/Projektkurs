@@ -16,7 +16,7 @@ void loadMedia(SDL_Renderer* renderer, SDL_Rect gTiles[], SDL_Texture** tiles, S
 bool rectCollisionTest(SDL_Rect* a, SDL_Rect* b);
 void initClient(UDPsocket* sd, IPaddress* srvadd, UDPpacket** p, UDPpacket** p2, char* ip, TCPsocket* tcpsock, int* localPort);
 void initGameObjects(Player players[], Bullet bullets[]);
-static int TestThread(void* server);
+static void TestThread(void* server);
 void startPrompt(int* playerID, Server* server, bool* host);
 void fire(Bullet bullets[], Player* p, int* playerID, int xTarget, int yTarget);
 void playerBulletCollisionCheck(Bullet bullets[], Player players[]);
@@ -48,8 +48,8 @@ int main(int argc, char* args[])
     SDL_Texture* bulletTexture = NULL;
     int up = 0, down = 0, left = 0, right = 0;
     SDL_Point playerRotationPoint = { 20, 32 };
-
     Uint32 fpsTimerStart, frameTicks, test;
+
     // Init functions
     if (!initSDL(&renderer)) return 1;
     initGameObjects(players, bullets);
@@ -59,15 +59,18 @@ int main(int argc, char* args[])
 
     // TCP för programstart. Man kan inte lämna loopen förrän man har anslutit till servern
     bool connected = false;
-    int connectionAttempt = 1;
     char msg[1024];
     while (!connected)
     {
-        printf("Connecting, attempt %d\n", connectionAttempt);
+        printf("Connecting... \n");
         if (SDLNet_TCP_Recv(tcpsock, msg, 1024))
         {
             int p0x, p0y, p1x, p1y, p2x, p2y, p3x, p3y, p4x, p4y;
             sscanf((char*)msg, "%d %d %d %d %d %d %d %d %d %d %d\n", &playerID, &p0x, &p0y, &p1x, &p1y, &p2x, &p2y, &p3x, &p3y, &p4x, &p4y);
+            if (playerID == -1)
+            {
+                return; // Stäng av programmet om servern är full
+            }
             snapPlayer(players[0], p0x, p0y);
             snapPlayer(players[1], p1x, p1y);
             snapPlayer(players[2], p2x, p2y);
@@ -80,11 +83,7 @@ int main(int argc, char* args[])
             printf("\nConnected with playerID: %d!\n", playerID);
 
             connected = true;
-        }
-        else
-        {
-            SDL_Delay(1000);
-        }       
+        }      
     }
     
 
@@ -365,14 +364,9 @@ void startPrompt(int* playerID, Server* server, bool* host)
     }
 }
 
-static int TestThread(void* server)
+static void TestThread(void* server)
 {
-    //Uppdatera servern 300ggr / sekunden
-    while (true)
-    {
-        refreshServer(*(Server*)server);
-        SDL_Delay(3);
-    }
+        startServer(*(Server*)server);
 }
 
 void fire(Bullet bullets[], Player* p, int* playerID, int xTarget, int yTarget)
@@ -433,7 +427,7 @@ void sendReceivePackets(int sendDelay, int* playerID, int* oldPlayerX, int* oldP
         int a, b, c;
         int d;
         sscanf((char*)(*p2)->data, "%d %d %d %d\n", &a, &b, &c, &d);
-        updatePlayerPosition(players[c], a, b, d);
-    }
-    
+        if(c != -1) updatePlayerPosition(players[c], a, b, d);
+        
+    }   
 }
