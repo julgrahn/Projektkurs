@@ -62,7 +62,7 @@ int main(int argc, char* args[])
     if (!initSDL(&renderer)) return 1;
     initGameObjects(players, bullets);
     startPrompt(&playerID, &server, &host);
-    initClient(&sd, &srvadd, &p, &p2, ANDREAS_IP, &tcpsock, &localPort);
+    initClient(&sd, &srvadd, &p, &p2, LOCAL_IP, &tcpsock, &localPort);
     loadMedia(renderer, gridTiles, &tiles, playerRect, &playerText, &cursor, &bulletTexture);
 
     // TCP för programstart. Man kan inte lämna loopen förrän man har anslutit till servern
@@ -77,7 +77,7 @@ int main(int argc, char* args[])
             sscanf((char*)msg, "%d %d %d %d %d %d %d %d %d %d %d\n", &playerID, &p0x, &p0y, &p1x, &p1y, &p2x, &p2y, &p3x, &p3y, &p4x, &p4y);
             if (playerID == -1)
             {
-                return; // Stäng av programmet om servern är full
+                return 0; // Stäng av programmet om servern är full
             }
             snapPlayer(players[0], p0x, p0y);
             snapPlayer(players[1], p1x, p1y);
@@ -156,7 +156,6 @@ void loadMedia(SDL_Renderer* renderer, SDL_Rect gTiles[], SDL_Texture** tiles, S
         }
 
     }
-
     SDL_Surface* playerSurface = IMG_Load("resources/playerRifle.png");
     *pTexture = SDL_CreateTextureFromSurface(renderer, playerSurface);
     SDL_FreeSurface(playerSurface);
@@ -167,7 +166,6 @@ void loadMedia(SDL_Renderer* renderer, SDL_Rect gTiles[], SDL_Texture** tiles, S
         playerRect[n].h = 64;
         playerRect[n].w = 64;
     }
-
     SDL_Surface* cursorSurface = IMG_Load("resources/crosshair161.png");
     *cursor = SDL_CreateColorCursor(cursorSurface, 36, 36);
     SDL_FreeSurface(cursorSurface);
@@ -430,6 +428,7 @@ void playerBulletCollisionCheck(Bullet bullets[], Player players[])
                 }
             }
         }
+        
     }
 }
 
