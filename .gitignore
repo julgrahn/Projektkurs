@@ -24,5 +24,6 @@
 *.pdb
 *.sln
 *.ilk
-*.enc
-*.main.exe
+topdown/.idea/.name
+topdown/.idea/vcs.xml
+topdown/.idea/workspace.xml
