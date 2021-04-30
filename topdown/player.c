@@ -72,7 +72,33 @@ PUBLIC void movePlayer(Player p, int up, int down, int right, int left, int mous
 
     // Set new pixel pos of player
     p->pDimensions.x = round(p->posX);
+    if (getWallCollision(p->pDimensions.x, p->pDimensions.y))   // Collision x-led
+    {
+        if (right)
+        {
+            p->posX -= 2;
+            p->pDimensions.x -= 2;
+        }
+        if (left)
+        {
+            p->posX += 2;
+            p->pDimensions.x += 2;
+        }
+    }
     p->pDimensions.y = round(p->posY);
+    if (getWallCollision(p->pDimensions.x, p->pDimensions.y))   // Collision y-led
+    {
+        if (up)
+        {
+            p->posY += 2;
+            p->pDimensions.y += 2;
+        }
+        if (down)
+        {
+            p->posY -= 2;
+            p->pDimensions.y -= 2;
+        }
+    }
 
     // Update player sprite frame
     p->frameCounter = (p->frameCounter + p->isMoving) % (ANIMATIONSPEED + 1);
@@ -80,22 +106,11 @@ PUBLIC void movePlayer(Player p, int up, int down, int right, int left, int mous
     // Rotate player
     p->direction = (atan2(mouseY - p->pDimensions.y - 34, mouseX - p->pDimensions.x - 18) * 180 / M_PI) - 6;
 
-<<<<<<< Updated upstream
-    // Collision detection with walls
-
-
-=======
->>>>>>> Stashed changes
     // Collision detection with window
     if (p->pDimensions.y <= 0) p->pDimensions.y = p->posY = 0;
     if (p->pDimensions.y >= WINDOWHEIGHT - p->pDimensions.h) p->pDimensions.y = p->posY = WINDOWHEIGHT - p->pDimensions.h;
     if (p->pDimensions.x <= 0) p->pDimensions.x = p->posX = 0;
     if (p->pDimensions.x >= WINDOWWIDTH - p->pDimensions.w) p->pDimensions.x = p->posX = WINDOWWIDTH - p->pDimensions.w;
-<<<<<<< Updated upstream
-
-    getWall(p->posX, p->posY, p->pDimensions.h, p->pDimensions.w);
-=======
->>>>>>> Stashed changes
 }
 
 PUBLIC double getPlayerDirection(Player p)
