@@ -59,7 +59,7 @@ PUBLIC int getPlayerFrame(Player p)
 
 PUBLIC void movePlayer(Player p, int up, int down, int right, int left, int mouseX, int mouseY)
 {
-    int newX = 0, newY = 0, diagonal;
+    int newX = 0, newY = 0, diagonal, oldX = p->posX, oldY = p->posY;
     p->isMoving=0;
 
     if (up && !down) {newY--;p->isMoving=1;}
@@ -90,7 +90,12 @@ PUBLIC void movePlayer(Player p, int up, int down, int right, int left, int mous
     if (p->pDimensions.x <= 0) p->pDimensions.x = p->posX = 0;
     if (p->pDimensions.x >= WINDOWWIDTH - p->pDimensions.w) p->pDimensions.x = p->posX = WINDOWWIDTH - p->pDimensions.w;
 
-    getWall(p->posX, p->posY, p->pDimensions.h, p->pDimensions.w);
+    if (getWallCollision(p->pDimensions.x, p->pDimensions.y))
+    {
+        p->posX = oldX;
+        p->posY = oldY;
+    }
+
 }
 
 PUBLIC double getPlayerDirection(Player p)
