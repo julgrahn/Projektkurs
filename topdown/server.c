@@ -24,6 +24,9 @@ struct Server_type {
     int playerY[MAX_PLAYERS]; // Spelar-Y
     int playerID[MAX_PLAYERS]; // SpelarID
     int playerRotation[MAX_PLAYERS]; // Player rotation
+    int playerShooting[MAX_PLAYERS];
+    int pMouseX[MAX_PLAYERS];
+    int pMouseY[MAX_PLAYERS];
     SDL_Thread* UDPreceiveThread;
     SDL_Thread* UDPsendThread;
 };
@@ -50,6 +53,9 @@ PUBLIC Server createServer()
         server->playerY[i] = 200; // Spelar-Y
         server->playerID[i] = -1; // SpelarID, 0 till 4. -1 innebär att spelaren inte är ansluten
         server->playerRotation[i] = 0; // Player rotation
+        server->playerShooting[i] = 0;
+        server->pMouseX[i] = 0;
+        server->pMouseY[i] = 0;
     }
 
     //Initialize SDL_net 
@@ -97,8 +103,9 @@ PUBLIC void startServer(Server server)
     {
         SDL_Delay(1); 
         TCPdelay = (TCPdelay + 1) % 1000;
-        UDPsendDelay = (UDPsendDelay + 1) % 100;
-        //UDPreceiveDelay = (UDPreceiveDelay++) % 1;
+        UDPreceiveDelay = (UDPreceiveDelay + 1) % 1;
+        UDPsendDelay = (UDPsendDelay + 1) % 33;
+        
 
         // TCP
         if (!TCPdelay)
@@ -161,24 +168,34 @@ PUBLIC void startServer(Server server)
                     {
                         printf("Client %d has disconnected\n", g);
                         server->tcpsockClient[g] = NULL;
-                        server->playerID[g] = -1;
+                        server->playerID[g] = -1;                       
+                        server->clients[g].host = NULL;
+                        server->clients[g].port = NULL;
                         server->noOfPlayers--;
                     }
                 }
             }
         }
-
         // UDP Receive
-        if (SDLNet_UDP_Recv(server->sd, server->pRecive))
+        if (!UDPreceiveDelay)
         {
-            for (int i = 0; i < server->noOfPlayers; i++)
+            if (SDLNet_UDP_Recv(server->sd, server->pRecive))
             {
-                if (server->pRecive->address.port == server->clients[i].port) // Kollar vem paket kom ifrån och uppdaterar endast den spelaren
+                for (int i = 0; i < server->noOfPlayers; i++)
                 {
-                    sscanf((char*)server->pRecive->data, "%d %d %d %d\n", &server->playerX[i], &server->playerY[i], &server->playerID[i], &server->playerRotation[i]);
+                    if (server->pRecive->address.port == server->clients[i].port) // Kollar vem paket kom ifrån och uppdaterar endast den spelaren
+                    {
+                        sscanf((char*)server->pRecive->data, "%d %d %d %d %d %d %d\n",
+                            &server->playerX[i], &server->playerY[i],
+                            &server->playerID[i], &server->playerRotation[i],
+                            &server->playerShooting[i], &server->pMouseX[i],
+                            &server->pMouseY[i]);
+                    }
                 }
             }
         }
+        
+       
 
         // UDP Send
         if (!UDPsendDelay)
@@ -191,7 +208,11 @@ PUBLIC void startServer(Server server)
                     if (i != j && (server->tcpsockClient[i] != NULL) && (server->tcpsockClient[j] != NULL)) // Paket skickas bara till de som är inne
                     {
                         server->pSent->address = server->clients[j];	// Set the destination host 
-                        sprintf((char*)server->pSent->data, "%d %d %d %d\n", server->playerX[i], server->playerY[i], server->playerID[i], (int)server->playerRotation[i]);
+                        sprintf((char*)server->pSent->data, "%d %d %d %d %d %d %d\n",
+                            server->playerX[i], server->playerY[i],
+                            server->playerID[i], (int)server->playerRotation[i],
+                            server->playerShooting[i], server->pMouseX[i], server->pMouseY[i]);
+
                         server->pSent->len = strlen((char*)server->pSent->data) + 1;
                         SDLNet_UDP_Send(server->sd, -1, server->pSent);
                     }

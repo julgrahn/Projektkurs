@@ -18,9 +18,9 @@ void initClient(UDPsocket* sd, IPaddress* srvadd, UDPpacket** p, UDPpacket** p2,
 void initGameObjects(Player players[], Bullet bullets[]);
 static void TestThread(void* server);
 void startPrompt(int* playerID, Server* server, bool* host);
-void fire(Bullet bullets[], Player* p, int* playerID, int xTarget, int yTarget);
+void fire(Bullet bullets[], Player* p, int playerID, int xTarget, int yTarget);
 void playerBulletCollisionCheck(Bullet bullets[], Player players[]);
-void sendReceivePackets(int sendDelay, int* playerID, int* oldPlayerX, int* oldPlayerY, Player players[], UDPsocket* sd, IPaddress* srvadd, UDPpacket** p, UDPpacket** p2, TCPsocket* tcpsock);
+void sendReceivePackets(int sendDelay, int* playerID, int* oldPlayerX, int* oldPlayerY, Player players[], UDPsocket* sd, IPaddress* srvadd, UDPpacket** p, UDPpacket** p2, bool *shooting, Bullet bullets[], int *mouseX, int *mouseY);
 
 int main(int argc, char* args[])
 {
@@ -101,14 +101,14 @@ int main(int argc, char* args[])
             if (i != playerID) moveOtherPlayers(players[i]);
         }
 
-        if (shooting) fire(bullets, &players[playerID], &playerID, mouseX, mouseY);
+        if (shooting) fire(bullets, &players[playerID], playerID, mouseX, mouseY);     
 
         playerBulletCollisionCheck(bullets, players);
 
-
         renderGame(renderer, tiles, gridTiles, bullets, bulletTexture, players, playerText, playerRect, &playerRotationPoint);
 
-        sendReceivePackets(TICKRATE, &playerID, &oldPlayerX, &oldPlayerY, players, &sd, &srvadd, &p, &p2, &tcpsock);
+        sendReceivePackets(TICKRATE, &playerID, &oldPlayerX, &oldPlayerY, players, &sd, &srvadd, &p, &p2, &shooting, bullets, &mouseX, &mouseY);
+        shooting = false;
         frameTicks = SDL_GetTicks() - fpsTimerStart;
         if (frameTicks < (1000 / 60))
         {
@@ -289,14 +289,18 @@ void handleEvents(SDL_Event* event, int* up, int* down, int* right, int* left, b
             break;
 
 
-        case SDL_MOUSEBUTTONDOWN: //KP
+        case SDL_MOUSEBUTTONDOWN:
 
-            *shooting = true;
+            switch (event->button.button)
+            {
+            case SDL_BUTTON_LEFT:
+                *shooting = true;
+            default:
+                break;
+            }
             break;
 
-        case SDL_MOUSEBUTTONUP: //KP
-            *shooting = false;
-            break;
+        break;
 
         }
 
@@ -369,13 +373,13 @@ static void TestThread(void* server)
         startServer(*(Server*)server);
 }
 
-void fire(Bullet bullets[], Player* p, int* playerID, int xTarget, int yTarget)
+void fire(Bullet bullets[], Player* p, int playerID, int xTarget, int yTarget)
 {
     for (int i = 0; i < MAX_BULLETS; i++)
     {
         if (!isBulletActive(bullets[i]))
         {
-            spawnBullet(bullets[i], getPlayerX(*p), getPlayerY(*p), xTarget, yTarget, *playerID);
+            spawnBullet(bullets[i], getPlayerX(*p), getPlayerY(*p), xTarget, yTarget, playerID);
             break;
         }
     }
@@ -400,7 +404,7 @@ void playerBulletCollisionCheck(Bullet bullets[], Player players[])
     }
 }
 
-void sendReceivePackets(int sendDelay, int* playerID, int* oldPlayerX, int* oldPlayerY, Player players[], UDPsocket* sd, IPaddress* srvadd, UDPpacket** p, UDPpacket** p2, TCPsocket* tcpsock)
+void sendReceivePackets(int sendDelay, int* playerID, int* oldPlayerX, int* oldPlayerY, Player players[], UDPsocket* sd, IPaddress* srvadd, UDPpacket** p, UDPpacket** p2, bool *shooting, Bullet bullets[], int *mouseX, int *mouseY)
 {
 
     // Send
@@ -411,7 +415,7 @@ void sendReceivePackets(int sendDelay, int* playerID, int* oldPlayerX, int* oldP
         // if (getPlayerX(players[*playerID]) != *oldPlayerX || getPlayerY(players[*playerID]) != *oldPlayerY)
         if (1)
         {
-            sprintf((char*)(*p)->data, "%d %d %d %d\n", getPlayerX(players[*playerID]), getPlayerY(players[*playerID]), getPlayerID(players[*playerID]), (int)getPlayerDirection(players[*playerID]));
+            sprintf((char*)(*p)->data, "%d %d %d %d %d %d %d\n", getPlayerX(players[*playerID]), getPlayerY(players[*playerID]), getPlayerID(players[*playerID]), (int)getPlayerDirection(players[*playerID]), *shooting, *mouseX, *mouseY);
             (*p)->address.host = srvadd->host;
             (*p)->address.port = srvadd->port;
             (*p)->len = strlen((char*)(*p)->data) + 1;
@@ -424,10 +428,10 @@ void sendReceivePackets(int sendDelay, int* playerID, int* oldPlayerX, int* oldP
     // Receive
     if (SDLNet_UDP_Recv(*sd, *p2))
     {     
-        int a, b, c;
-        int d;
-        sscanf((char*)(*p2)->data, "%d %d %d %d\n", &a, &b, &c, &d);
+        int a, b, c, d, e, f, g;
+        sscanf((char*)(*p2)->data, "%d %d %d %d %d %d %d\n", &a, &b, &c, &d, &e, &f, &g);
         if(c != -1) updatePlayerPosition(players[c], a, b, d);
+        if (e == 1) fire(bullets, &players[c], c, f, g);
         
     }   
 }
