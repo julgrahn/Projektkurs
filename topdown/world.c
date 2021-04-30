@@ -49,17 +49,18 @@ int getTileGrid(int x, int y) {
     return tileGrid[x][y];
 }
 int getWall(int x, int y, int h, int w){
-    for (int i = 0; i < 32; i++)
+    for (int i = 0; i < tileRows; i++)
     {
-        for(int j = 0; j < 32; j++)
+        for (int j = 0; j < tileColumns; j++)
         {
-            if (tileGrid[x/32][y/32] != bricks)
+            if (tileGrid[i][j] != bricks)
             {
-                printf("kolumn: %d, rad: %d\n", x/32, y/32);
+
+                printf("kolumn: %d, rad: %d\n", j*32, i*32);
+                printf("kolumn: %d, rad: %d\n", j*32+32, i*32+32);
+                
             }
         }
     }
-
-
     return 0;
 }
