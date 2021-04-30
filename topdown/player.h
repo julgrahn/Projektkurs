@@ -17,5 +17,6 @@ void activatePlayer(Player p);
 void playerHealth(Player p, int health);
 void updatePlayerPosition(Player p, int x, int y, int rotation);
 void moveOtherPlayers(Player p);
+void snapPlayer(Player p, int x, int y);
 
 #endif

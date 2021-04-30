@@ -152,6 +152,13 @@ PUBLIC void updatePlayerPosition(Player p, int x, int y, int direction)
 //     x_vel = delta_x * SPEED / distance;
 //     y_vel = delta_y * SPEED / distance;
 
+
+//     // p->posX += x_vel;
+//     // p->posY += y_vel;
+
+//     // p->pDimensions.x += round(p->posX);
+//     // p->pDimensions.y += round(p->posY);
+
 //     if (distance < 1)
 //     {
 //         x_vel = y_vel = 0;
@@ -165,6 +172,8 @@ PUBLIC void updatePlayerPosition(Player p, int x, int y, int direction)
 
 //     // printf("%.2f %.2f %.2f %.2f\n", p->posX, p->posY, p->speed, p->diaSpeed);
 //     // Set new pixel pos of player
+   
+    
 // }
 
 PUBLIC void moveOtherPlayers(Player p)
@@ -173,32 +182,36 @@ PUBLIC void moveOtherPlayers(Player p)
     int yDelta = p->newY - p->pDimensions.y;
     double distance = sqrt(xDelta*xDelta + yDelta*yDelta);
     double scaling = p->speed/(distance*(distance >= 1)+(distance < 1));
-    bool refresh = (xDelta > 1 || xDelta < -1 || yDelta > 1 || yDelta < -1);
-    
-    p->xSpeed = scaling*xDelta*refresh + p->xSpeed*!refresh;
-    p->ySpeed = scaling*yDelta*refresh + p->ySpeed*!refresh;
-
-    p->posX += p->xSpeed*refresh;
-    p->posY += p->ySpeed*refresh;
-    p->pDimensions.x = round(p->posX);
-    p->pDimensions.y = round(p->posY);
-
-    p->frameCounter = ((p->frameCounter + 1) % (ANIMATIONSPEED + 1))*refresh + p->frameCounter*!refresh;
-    p->frame = ((p->frame + ((p->frameCounter / ANIMATIONSPEED))) % 4)*refresh + p->frame*!refresh;
-
     // if(xDelta > 1 || xDelta < -1 || yDelta > 1 || yDelta < -1)
+    if(distance > 1)
+    {
+        // if(distance >= 0) scaling = p->speed/distance
+        // scaling = p->speed/(distance*(distance >= 1)+(distance < 1));
+        p->xSpeed = scaling*xDelta;
+        p->ySpeed = scaling*yDelta;
+
+        p->posX += p->xSpeed;
+        p->posY += p->ySpeed;
+
+        p->pDimensions.x = round(p->posX);
+        p->pDimensions.y = round(p->posY);
+        p->frameCounter = (p->frameCounter + 1) % (ANIMATIONSPEED + 1);
+        p->frame = (p->frame + ((p->frameCounter / ANIMATIONSPEED))) % 4;
+        // printf("%d %d\n", p->pDimensions.x, p->pDimensions.y);
+    }
+    // else
     // {
-    //     // if(distance >= 0) scaling = p->speed/distance
-    //     // scaling = p->speed/(distance*(distance >= 1)+(distance < 1));
-    //     p->xSpeed = scaling*xDelta;
-    //     p->ySpeed = scaling*yDelta;
-
-    //     p->posX += p->xSpeed;
-    //     p->posY += p->ySpeed;
-
-    //     p->pDimensions.x = round(p->posX);
-    //     p->pDimensions.y = round(p->posY);
-    //     p->frameCounter = (p->frameCounter + 1) % (ANIMATIONSPEED + 1);
-    //     p->frame = (p->frame + ((p->frameCounter / ANIMATIONSPEED))) % 4;
+    //     p->pDimensions.x = p->posX = p->newX;
+    //     p->pDimensions.y = p->posY = p->newY;
     // }
+}
+
+PUBLIC void snapPlayer(Player p, int x, int y)
+{
+    p->pDimensions.x = x;
+    p->pDimensions.y = y;
+    p->newX = x;
+    p->newY = y;
+    p->posX = x;
+    p->posY = y;
 }

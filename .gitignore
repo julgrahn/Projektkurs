@@ -24,5 +24,11 @@
 *.pdb
 *.sln
 *.ilk
+<<<<<<< HEAD
 *.enc
 *.main.exe
+=======
+topdown/.idea/.name
+topdown/.idea/vcs.xml
+topdown/.idea/workspace.xml
+>>>>>>> 615123f6ee787d2a1a8bb342a5ecb2c6daca176d

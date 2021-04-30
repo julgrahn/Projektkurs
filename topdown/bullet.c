@@ -90,7 +90,12 @@ PUBLIC double getBulletDirection(Bullet a)
 {
 	return a->direction;
 }
+<<<<<<< HEAD
 PUBLIC int getBulletOwner(Bullet b)
+=======
+
+int getBulletOwner(Bullet b)
+>>>>>>> 615123f6ee787d2a1a8bb342a5ecb2c6daca176d
 {
 	return b->owner;
 }
