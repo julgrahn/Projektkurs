@@ -8,6 +8,13 @@
 #include "server.h"
 
 #define TICKRATE 2 // Number of frames per network-packet
+typedef struct UDPReceiveStruct_type* UDPReceiveStruct;
+struct UDPReceiveStruct_type {
+    UDPpacket* p2;
+    Player *players;
+    Bullet *bullets;
+    UDPsocket sd;
+};
 
 bool initSDL(SDL_Renderer** renderer);
 void handleEvents(SDL_Event* event, int* up, int* down, int* right, int* left, bool* isPlaying, int* mouseX, int* mouseY, bool* shooting);
@@ -21,6 +28,7 @@ void startPrompt(int* playerID, Server* server, bool* host);
 void fire(Bullet bullets[], Player* p, int playerID, int xTarget, int yTarget);
 void playerBulletCollisionCheck(Bullet bullets[], Player players[]);
 void sendReceivePackets(int sendDelay, int* playerID, int* oldPlayerX, int* oldPlayerY, Player players[], UDPsocket* sd, IPaddress* srvadd, UDPpacket** p, UDPpacket** p2, bool *shooting, Bullet bullets[], int *mouseX, int *mouseY);
+static void UDPReceive(void* args);
 
 int main(int argc, char* args[])
 {
@@ -85,7 +93,15 @@ int main(int argc, char* args[])
             connected = true;
         }      
     }
-    
+
+    UDPReceiveStruct urs = malloc(sizeof(struct UDPReceiveStruct_type));
+    urs->sd = sd;
+    urs->p2 = p2;
+    urs->bullets = bullets;
+    urs->players = players;
+
+    SDL_Thread* UDPReceiveThread;
+    UDPReceiveThread = SDL_CreateThread(UDPReceive, "UDPReceive", urs);
 
     // Main loop
     while (isPlaying)
@@ -108,7 +124,7 @@ int main(int argc, char* args[])
         renderGame(renderer, tiles, gridTiles, bullets, bulletTexture, players, playerText, playerRect, &playerRotationPoint);
 
         sendReceivePackets(TICKRATE, &playerID, &oldPlayerX, &oldPlayerY, players, &sd, &srvadd, &p, &p2, &shooting, bullets, &mouseX, &mouseY);
-        shooting = false;
+
         frameTicks = SDL_GetTicks() - fpsTimerStart;
         if (frameTicks < (1000 / 60))
         {
@@ -299,8 +315,16 @@ void handleEvents(SDL_Event* event, int* up, int* down, int* right, int* left, b
                 break;
             }
             break;
+        case SDL_MOUSEBUTTONUP:
 
-        break;
+            switch (event->button.button)
+            {
+            case SDL_BUTTON_LEFT:
+                *shooting = false;
+            default:
+                break;
+            }
+            break;
 
         }
 
@@ -331,6 +355,11 @@ void initClient(UDPsocket* sd, IPaddress* srvadd, UDPpacket** p, UDPpacket** p2,
 
     *tcpsock = SDLNet_TCP_Open(srvadd);
 
+    if (!*tcpsock)
+    {
+        fprintf(stderr, "SDLNet_TCP_Open: %s\n", SDLNet_GetError());
+        exit(EXIT_FAILURE);
+    }
     if (!((*p = SDLNet_AllocPacket(512)) && (*p2 = SDLNet_AllocPacket(512))))
     {
         fprintf(stderr, "SDLNet_AllocPacket: %s\n", SDLNet_GetError());
@@ -426,12 +455,31 @@ void sendReceivePackets(int sendDelay, int* playerID, int* oldPlayerX, int* oldP
     }
 
     // Receive
-    if (SDLNet_UDP_Recv(*sd, *p2))
+    /*if (SDLNet_UDP_Recv(*sd, *p2))
     {     
         int a, b, c, d, e, f, g;
         sscanf((char*)(*p2)->data, "%d %d %d %d %d %d %d\n", &a, &b, &c, &d, &e, &f, &g);
         if(c != -1) updatePlayerPosition(players[c], a, b, d);
         if (e == 1) fire(bullets, &players[c], c, f, g);
         
-    }   
+    }   */
+}
+
+static void UDPReceive(void* args)
+{
+    UDPReceiveStruct urs = (UDPReceiveStruct)args;
+
+    while (true)
+    {
+        SDL_Delay(1);
+        if (SDLNet_UDP_Recv(urs->sd, urs->p2))
+        {
+            int a, b, c, d, e, f, g;
+            sscanf((char*)(urs->p2)->data, "%d %d %d %d %d %d %d\n", &a, &b, &c, &d, &e, &f, &g);
+            if (c != -1) updatePlayerPosition(urs->players[c], a, b, d);
+            if (e == 1) fire(urs->bullets, &urs->players[c], c, f, g);
+
+        }
+    }
+    
 }

@@ -104,7 +104,7 @@ PUBLIC void startServer(Server server)
         SDL_Delay(1); 
         TCPdelay = (TCPdelay + 1) % 1000;
         UDPreceiveDelay = (UDPreceiveDelay + 1) % 1;
-        UDPsendDelay = (UDPsendDelay + 1) % 33;
+        UDPsendDelay = (UDPsendDelay + 1) % 10;
         
 
         // TCP
@@ -258,6 +258,7 @@ PUBLIC static void UDPSend(void* serverPtr)
             {
                 if (i != j)
                 {
+
                     server->pSent->address = server->clients[j];	// Set the destination host 
                     sprintf((char*)server->pSent->data, "%d %d %d %d\n", server->playerX[i], server->playerY[i], server->playerID[i], (int)server->playerRotation[i]);
                     server->pSent->len = strlen((char*)server->pSent->data) + 1;
