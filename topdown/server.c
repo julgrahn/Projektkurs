@@ -7,46 +7,55 @@
 
 #define PUBLIC /* empty */
 #define PRIVATE static
-#define SERVER_REFRESH_RATE 30  // 30 = 10/s    10 = 30/s
+#define SERVER_REFRESH_RATE 10  // 30 = 10/s    10 = 30/s
 
 struct Server_type {
     UDPsocket sd;       /* Socket descriptor */
     UDPpacket* pRecive;       /* Pointer to packet memory */
     UDPpacket* pSent;
     TCPsocket tcpsockServer;
-    TCPsocket tcpsockClient;
+    TCPsocket tcpsockClient[MAX_PLAYERS + 1];
     IPaddress serverIP;
     IPaddress clients[MAX_PLAYERS];
-    Uint32 IPclients[MAX_PLAYERS];
-    Uint32 portClients[MAX_PLAYERS];
     int noOfPlayers;
     int xPos[MAX_PLAYERS], yPos[MAX_PLAYERS], pID[MAX_PLAYERS];
     double pDirection[MAX_PLAYERS];
-    int send;
-    int a[MAX_PLAYERS]; // Spelar-X
-    int b[MAX_PLAYERS]; // Spelar-Y
-    int c[MAX_PLAYERS]; // SpelarID
-    int d[MAX_PLAYERS]; // Player rotation
+    int playerX[MAX_PLAYERS]; // Spelar-X
+    int playerY[MAX_PLAYERS]; // Spelar-Y
+    int playerID[MAX_PLAYERS]; // SpelarID
+    int playerRotation[MAX_PLAYERS]; // Player rotation
+    int playerShooting[MAX_PLAYERS];
+    int pMouseX[MAX_PLAYERS];
+    int pMouseY[MAX_PLAYERS];
+    SDL_Thread* UDPreceiveThread;
+    SDL_Thread* UDPsendThread;
 };
 
 PUBLIC Server createServer()
 {
 
     Server server = malloc(sizeof(struct Server_type));
-    server->send = 0;
-    server->tcpsockClient = NULL;
+
+    for (int i = 0; i < MAX_PLAYERS + 1; i++)
+    {
+        server->tcpsockClient[i] = NULL;
+    }
+
     for (int i = 0; i < MAX_PLAYERS; i++)
     {
-        server->IPclients[i] = 0;
-        server->portClients[i] = 0;
+        server->clients[i].host = 0;
+        server->clients[i].port = 0;
     }
     server->noOfPlayers = 0;
     for (int i = 0; i < MAX_PLAYERS; i++)
     {
-        server->a[i] = 200; // Spelar-X
-        server->b[i] = 200; // Spelar-Y
-        server->c[i] = 0; // SpelarID
-        server->d[i] = 0; // Player rotation
+        server->playerX[i] = 200; // Spelar-X
+        server->playerY[i] = 200; // Spelar-Y
+        server->playerID[i] = -1; // SpelarID, 0 till 4. -1 innebär att spelaren inte är ansluten
+        server->playerRotation[i] = 0; // Player rotation
+        server->playerShooting[i] = 0;
+        server->pMouseX[i] = 0;
+        server->pMouseY[i] = 0;
     }
 
     //Initialize SDL_net 
@@ -82,66 +91,180 @@ PUBLIC Server createServer()
     return server;
 }
 
-PUBLIC void refreshServer(Server server)
+PUBLIC void startServer(Server server)
 {
-    Uint32 data;
-    server->send = (server->send + 1) % SERVER_REFRESH_RATE;
-    /* Wait a packet. UDP_Recv returns != 0 if a packet is coming */
-
-    // TCP
-    if (server->tcpsockClient == NULL)
+    //server->UDPreceiveThread = SDL_CreateThread(UDPReceive, "UDPReceive", server);
+    //server->UDPsendThread = SDL_CreateThread(UDPSend, "UDPSend", server);
+    static int TCPdelay = 0;
+    static int UDPsendDelay = 0;
+    static int UDPreceiveDelay = 0;
+    // Main-loop
+    while (true)
     {
-        server->tcpsockClient = SDLNet_TCP_Accept(server->tcpsockServer);
-        if (server->tcpsockClient)
-        {
-            char msg[1024];
-            int len;
-
-            // Tilldela spelarID och skicka startpositionerna för alla spelare
-            sprintf(msg, "%d %d %d %d %d %d %d %d %d %d %d\n", server->noOfPlayers, server->a[0], server->b[0], server->a[1], server->b[1], server->a[2], server->b[2], server->a[3], server->b[3], server->a[4], server->b[4]);
-            len = strlen(msg) + 1;
-            SDLNet_TCP_Send(server->tcpsockClient, msg, len);
-            server->IPclients[server->noOfPlayers] = SDLNet_TCP_GetPeerAddress(server->tcpsockClient)->host;
-            SDLNet_TCP_Recv(server->tcpsockClient, msg, 1024);
-            sscanf((char*)msg, "%d\n", &(server->portClients[server->noOfPlayers]));       
-            server->tcpsockClient = NULL;
-            server->noOfPlayers++;         
-        }
-    }
-    
-    // UDP Ta emot
-    if (SDLNet_UDP_Recv(server->sd, server->pRecive))
-    {     
-        // Hanterandet av paket
-        // i �r den som skickar
-        // j �r den som tar emot 
-        for (int i = 0; i < server->noOfPlayers; i++)
-        {
-            if (server->pRecive->address.host == server->IPclients[i])
-            {
-                sscanf((char*)server->pRecive->data, "%d %d %d %d\n", &server->a[i], &server->b[i], &server->c[i], &server->d[i]);
-            }
-        }     
-    }
-    // UDP Skicka
-    if (!server->send)
-    {
+        SDL_Delay(1); 
+        TCPdelay = (TCPdelay + 1) % 1000;
+        UDPreceiveDelay = (UDPreceiveDelay + 1) % 1;
+        UDPsendDelay = (UDPsendDelay + 1) % 33;
         
+
+        // TCP
+        if (!TCPdelay)
+        {
+            // Gå igenom alla TCPsockets för klienter (g som index)
+            for (int g = 0; g < MAX_PLAYERS + 1; g++) // En socket för varje spelare PLUS en som används för att säga åt en klient om servern är full
+            {
+                if (server->tcpsockClient[g] == NULL) // Om socketen är NULL så betyder det att den är ledig
+                {
+                    server->tcpsockClient[g] = SDLNet_TCP_Accept(server->tcpsockServer); // TCP_Accept kollar om det är någon som försöker kopplar upp sig till servern (Serverns TCPsocket, tcpsockServer)
+
+                    if (server->tcpsockClient[g]) // Om det är någon som svarar så är inte tcpsockClient[g] = NULL längre. Den tilldelas till den som har anslutit.
+                    {
+                        if (server->noOfPlayers >= MAX_PLAYERS) // Om servern är full, skicka tillbaka -1 som säger åt klienten att stänga av programmet
+                        {
+                            char msg[1024];
+                            int len;
+                            sprintf(msg, "%d\n", -1);
+                            len = strlen(msg) + 1;
+                            SDLNet_TCP_Send(server->tcpsockClient[MAX_PLAYERS], msg, len);
+                            server->tcpsockClient[MAX_PLAYERS] = NULL;
+                            printf("A player tried to connect, but the server was full :( \n");
+                        }
+                        else // Annars så körs alla startrutiner. Dela ut spelar ID, skicka ut positioner på alla andra spelare etc.
+                        {
+                            printf("Client %d has connected\n", g);
+                            char msg[1024];
+                            int len;
+                            int newPlayerID;
+                            for (int i = 0; i < MAX_PLAYERS; i++) // Kollar vilken spelarID som är ledig
+                            {
+                                if (server->playerID[i] == -1)
+                                {
+                                    newPlayerID = i;
+                                    server->playerID[i] = i;
+                                    break;
+                                }
+                            }
+                            // Tilldela spelarID och skicka startpositionerna för alla spelare
+                            sprintf(msg, "%d %d %d %d %d %d %d %d %d %d %d\n", newPlayerID, server->playerX[0], server->playerY[0], server->playerX[1], server->playerY[1], server->playerX[2], server->playerY[2], server->playerX[3], server->playerY[3], server->playerX[4], server->playerY[4]);
+                            len = strlen(msg) + 1;
+                            SDLNet_TCP_Send(server->tcpsockClient[g], msg, len);
+                            server->clients[g].host = SDLNet_TCP_GetPeerAddress(server->tcpsockClient[g])->host;
+
+                            // Klienten behöver skicka sin lokala UDP-port till servern så servern vet vilken port den ska skicka paketen till.
+                            SDLNet_TCP_Recv(server->tcpsockClient[g], msg, 1024);
+                            sscanf((char*)msg, "%d\n", &(server->clients[g].port));
+                            server->noOfPlayers++;
+                        }
+                    }
+                }
+                else // Om socketen inte är NULL så betyder det att den är upptagen av någon klient. 
+                     // Servern "Pingar" alla uppkopplade spelare. Om TCP_SEND returnerar en int mindre än "len" så betyder det att klienten inte svarar och servern gör en plats ledig.
+                {
+                    char msg[1024];
+                    int len;
+                    sprintf(msg, "%d\n", 7);
+                    len = strlen(msg) + 1;
+                    if (SDLNet_TCP_Send(server->tcpsockClient[g], msg, len) < len)
+                    {
+                        printf("Client %d has disconnected\n", g);
+                        server->tcpsockClient[g] = NULL;
+                        server->playerID[g] = -1;                       
+                        server->clients[g].host = NULL;
+                        server->clients[g].port = NULL;
+                        server->noOfPlayers--;
+                    }
+                }
+            }
+        }
+        // UDP Receive
+        if (!UDPreceiveDelay)
+        {
+            if (SDLNet_UDP_Recv(server->sd, server->pRecive))
+            {
+                for (int i = 0; i < server->noOfPlayers; i++)
+                {
+                    if (server->pRecive->address.port == server->clients[i].port) // Kollar vem paket kom ifrån och uppdaterar endast den spelaren
+                    {
+                        sscanf((char*)server->pRecive->data, "%d %d %d %d %d %d %d\n",
+                            &server->playerX[i], &server->playerY[i],
+                            &server->playerID[i], &server->playerRotation[i],
+                            &server->playerShooting[i], &server->pMouseX[i],
+                            &server->pMouseY[i]);
+                    }
+                }
+            }
+        }
+        
+       
+
+        // UDP Send
+        if (!UDPsendDelay)
+        {
+            // Spelar i's information skickas till spelare j
+            for (int i = 0; i < MAX_PLAYERS; i++)
+            {
+                for (int j = 0; j < MAX_PLAYERS; j++)
+                {
+                    if (i != j && (server->tcpsockClient[i] != NULL) && (server->tcpsockClient[j] != NULL)) // Paket skickas bara till de som är inne
+                    {
+                        server->pSent->address = server->clients[j];	// Set the destination host 
+                        sprintf((char*)server->pSent->data, "%d %d %d %d %d %d %d\n",
+                            server->playerX[i], server->playerY[i],
+                            server->playerID[i], (int)server->playerRotation[i],
+                            server->playerShooting[i], server->pMouseX[i], server->pMouseY[i]);
+
+                        server->pSent->len = strlen((char*)server->pSent->data) + 1;
+                        SDLNet_UDP_Send(server->sd, -1, server->pSent);
+                    }
+                }
+            }
+        }
+    }         
+}
+
+
+// Trådar som inte används just nu
+
+PUBLIC static void UDPReceive(void* serverPtr)
+{
+    Server server = (Server)serverPtr;
+    while (true)
+    {      
+        SDL_Delay(1); // Hur ofta servern scannar för att ta emot paket
+        if (SDLNet_UDP_Recv(server->sd, server->pRecive))
+        {          
+            for (int i = 0; i < server->noOfPlayers; i++)
+            {
+                if (server->pRecive->address.port == server->clients[i].port) // KOllar vem paket kom ifrån och uppdaterar endast den spelaren
+                {
+                    sscanf((char*)server->pRecive->data, "%d %d %d %d\n", &server->playerX[i], &server->playerY[i], &server->playerID[i], &server->playerRotation[i]);
+                }
+            }          
+        }        
+    }     
+}
+
+PUBLIC static void UDPSend(void* serverPtr)
+{
+    Server server = (Server)serverPtr;
+    while (true)
+    {
+        SDL_Delay(100); // Hur ofta servern skickar paket
+
+        // Spelar i's information skickas till spelare j
         for (int i = 0; i < server->noOfPlayers; i++)
         {
             for (int j = 0; j < server->noOfPlayers; j++)
-            {             
+            {
                 if (i != j)
-                {   
-                    server->pSent->address.host = server->IPclients[j];	// Set the destination host 
-                    server->pSent->address.port = server->portClients[j];
-                    sprintf((char*)server->pSent->data, "%d %d %d %d\n", server->a[i], server->b[i], server->c[i], (int)server->d[i]);
+                {
+                    server->pSent->address = server->clients[j];	// Set the destination host 
+                    sprintf((char*)server->pSent->data, "%d %d %d %d\n", server->playerX[i], server->playerY[i], server->playerID[i], (int)server->playerRotation[i]);
                     server->pSent->len = strlen((char*)server->pSent->data) + 1;
-                    SDLNet_UDP_Send(server->sd, -1, server->pSent);
-
-                    // SDL_Delay(10);
+                    SDLNet_UDP_Send(server->sd, -1, server->pSent);                 
                 }
             }
         }
     }
+    
 }
