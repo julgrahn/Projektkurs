@@ -1,6 +1,5 @@
 #include <stdlib.h>
 #include "player.h"
-#include "world.h"
 #include <math.h>
 #include <stdbool.h>
 
@@ -81,16 +80,22 @@ PUBLIC void movePlayer(Player p, int up, int down, int right, int left, int mous
     // Rotate player
     p->direction = (atan2(mouseY - p->pDimensions.y - 34, mouseX - p->pDimensions.x - 18) * 180 / M_PI) - 6;
 
+<<<<<<< Updated upstream
     // Collision detection with walls
 
 
+=======
+>>>>>>> Stashed changes
     // Collision detection with window
     if (p->pDimensions.y <= 0) p->pDimensions.y = p->posY = 0;
     if (p->pDimensions.y >= WINDOWHEIGHT - p->pDimensions.h) p->pDimensions.y = p->posY = WINDOWHEIGHT - p->pDimensions.h;
     if (p->pDimensions.x <= 0) p->pDimensions.x = p->posX = 0;
     if (p->pDimensions.x >= WINDOWWIDTH - p->pDimensions.w) p->pDimensions.x = p->posX = WINDOWWIDTH - p->pDimensions.w;
+<<<<<<< Updated upstream
 
     getWall(p->posX, p->posY, p->pDimensions.h, p->pDimensions.w);
+=======
+>>>>>>> Stashed changes
 }
 
 PUBLIC double getPlayerDirection(Player p)
