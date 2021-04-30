@@ -51,20 +51,45 @@ int getTileGrid(int x, int y) {
     return tileGrid[x][y];
 }
 int getWallCollision(int x, int y){
+    int wallCordStartX;
+    int wallCordEndX;
+    int wallCordStartY;
+    int wallCordEndY;
     for (int i = 0; i < tileRows; i++)
     {
         for (int j = 0; j < tileColumns; j++)
         {
             if (tileGrid[i][j] != bricks)
             {
-                int wallCordStartX = j * 32 ;
-                int wallCordEndX = j*32 + 32; 
-                int wallCordStartY = i * 32;
-                int wallCordEndY = i*32 + 32;
+                wallCordStartX = j * 32;
+                wallCordEndX = j*32 + 32; 
+                wallCordStartY = i * 32;
+                wallCordEndY = i*32 + 32;
 
-                if (x + 64 >= wallCordStartX + 20 && x <= wallCordEndX && y + 64 >= wallCordStartY + 15 && y <= wallCordEndY - 15) // addition och sub i IF sats baseras på spelarrektangel och kan behöva anpassas. 
+                if (x + 64 >= wallCordStartX + 20 && x <= wallCordEndX && y + 64 >= wallCordStartY + 15 && y <= wallCordEndY - 15) // addition och sub i IF sats baseras pï¿½ spelarrektangel och kan behï¿½va anpassas. 
                 {
+                    // if (x < wallCordStartX)
+                    // {
+                    //     printf("%d\n", wallCordStartX-x); // 43-44
+                    //     return 1;
+                    // }
+                    // if (x + 1 >= wallCordEndX)
+                    // {
+                    //     printf("%d\n",x-wallCordEndX); 
+                    //     return 1;
+                    // }
+                    // if (y < wallCordStartY)
+                    // {
+                    //     printf("%d\n",wallCordStartY-y); // 48-49
+                    //     return 2;
+                    // }
+                    // if (y + 16 > wallCordEndY)
+                    // {
+                    //     printf("%d\n",y-wallCordEndY);
+                    //     return 2;
+                    // }
                     return 1;
+
                 }
             }
         }
