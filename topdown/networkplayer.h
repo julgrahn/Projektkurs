@@ -10,7 +10,7 @@
 typedef struct Networkplayer_type{
     short id, health, direction;
     short posX, posY, xTarget, yTarget;
-    bool active, isShooting;
+    bool isAlive, isShooting;
     // Networkbullet bullets[10];
 }Networkplayer;
 

@@ -97,6 +97,7 @@ PUBLIC int getBulletX(Bullet a)
 PUBLIC int getBulletY(Bullet a)
 {
 	return a->yPos;
+}
 int getBulletDamage(Bullet b)
 {
 	return b->damage;

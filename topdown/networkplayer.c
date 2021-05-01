@@ -28,9 +28,9 @@ PUBLIC Networkplayer createNetworkplayer(int id)
     a.direction = 0;
     a.posX = 200;
     a.posY = 200;
-    a.active = false;
-    a.id = id;
+    a.isAlive = false;
     a.isShooting = false;
+    a.id = id;
     return a;
 }
 
@@ -74,10 +74,12 @@ PUBLIC int getNetplayerX(Networkplayer a)
 
 PUBLIC void setNetworkplayer(Networkplayer *a, Player b)
 {
-    a->active = 1;
+    a->isAlive = isPlayerAlive(b);
     a->posX = getPlayerX(b);
     a->posY = getPlayerY(b);
     a->direction = (short)getPlayerDirection(b);
+    a->xTarget = getPlayerxtarget(b);
+    a->xTarget = getPlayerytarget(b);
     // for(int i = 0; i < 10; i++)
     // {
     //     setNetworkbullet(&a->bullets[i], c[i]);

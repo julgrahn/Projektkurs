@@ -1,5 +1,6 @@
 ﻿#include "world.h"
 #include "player.h"
+#define PUBLIC
 
 enum material { bricks = 120, wall = 186, truck = 102, wall2 = 246, wall3 = 216 };
 
@@ -56,7 +57,7 @@ int getTileHeight() {
 int getTileGrid(int x, int y) {
     return tileGrid[x][y];
 }
-int getWallCollisionPlayer(int x, int y) {
+PUBLIC int getWallCollisionPlayer(int x, int y) {
     int wallCordStartX;
     int wallCordEndX;
     int wallCordStartY;
@@ -81,7 +82,7 @@ int getWallCollisionPlayer(int x, int y) {
     }
     return 0;
 }
-bool getWallCollisionBullet(int x, int y, int h, int w) {
+PUBLIC bool getWallCollisionBullet(int x, int y, int h, int w) {
     for (int i = 0; i < tileRows; i++)
     {
         for (int j = 0; j < tileColumns; j++)

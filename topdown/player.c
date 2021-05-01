@@ -26,6 +26,7 @@ struct Player_type {
     int newY;
     double xSpeed, ySpeed;
     int newDirection;
+    int xTarget, yTarget;
 };
 
 PUBLIC Player createPlayer(int x, int y, int id)
@@ -63,7 +64,8 @@ PUBLIC void movePlayer(Player p, int up, int down, int right, int left, int mous
 {
     int newX = 0, newY = 0, diagonal, oldX = p->posX, oldY = p->posY;
     p->isMoving = 0;
-
+    p->xTarget = mouseX;
+    p->yTarget = mouseY;
     if (up && !down) { newY--; p->isMoving = 1; }
     if (down && !up) { newY++; p->isMoving = 1; }
     if (left && !right) { newX--; p->isMoving = 1; }
@@ -160,11 +162,13 @@ PUBLIC int getPlayerID(Player p)
     return p->id;
 }
 
-PUBLIC void updatePlayerPosition(Player p, int x, int y, int direction)
+PUBLIC void updatePlayerPosition(Player *p, int x, int y, int direction, bool alive)
 {
-    p->newX = x;
-    p->newY = y;
-    p->newDirection = direction;
+    (*p)->alive = alive;
+    (*p)->newX = x;
+    (*p)->newY = y;
+    (*p)->newDirection = direction;
+    (*p)->direction = direction;
 }
 
 PUBLIC void moveOtherPlayers(Player p)
@@ -221,28 +225,6 @@ PUBLIC void moveOtherPlayers(Player p)
 
 }
 
-
-// bool refresh = (xDelta > 1 || xDelta < -1 || yDelta > 1 || yDelta < -1);
-    
-    // p->xSpeed = scaling*xDelta*refresh + p->xSpeed*!refresh;
-    // p->ySpeed = scaling*yDelta*refresh + p->ySpeed*!refresh;
-
-    // p->posX += p->xSpeed*refresh;
-    // p->posY += p->ySpeed*refresh;
-    // p->pDimensions.x = round(p->posX);
-    // p->pDimensions.y = round(p->posY);
-
-    // p->frameCounter = ((p->frameCounter + 1) % (ANIMATIONSPEED + 1))*refresh + p->frameCounter*!refresh;
-    // p->frame = ((p->frame + ((p->frameCounter / ANIMATIONSPEED))) % 4)*refresh + p->frame*!refresh;
-        // printf("%d %d\n", p->pDimensions.x, p->pDimensions.y);
-    }
-    // else
-    // {
-    //     p->pDimensions.x = p->posX = p->newX;
-    //     p->pDimensions.y = p->posY = p->newY;
-    // }
-}
-
 PUBLIC void snapPlayer(Player p, int x, int y)
 {
     p->pDimensions.x = x;
@@ -267,4 +249,14 @@ PUBLIC bool isPlayerAlive(Player p)
 PUBLIC void setPlayerAlive(Player p, bool value)
 {
     p->alive = value;
+}
+
+PUBLIC int getPlayerxtarget(Player a)
+{
+    return a->xTarget;
+}
+
+PUBLIC int getPlayerytarget(Player a)
+{
+    return a->yTarget;
 }

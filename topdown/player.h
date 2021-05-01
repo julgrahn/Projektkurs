@@ -16,11 +16,14 @@ int getPlayerY(Player p);
 int getPlayerID(Player p);
 void activatePlayer(Player p);
 void playerHealth(Player p, int health);
-void updatePlayerPosition(Player p, int x, int y, int rotation);
+void updatePlayerPosition(Player *p, int x, int y, int direction, bool alive);
 void moveOtherPlayers(Player p);
 void snapPlayer(Player p, int x, int y);
 void damagePlayer(Player p, int damage);
 bool isPlayerAlive(Player p);
 void setPlayerAlive(Player p, bool value);
+int getPlayerxtarget(Player b);
+int getPlayerytarget(Player b);
+
 
 #endif
