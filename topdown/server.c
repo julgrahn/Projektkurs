@@ -4,6 +4,7 @@
 
 #include "server.h"
 #include <stdbool.h>
+#include "networkgamestate.h"
 
 #define PUBLIC /* empty */
 #define PRIVATE static
@@ -16,8 +17,9 @@ struct Server_type {
     Uint32 IPclients[MAX_PLAYERS];
     Uint32 portClients[MAX_PLAYERS];
     int noOfPlayers;
-    int xPos[MAX_PLAYERS], yPos[MAX_PLAYERS], ID[MAX_PLAYERS], direction[MAX_PLAYERS];
+    // int xPos[MAX_PLAYERS], yPos[MAX_PLAYERS], ID[MAX_PLAYERS], direction[MAX_PLAYERS];
     int send;
+    Networkgamestate state;
 };
 
 PUBLIC Server createServer()
@@ -31,13 +33,6 @@ PUBLIC Server createServer()
         server->portClients[i] = 0;
     }
     server->noOfPlayers = 0;
-    for(int i = 0; i < MAX_PLAYERS; i++)
-    {
-        server->xPos[i] = 0;
-        server->yPos[i] = 0;
-        server->ID[i] = 0;
-        server->direction[i] = 0;
-    }
     //Initialize SDL_net 
     if (SDLNet_Init() < 0)
     {
@@ -61,7 +56,6 @@ PUBLIC Server createServer()
 
 PUBLIC void refreshServer(Server server)
 {
-    Uint32 data;
     server->send = (server->send+1)%SERVER_REFRESH_RATE;
     /* Wait a packet. UDP_Recv returns != 0 if a packet is coming */
     if (SDLNet_UDP_Recv(server->sd, server->pRecive))
@@ -86,12 +80,11 @@ PUBLIC void refreshServer(Server server)
         // Hanterandet av paket
         // i �r den som skickar
         // j �r den som tar emot
-        
         for (int i = 0; i < server->noOfPlayers; i++)
         {
             if (server->pRecive->address.port == server->portClients[i])
             {
-                sscanf((char*)server->pRecive->data, "%d %d %d %d\n", &server->xPos[i], &server->yPos[i], &server->ID[i], &server->direction[i]);
+                memcpy(&server->state.players[i], server->pRecive->data, sizeof(server->state.players[i]));
             }
         }
     }
@@ -105,8 +98,8 @@ PUBLIC void refreshServer(Server server)
                 {
                     server->pSent->address.host = server->IPclients[j];	// Set the destination host 
                     server->pSent->address.port = server->portClients[j];
-                    sprintf((char*)server->pSent->data, "%d %d %d %d\n", server->xPos[i], server->yPos[i], server->ID[i], server->direction[i]);
-                    server->pSent->len = strlen((char*)server->pSent->data) + 1;
+                    memcpy(server->pSent->data, &server->state, sizeof(server->state));
+                    server->pSent->len = sizeof(server->state);
                     SDLNet_UDP_Send(server->sd, -1, server->pSent);
                 }
             }
