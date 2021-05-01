@@ -17,4 +17,5 @@ int getBulletOwner(Bullet b);
 int getBulletX(Bullet a);
 int getBulletY(Bullet a);
 
+int getBulletDamage(Bullet b);
 #endif

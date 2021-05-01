@@ -9,6 +9,10 @@
 //.vscode
 *.exe
 *.dll
+*.main.o
+*.player.o
+*.world.o
+*.theGame
 *.vcxproj
 *.filters
 *.user
@@ -20,4 +24,6 @@
 *.pdb
 *.sln
 *.ilk
-*.enc
+topdown/.idea/.name
+topdown/.idea/vcs.xml
+topdown/.idea/workspace.xml

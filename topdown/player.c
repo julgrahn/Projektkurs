@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include "player.h"
+#include "world.h"
 #include <math.h>
-#include <stdbool.h>
 
 #define PUBLIC
 #define SPEED 2
@@ -20,14 +20,13 @@ struct Player_type {
     int isMoving;
     double direction;
     bool active;
+    bool alive;
     int id;
     int newX;
     int newY;
     double xSpeed, ySpeed;
     int newDirection;
 };
-
-//int SDL_RenderDrawRect(SDL_Renderer* renderer, SDL_Rect NULL);
 
 PUBLIC Player createPlayer(int x, int y, int id)
 {
@@ -48,6 +47,7 @@ PUBLIC Player createPlayer(int x, int y, int id)
     a->newX = x;
     a->newY = y;
     a->active = false;
+    a->alive = false;
     a->id = id;
     a->xSpeed = a->ySpeed = 0;
     a->newDirection = 0;
@@ -61,21 +61,47 @@ PUBLIC int getPlayerFrame(Player p)
 
 PUBLIC void movePlayer(Player p, int up, int down, int right, int left, int mouseX, int mouseY)
 {
-    int newX = 0, newY = 0, diagonal;
-    p->isMoving=0;
+    int newX = 0, newY = 0, diagonal, oldX = p->posX, oldY = p->posY;
+    p->isMoving = 0;
 
-    if (up && !down) {newY--;p->isMoving=1;}
-    if (down && !up) {newY++;p->isMoving=1;}
-    if (left && !right) {newX--;p->isMoving=1;}
-    if (right && !left) {newX++;p->isMoving=1;}
-    diagonal = (newX!=0 && newY!=0);
+    if (up && !down) { newY--; p->isMoving = 1; }
+    if (down && !up) { newY++; p->isMoving = 1; }
+    if (left && !right) { newX--; p->isMoving = 1; }
+    if (right && !left) { newX++; p->isMoving = 1; }
+    diagonal = (newX != 0 && newY != 0);
     // Set player absolute pos
-    p->posX += p->diaSpeed*diagonal*newX + p->speed*!diagonal*newX;
-    p->posY += p->diaSpeed*diagonal*newY + p->speed*!diagonal*newY;
+    p->posX += p->diaSpeed * diagonal * newX + p->speed * !diagonal * newX;
+    p->posY += p->diaSpeed * diagonal * newY + p->speed * !diagonal * newY;
 
     // Set new pixel pos of player
     p->pDimensions.x = round(p->posX);
+    if (getWallCollisionPlayer(p->pDimensions.x, p->pDimensions.y))   // Collision x-led
+    {
+        if (right)
+        {
+            p->posX -= 2;
+            p->pDimensions.x -= 2;
+        }
+        if (left)
+        {
+            p->posX += 2;
+            p->pDimensions.x += 2;
+        }
+    }
     p->pDimensions.y = round(p->posY);
+    if (getWallCollisionPlayer(p->pDimensions.x, p->pDimensions.y))   // Collision y-led
+    {
+        if (up)
+        {
+            p->posY += 2;
+            p->pDimensions.y += 2;
+        }
+        if (down)
+        {
+            p->posY -= 2;
+            p->pDimensions.y -= 2;
+        }
+    }
 
     // Update player sprite frame
     p->frameCounter = (p->frameCounter + p->isMoving) % (ANIMATIONSPEED + 1);
@@ -83,11 +109,20 @@ PUBLIC void movePlayer(Player p, int up, int down, int right, int left, int mous
     // Rotate player
     p->direction = (atan2(mouseY - p->pDimensions.y - 34, mouseX - p->pDimensions.x - 18) * 180 / M_PI) - 6;
 
+    // // Collision detection with walls
+    // if (getWallCollision(p->pDimensions.x, p->pDimensions.y))
+    // {
+    //     p->posX = oldX;
+    //     p->posY = oldY;
+    // }
+
+
     // Collision detection with window
     if (p->pDimensions.y <= 0) p->pDimensions.y = p->posY = 0;
     if (p->pDimensions.y >= WINDOWHEIGHT - p->pDimensions.h) p->pDimensions.y = p->posY = WINDOWHEIGHT - p->pDimensions.h;
     if (p->pDimensions.x <= 0) p->pDimensions.x = p->posX = 0;
     if (p->pDimensions.x >= WINDOWWIDTH - p->pDimensions.w) p->pDimensions.x = p->posX = WINDOWWIDTH - p->pDimensions.w;
+
 }
 
 PUBLIC double getPlayerDirection(Player p)
@@ -114,18 +149,6 @@ PUBLIC int getPlayerY(Player p)
 {
     return p->pDimensions.y;
 }
-
-/*PUBLIC void shoot(Player p, Bullet bullets[])
-{
-    for (int i = 0; i < MAX_BULLETS; i++)
-    {
-        if (!isBulletActive(bullets[i]))
-        {
-            spawnBullet(p, bullets[i]);
-            return;
-        }
-    }
-}*/
 
 PUBLIC void activatePlayer(Player p)
 {
@@ -165,36 +188,36 @@ PUBLIC void moveOtherPlayers(Player p)
         p->frameCounter = (p->frameCounter + 1) % (ANIMATIONSPEED + 1);
         p->frame = (p->frame + ((p->frameCounter / ANIMATIONSPEED))) % 4;
     }
-    if(p->direction != p->newDirection)
-    {
-        if(new - old < 180 && new - old > 0)
-        {
-            old += ROTATION_UPDATE_SPEED;
-        }
-        else if(new - old > -180 && new - old < 0)
-        {
-            old -= ROTATION_UPDATE_SPEED;
-        }
-        else if(new - old < -180)
-        {
-                old += ROTATION_UPDATE_SPEED;
-            if(old > 360)
-            {
-                old -= 360;
-            }
-        }
-        else if(new - old > 180)
-        {
-            old -= ROTATION_UPDATE_SPEED;
-            if(old < 0)
-            {
-                old += 360;
-            }
-            // if(new - old < ROTATION_UPDATE_SPEED) old = new;
-        }
-        old -= (180+5);
-        p->direction = old;
-    }
+    // if(p->direction != p->newDirection)
+    // {
+    //     if(new - old < 180 && new - old > 0)
+    //     {
+    //         old += ROTATION_UPDATE_SPEED;
+    //     }
+    //     else if(new - old > -180 && new - old < 0)
+    //     {
+    //         old -= ROTATION_UPDATE_SPEED;
+    //     }
+    //     else if(new - old < -180)
+    //     {
+    //             old += ROTATION_UPDATE_SPEED;
+    //         if(old > 360)
+    //         {
+    //             old -= 360;
+    //         }
+    //     }
+    //     else if(new - old > 180)
+    //     {
+    //         old -= ROTATION_UPDATE_SPEED;
+    //         if(old < 0)
+    //         {
+    //             old += 360;
+    //         }
+    //         // if(new - old < ROTATION_UPDATE_SPEED) old = new;
+    //     }
+    //     old -= (180+5);
+    //     p->direction = old;
+    // }
 
 }
 
@@ -211,3 +234,37 @@ PUBLIC void moveOtherPlayers(Player p)
 
     // p->frameCounter = ((p->frameCounter + 1) % (ANIMATIONSPEED + 1))*refresh + p->frameCounter*!refresh;
     // p->frame = ((p->frame + ((p->frameCounter / ANIMATIONSPEED))) % 4)*refresh + p->frame*!refresh;
+        // printf("%d %d\n", p->pDimensions.x, p->pDimensions.y);
+    }
+    // else
+    // {
+    //     p->pDimensions.x = p->posX = p->newX;
+    //     p->pDimensions.y = p->posY = p->newY;
+    // }
+}
+
+PUBLIC void snapPlayer(Player p, int x, int y)
+{
+    p->pDimensions.x = x;
+    p->pDimensions.y = y;
+    p->newX = x;
+    p->newY = y;
+    p->posX = x;
+    p->posY = y;
+}
+
+PUBLIC void damagePlayer(Player p, int damage)
+{
+    p->health -= damage;
+    if (p->health <= 0) p->alive = false;
+}
+
+PUBLIC bool isPlayerAlive(Player p)
+{
+    return p->alive;
+}
+
+PUBLIC void setPlayerAlive(Player p, bool value)
+{
+    p->alive = value;
+}
