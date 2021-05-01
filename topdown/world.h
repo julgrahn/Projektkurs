@@ -11,5 +11,6 @@ int getTileHeight();
 int getTileGrid(int x, int y);
 int getWallCollisionPlayer(int x, int y);
 bool getWallCollisionBullet(int x, int y, int h, int w);
+void countWallHits(int i, int j);
 
 #endif /* world_h */
