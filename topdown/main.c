@@ -26,7 +26,7 @@ void initGameObjects(Player players[], Bullet bullets[]);
 static void TestThread(void* server);
 void startPrompt(int* playerID, Server* server, bool* host);
 void fire(Bullet bullets[], Player* p, int playerID, int xTarget, int yTarget);
-void playerBulletCollisionCheck(Bullet bullets[], Player players[]);
+void playerBulletCollisionCheck(Bullet bullets[], Player players[], int *playerID);
 void sendReceivePackets(int sendDelay, int* playerID, int* oldPlayerX, int* oldPlayerY, Player players[], UDPsocket* sd, IPaddress* srvadd, UDPpacket** p, UDPpacket** p2, bool *shooting, Bullet bullets[], int *mouseX, int *mouseY);
 static void UDPReceive(void* args);
 
@@ -79,6 +79,7 @@ int main(int argc, char* args[])
             {
                 return; // Stäng av programmet om servern är full
             }
+            setPlayerAlive(players[playerID], true);
             snapPlayer(players[0], p0x, p0y);
             snapPlayer(players[1], p1x, p1y);
             snapPlayer(players[2], p2x, p2y);
@@ -107,19 +108,22 @@ int main(int argc, char* args[])
     while (isPlaying)
     {
         test = fpsTimerStart = SDL_GetTicks();
+
         handleEvents(&event, &up, &down, &right, &left, &isPlaying, &mouseX, &mouseY, &shooting);
 
-        movePlayer(players[playerID], up, down, right, left, mouseX, mouseY);
+        if (isPlayerAlive(players[playerID]))
+        {            
+            movePlayer(players[playerID], up, down, right, left, mouseX, mouseY);
+            if (shooting) fire(bullets, &players[playerID], playerID, mouseX, mouseY);
+        }
 
         //Flytta på alla andra spelare
         for (int i = 0; i < MAX_PLAYERS; i++)
         {
             if (i != playerID) moveOtherPlayers(players[i]);
-        }
+        }           
 
-        if (shooting) fire(bullets, &players[playerID], playerID, mouseX, mouseY);     
-
-        playerBulletCollisionCheck(bullets, players);
+        playerBulletCollisionCheck(bullets, players, &playerID);
 
         renderGame(renderer, tiles, gridTiles, bullets, bulletTexture, players, playerText, playerRect, &playerRotationPoint);
 
@@ -209,7 +213,10 @@ void renderGame(SDL_Renderer* renderer, SDL_Texture* mTiles, SDL_Rect gTiles[], 
     // Render Players
     for (int i = 0; i < MAX_PLAYERS; i++)
     {
-        SDL_RenderCopyEx(renderer, playerText, &playerRect[getPlayerFrame(players[i])], getPlayerRect(players[i]), getPlayerDirection(players[i]), playerRotationPoint, SDL_FLIP_NONE);
+        if (isPlayerAlive(players[i]))
+        {
+            SDL_RenderCopyEx(renderer, playerText, &playerRect[getPlayerFrame(players[i])], getPlayerRect(players[i]), getPlayerDirection(players[i]), playerRotationPoint, SDL_FLIP_NONE);
+        }    
     }
     SDL_RenderPresent(renderer);
 }
@@ -376,8 +383,8 @@ void initGameObjects(Player players[], Bullet bullets[])
         bullets[i] = createBullet();
     }
     for (int i = 0; i < MAX_PLAYERS; i++)
-    {
-        players[i] = createPlayer(200, 200, i);
+    {      
+        players[i] = createPlayer(100, 100, i);
     }
 }
 
@@ -414,7 +421,7 @@ void fire(Bullet bullets[], Player* p, int playerID, int xTarget, int yTarget)
     }
 }
 
-void playerBulletCollisionCheck(Bullet bullets[], Player players[])
+void playerBulletCollisionCheck(Bullet bullets[], Player players[], int *playerID)
 {
     for (int i = 0; i < MAX_BULLETS; i++)
     {
@@ -424,9 +431,13 @@ void playerBulletCollisionCheck(Bullet bullets[], Player players[])
             for (int j = 0; j < MAX_PLAYERS; j++)
             {
                 if (rectCollisionTest(getBulletRect(bullets[i]), getPlayerRect(players[j]))
-                    && (getBulletOwner(bullets[i]) != j))
+                    && (getBulletOwner(bullets[i]) != j) && isPlayerAlive(players[j]))
                 {
                     freeBullet(bullets[i]);
+                    if (j == *playerID)
+                    {
+                        damagePlayer(players[j], getBulletDamage(bullets[j]));
+                    }
                 }
             }
         }
@@ -439,12 +450,12 @@ void sendReceivePackets(int sendDelay, int* playerID, int* oldPlayerX, int* oldP
     // Send
     static int send = 0;
     if (sendDelay) send = (send + 1) % sendDelay;
-    if (!send) // Skickar paket 30/sek
+    if (1) // Skickar paket 30/sek
     {
         // if (getPlayerX(players[*playerID]) != *oldPlayerX || getPlayerY(players[*playerID]) != *oldPlayerY)
         if (1)
         {
-            sprintf((char*)(*p)->data, "%d %d %d %d %d %d %d\n", getPlayerX(players[*playerID]), getPlayerY(players[*playerID]), getPlayerID(players[*playerID]), (int)getPlayerDirection(players[*playerID]), *shooting, *mouseX, *mouseY);
+            sprintf((char*)(*p)->data, "%d %d %d %d %d %d %d %d\n", getPlayerX(players[*playerID]), getPlayerY(players[*playerID]), getPlayerID(players[*playerID]), (int)getPlayerDirection(players[*playerID]), *shooting, *mouseX, *mouseY, isPlayerAlive(players[*playerID]));
             (*p)->address.host = srvadd->host;
             (*p)->address.port = srvadd->port;
             (*p)->len = strlen((char*)(*p)->data) + 1;
@@ -474,11 +485,14 @@ static void UDPReceive(void* args)
         SDL_Delay(1);
         if (SDLNet_UDP_Recv(urs->sd, urs->p2))
         {
-            int a, b, c, d, e, f, g;
-            sscanf((char*)(urs->p2)->data, "%d %d %d %d %d %d %d\n", &a, &b, &c, &d, &e, &f, &g);
-            if (c != -1) updatePlayerPosition(urs->players[c], a, b, d);
+            int a, b, c, d, e, f, g, h;
+            sscanf((char*)(urs->p2)->data, "%d %d %d %d %d %d %d %d\n", &a, &b, &c, &d, &e, &f, &g, &h);
+            if (c != -1)
+            {
+                updatePlayerPosition(urs->players[c], a, b, d);
+                setPlayerAlive(urs->players[c], h);
+            }
             if (e == 1) fire(urs->bullets, &urs->players[c], c, f, g);
-
         }
     }
     
