@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include "sdlinclude.h"
 #include "bullet.h"
+#include "world.h"
 #include <stdbool.h>
 #include <math.h>
 
@@ -65,6 +66,11 @@ PUBLIC void moveBullet(Bullet bullet)
 {
 	bullet->xPos += bullet->xSpeed;
 	bullet->yPos += bullet->ySpeed;
+
+	if(getWallCollisionBullet(bullet->xPos, bullet->yPos, bullet->dimensions.h, bullet->dimensions.w))
+	{
+		freeBullet(bullet);
+	}
 
 	bullet->dimensions.x = round(bullet->xPos);
 	bullet->dimensions.y = round(bullet->yPos);

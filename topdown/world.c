@@ -1,5 +1,6 @@
 #include "world.h"
 #include "player.h"
+#include <stdbool.h>
 
 
 enum material {bricks = 120, wall = 186};
@@ -29,6 +30,11 @@ int tileGrid[22][22] = {
     {bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks},
 };
 
+int wallCordStartX;
+int wallCordEndX;
+int wallCordStartY;
+int wallCordEndY;
+
 int tileRows = 22;
 int tileColumns = 22;
 
@@ -50,11 +56,7 @@ int getTileHeight() {
 int getTileGrid(int x, int y) {
     return tileGrid[x][y];
 }
-int getWallCollision(int x, int y){
-    int wallCordStartX;
-    int wallCordEndX;
-    int wallCordStartY;
-    int wallCordEndY;
+int getWallCollisionPlayer(int x, int y){
     for (int i = 0; i < tileRows; i++)
     {
         for (int j = 0; j < tileColumns; j++)
@@ -62,9 +64,9 @@ int getWallCollision(int x, int y){
             if (tileGrid[i][j] != bricks)
             {
                 wallCordStartX = j * 32;
-                wallCordEndX = j*32 + 32; 
+                wallCordEndX = j * 32 + 32; 
                 wallCordStartY = i * 32;
-                wallCordEndY = i*32 + 32;
+                wallCordEndY = i * 32 + 32;
 
                 if (x + 64 >= wallCordStartX + 20 && x <= wallCordEndX && y + 64 >= wallCordStartY + 15 && y <= wallCordEndY - 15) // addition och sub i IF sats baseras p� spelarrektangel och kan beh�va anpassas. 
                 {
@@ -89,10 +91,30 @@ int getWallCollision(int x, int y){
                     //     return 2;
                     // }
                     return 1;
-
                 }
             }
         }
     }
     return 0;
+}
+bool getWallCollisionBullet(int x, int y, int h, int w){
+    for (int i = 0; i < tileRows; i++)
+    {
+        for (int j = 0; j < tileColumns; j++)
+        {
+            if (tileGrid[i][j] != bricks)
+            {
+                wallCordStartX = j * 32;
+                wallCordEndX = j * 32 + 32; 
+                wallCordStartY = i * 32;
+                wallCordEndY = i * 32 + 32;
+
+                if (x + w >= wallCordStartX && x <= wallCordEndX && y + h >= wallCordStartY && y <= wallCordEndY)
+                {
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
 }

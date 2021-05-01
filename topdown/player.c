@@ -73,7 +73,7 @@ PUBLIC void movePlayer(Player p, int up, int down, int right, int left, int mous
 
     // Set new pixel pos of player
     p->pDimensions.x = round(p->posX);
-    if (getWallCollision(p->pDimensions.x, p->pDimensions.y))   // Collision x-led
+    if (getWallCollisionPlayer(p->pDimensions.x, p->pDimensions.y))   // Collision x-led
     {
         if (right)
         {
@@ -87,7 +87,7 @@ PUBLIC void movePlayer(Player p, int up, int down, int right, int left, int mous
         }
     }
     p->pDimensions.y = round(p->posY);
-    if (getWallCollision(p->pDimensions.x, p->pDimensions.y))   // Collision y-led
+    if (getWallCollisionPlayer(p->pDimensions.x, p->pDimensions.y))   // Collision y-led
     {
         if (up)
         {
@@ -107,12 +107,12 @@ PUBLIC void movePlayer(Player p, int up, int down, int right, int left, int mous
     // Rotate player
     p->direction = (atan2(mouseY - p->pDimensions.y - 34, mouseX - p->pDimensions.x - 18) * 180 / M_PI) - 6;
 
-    // Collision detection with walls
-    if (getWallCollision(p->pDimensions.x, p->pDimensions.y))
-    {
-        p->posX = oldX;
-        p->posY = oldY;
-    }
+    // // Collision detection with walls
+    // if (getWallCollision(p->pDimensions.x, p->pDimensions.y))
+    // {
+    //     p->posX = oldX;
+    //     p->posY = oldY;
+    // }
 
 
     // Collision detection with window
