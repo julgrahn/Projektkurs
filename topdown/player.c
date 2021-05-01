@@ -27,6 +27,7 @@ struct Player_type {
     double xSpeed, ySpeed;
     int newDirection;
     int xTarget, yTarget;
+    bool isShooting;
 };
 
 PUBLIC Player createPlayer(int x, int y, int id)
@@ -52,6 +53,7 @@ PUBLIC Player createPlayer(int x, int y, int id)
     a->id = id;
     a->xSpeed = a->ySpeed = 0;
     a->newDirection = 0;
+    a->isShooting = false;
     return a;
 }
 
@@ -162,13 +164,15 @@ PUBLIC int getPlayerID(Player p)
     return p->id;
 }
 
-PUBLIC void updatePlayerPosition(Player *p, int x, int y, int direction, bool alive)
+PUBLIC void updatePlayerPosition(Player *p, int x, int y, int direction, bool alive, bool isShooting, int xTarget, int yTarget)
 {
     (*p)->alive = alive;
     (*p)->newX = x;
     (*p)->newY = y;
     (*p)->newDirection = direction;
     (*p)->direction = direction;
+    (*p)->isShooting = isShooting;
+    (*p)->xTarget = xTarget, (*p)->yTarget = yTarget;
 }
 
 PUBLIC void moveOtherPlayers(Player p)
@@ -259,4 +263,18 @@ PUBLIC int getPlayerxtarget(Player a)
 PUBLIC int getPlayerytarget(Player a)
 {
     return a->yTarget;
+}
+
+PUBLIC bool isPlayershooting(Player a)
+{
+    if(a->alive)
+        return a->isShooting;
+    else
+        return false;
+}
+
+PUBLIC void setPlayerShooting(Player *a, bool isShooting, int xTarget, int yTarget)
+{
+    (*a)->isShooting = isShooting;
+    (*a)->xTarget = xTarget, (*a)->yTarget = yTarget;
 }

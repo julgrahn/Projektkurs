@@ -10,7 +10,7 @@
 PUBLIC Networkgamestate createNetworkgamestate()
 {
     Networkgamestate a;
-    for(int i = 0; i < MAX_PLAYERS; i++) a.players[i] = createNetworkplayer(i);
+    for(int i = 0; i < MAX_PLAYERS; i++) a.players[i] = createNetworkplayer(-1);
     // sizeof(*a);
     return a;
 }
