@@ -2,7 +2,6 @@
 #include "player.h"
 #include "world.h"
 #include <math.h>
-#include <stdbool.h>
 
 #define PUBLIC
 #define SPEED 2
@@ -20,13 +19,12 @@ struct Player_type {
     int isMoving;
     double direction;
     bool active;
+    bool alive;
     int id;
     int newX;
     int newY;
     double xSpeed, ySpeed;
 };
-
-//int SDL_RenderDrawRect(SDL_Renderer* renderer, SDL_Rect NULL);
 
 PUBLIC Player createPlayer(int x, int y, int id)
 {
@@ -47,6 +45,7 @@ PUBLIC Player createPlayer(int x, int y, int id)
     a->newX = x;
     a->newY = y;
     a->active = false;
+    a->alive = false;
     a->id = id;
     a->xSpeed = a->ySpeed = 0;
     return a;
@@ -60,16 +59,16 @@ PUBLIC int getPlayerFrame(Player p)
 PUBLIC void movePlayer(Player p, int up, int down, int right, int left, int mouseX, int mouseY)
 {
     int newX = 0, newY = 0, diagonal, oldX = p->posX, oldY = p->posY;
-    p->isMoving=0;
+    p->isMoving = 0;
 
-    if (up && !down) {newY--;p->isMoving=1;}
-    if (down && !up) {newY++;p->isMoving=1;}
-    if (left && !right) {newX--;p->isMoving=1;}
-    if (right && !left) {newX++;p->isMoving=1;}
-    diagonal = (newX!=0 && newY!=0);
+    if (up && !down) { newY--; p->isMoving = 1; }
+    if (down && !up) { newY++; p->isMoving = 1; }
+    if (left && !right) { newX--; p->isMoving = 1; }
+    if (right && !left) { newX++; p->isMoving = 1; }
+    diagonal = (newX != 0 && newY != 0);
     // Set player absolute pos
-    p->posX += p->diaSpeed*diagonal*newX + p->speed*!diagonal*newX;
-    p->posY += p->diaSpeed*diagonal*newY + p->speed*!diagonal*newY;
+    p->posX += p->diaSpeed * diagonal * newX + p->speed * !diagonal * newX;
+    p->posY += p->diaSpeed * diagonal * newY + p->speed * !diagonal * newY;
 
     // Set new pixel pos of player
     p->pDimensions.x = round(p->posX);
@@ -148,18 +147,6 @@ PUBLIC int getPlayerY(Player p)
     return p->pDimensions.y;
 }
 
-/*PUBLIC void shoot(Player p, Bullet bullets[])
-{
-    for (int i = 0; i < MAX_BULLETS; i++)
-    {
-        if (!isBulletActive(bullets[i]))
-        {
-            spawnBullet(p, bullets[i]);
-            return;
-        }
-    }
-}*/
-
 PUBLIC void activatePlayer(Player p)
 {
     p->active = true;
@@ -178,53 +165,19 @@ PUBLIC void updatePlayerPosition(Player p, int x, int y, int direction)
     p->direction = direction;
 }
 
-// PUBLIC void moveOtherPlayers(Player p)
-// {
-//     float x_vel;
-//     float y_vel;
-//     float delta_x = p->newX - p->pDimensions.x;
-//     float delta_y = p->newY - p->pDimensions.y;
-//     float distance = sqrt(delta_x * delta_x + delta_y * delta_y);
-//     x_vel = delta_x * SPEED / distance;
-//     y_vel = delta_y * SPEED / distance;
-
-
-//     // p->posX += x_vel;
-//     // p->posY += y_vel;
-
-//     // p->pDimensions.x += round(p->posX);
-//     // p->pDimensions.y += round(p->posY);
-
-//     if (distance < 1)
-//     {
-//         x_vel = y_vel = 0;
-//     }
-//     else
-//     {
-//         p->pDimensions.x += x_vel;
-//         p->pDimensions.y += y_vel;
-//     }
-
-
-//     // printf("%.2f %.2f %.2f %.2f\n", p->posX, p->posY, p->speed, p->diaSpeed);
-//     // Set new pixel pos of player
-   
-    
-// }
-
 PUBLIC void moveOtherPlayers(Player p)
 {
     int xDelta = p->newX - p->pDimensions.x;
     int yDelta = p->newY - p->pDimensions.y;
-    double distance = sqrt(xDelta*xDelta + yDelta*yDelta);
-    double scaling = p->speed/(distance*(distance >= 1)+(distance < 1));
+    double distance = sqrt(xDelta * xDelta + yDelta * yDelta);
+    double scaling = p->speed / (distance * (distance >= 1) + (distance < 1));
     // if(xDelta > 1 || xDelta < -1 || yDelta > 1 || yDelta < -1)
-    if(distance > 1)
+    if (distance > 1)
     {
         // if(distance >= 0) scaling = p->speed/distance
         // scaling = p->speed/(distance*(distance >= 1)+(distance < 1));
-        p->xSpeed = scaling*xDelta;
-        p->ySpeed = scaling*yDelta;
+        p->xSpeed = scaling * xDelta;
+        p->ySpeed = scaling * yDelta;
 
         p->posX += p->xSpeed;
         p->posY += p->ySpeed;
@@ -250,4 +203,20 @@ PUBLIC void snapPlayer(Player p, int x, int y)
     p->newY = y;
     p->posX = x;
     p->posY = y;
+}
+
+PUBLIC void damagePlayer(Player p, int damage)
+{
+    p->health -= damage;
+    if (p->health <= 0) p->alive = false;
+}
+
+PUBLIC bool isPlayerAlive(Player p)
+{
+    return p->alive;
+}
+
+PUBLIC void setPlayerAlive(Player p, bool value)
+{
+    p->alive = value;
 }

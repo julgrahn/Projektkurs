@@ -8,6 +8,13 @@
 #include "server.h"
 
 #define TICKRATE 2 // Number of frames per network-packet
+typedef struct UDPReceiveStruct_type* UDPReceiveStruct;
+struct UDPReceiveStruct_type {
+    UDPpacket* p2;
+    Player *players;
+    Bullet *bullets;
+    UDPsocket sd;
+};
 
 bool initSDL(SDL_Renderer** renderer);
 void handleEvents(SDL_Event* event, int* up, int* down, int* right, int* left, bool* isPlaying, int* mouseX, int* mouseY, bool* shooting);
@@ -19,8 +26,9 @@ void initGameObjects(Player players[], Bullet bullets[]);
 static void TestThread(void* server);
 void startPrompt(int* playerID, Server* server, bool* host);
 void fire(Bullet bullets[], Player* p, int playerID, int xTarget, int yTarget);
-void playerBulletCollisionCheck(Bullet bullets[], Player players[]);
+void playerBulletCollisionCheck(Bullet bullets[], Player players[], int *playerID);
 void sendReceivePackets(int sendDelay, int* playerID, int* oldPlayerX, int* oldPlayerY, Player players[], UDPsocket* sd, IPaddress* srvadd, UDPpacket** p, UDPpacket** p2, bool *shooting, Bullet bullets[], int *mouseX, int *mouseY);
+static void UDPReceive(void* args);
 
 int main(int argc, char* args[])
 {
@@ -54,7 +62,7 @@ int main(int argc, char* args[])
     if (!initSDL(&renderer)) return 1;
     initGameObjects(players, bullets);
     startPrompt(&playerID, &server, &host);
-    initClient(&sd, &srvadd, &p, &p2, LOCAL_IP, &tcpsock, &localPort);
+    initClient(&sd, &srvadd, &p, &p2, ANDREAS_IP, &tcpsock, &localPort);
     loadMedia(renderer, gridTiles, &tiles, playerRect, &playerText, &cursor, &bulletTexture);
 
     // TCP för programstart. Man kan inte lämna loopen förrän man har anslutit till servern
@@ -69,8 +77,9 @@ int main(int argc, char* args[])
             sscanf((char*)msg, "%d %d %d %d %d %d %d %d %d %d %d\n", &playerID, &p0x, &p0y, &p1x, &p1y, &p2x, &p2y, &p3x, &p3y, &p4x, &p4y);
             if (playerID == -1)
             {
-                return 0; // Stäng av programmet om servern är full
+                return; // Stäng av programmet om servern är full
             }
+            setPlayerAlive(players[playerID], true);
             snapPlayer(players[0], p0x, p0y);
             snapPlayer(players[1], p1x, p1y);
             snapPlayer(players[2], p2x, p2y);
@@ -85,30 +94,41 @@ int main(int argc, char* args[])
             connected = true;
         }      
     }
-    
+
+    UDPReceiveStruct urs = malloc(sizeof(struct UDPReceiveStruct_type));
+    urs->sd = sd;
+    urs->p2 = p2;
+    urs->bullets = bullets;
+    urs->players = players;
+
+    SDL_Thread* UDPReceiveThread;
+    UDPReceiveThread = SDL_CreateThread(UDPReceive, "UDPReceive", urs);
 
     // Main loop
     while (isPlaying)
     {
         test = fpsTimerStart = SDL_GetTicks();
+
         handleEvents(&event, &up, &down, &right, &left, &isPlaying, &mouseX, &mouseY, &shooting);
 
-        movePlayer(players[playerID], up, down, right, left, mouseX, mouseY);
+        if (isPlayerAlive(players[playerID]))
+        {            
+            movePlayer(players[playerID], up, down, right, left, mouseX, mouseY);
+            if (shooting) fire(bullets, &players[playerID], playerID, mouseX, mouseY);
+        }
 
         //Flytta på alla andra spelare
         for (int i = 0; i < MAX_PLAYERS; i++)
         {
             if (i != playerID) moveOtherPlayers(players[i]);
-        }
+        }           
 
-        if (shooting) fire(bullets, &players[playerID], playerID, mouseX, mouseY);     
-
-        playerBulletCollisionCheck(bullets, players);
+        playerBulletCollisionCheck(bullets, players, &playerID);
 
         renderGame(renderer, tiles, gridTiles, bullets, bulletTexture, players, playerText, playerRect, &playerRotationPoint);
 
         sendReceivePackets(TICKRATE, &playerID, &oldPlayerX, &oldPlayerY, players, &sd, &srvadd, &p, &p2, &shooting, bullets, &mouseX, &mouseY);
-        shooting = false;
+
         frameTicks = SDL_GetTicks() - fpsTimerStart;
         if (frameTicks < (1000 / 60))
         {
@@ -140,6 +160,7 @@ void loadMedia(SDL_Renderer* renderer, SDL_Rect gTiles[], SDL_Texture** tiles, S
         }
 
     }
+
     SDL_Surface* playerSurface = IMG_Load("resources/playerRifle.png");
     *pTexture = SDL_CreateTextureFromSurface(renderer, playerSurface);
     SDL_FreeSurface(playerSurface);
@@ -150,6 +171,7 @@ void loadMedia(SDL_Renderer* renderer, SDL_Rect gTiles[], SDL_Texture** tiles, S
         playerRect[n].h = 64;
         playerRect[n].w = 64;
     }
+
     SDL_Surface* cursorSurface = IMG_Load("resources/crosshair161.png");
     *cursor = SDL_CreateColorCursor(cursorSurface, 36, 36);
     SDL_FreeSurface(cursorSurface);
@@ -191,7 +213,10 @@ void renderGame(SDL_Renderer* renderer, SDL_Texture* mTiles, SDL_Rect gTiles[], 
     // Render Players
     for (int i = 0; i < MAX_PLAYERS; i++)
     {
-        SDL_RenderCopyEx(renderer, playerText, &playerRect[getPlayerFrame(players[i])], getPlayerRect(players[i]), getPlayerDirection(players[i]), playerRotationPoint, SDL_FLIP_NONE);
+        if (isPlayerAlive(players[i]))
+        {
+            SDL_RenderCopyEx(renderer, playerText, &playerRect[getPlayerFrame(players[i])], getPlayerRect(players[i]), getPlayerDirection(players[i]), playerRotationPoint, SDL_FLIP_NONE);
+        }    
     }
     SDL_RenderPresent(renderer);
 }
@@ -297,8 +322,16 @@ void handleEvents(SDL_Event* event, int* up, int* down, int* right, int* left, b
                 break;
             }
             break;
+        case SDL_MOUSEBUTTONUP:
 
-        break;
+            switch (event->button.button)
+            {
+            case SDL_BUTTON_LEFT:
+                *shooting = false;
+            default:
+                break;
+            }
+            break;
 
         }
 
@@ -329,6 +362,11 @@ void initClient(UDPsocket* sd, IPaddress* srvadd, UDPpacket** p, UDPpacket** p2,
 
     *tcpsock = SDLNet_TCP_Open(srvadd);
 
+    if (!*tcpsock)
+    {
+        fprintf(stderr, "SDLNet_TCP_Open: %s\n", SDLNet_GetError());
+        exit(EXIT_FAILURE);
+    }
     if (!((*p = SDLNet_AllocPacket(512)) && (*p2 = SDLNet_AllocPacket(512))))
     {
         fprintf(stderr, "SDLNet_AllocPacket: %s\n", SDLNet_GetError());
@@ -345,8 +383,8 @@ void initGameObjects(Player players[], Bullet bullets[])
         bullets[i] = createBullet();
     }
     for (int i = 0; i < MAX_PLAYERS; i++)
-    {
-        players[i] = createPlayer(200, 200, i);
+    {      
+        players[i] = createPlayer(100, 100, i);
     }
 }
 
@@ -383,7 +421,7 @@ void fire(Bullet bullets[], Player* p, int playerID, int xTarget, int yTarget)
     }
 }
 
-void playerBulletCollisionCheck(Bullet bullets[], Player players[])
+void playerBulletCollisionCheck(Bullet bullets[], Player players[], int *playerID)
 {
     for (int i = 0; i < MAX_BULLETS; i++)
     {
@@ -393,13 +431,16 @@ void playerBulletCollisionCheck(Bullet bullets[], Player players[])
             for (int j = 0; j < MAX_PLAYERS; j++)
             {
                 if (rectCollisionTest(getBulletRect(bullets[i]), getPlayerRect(players[j]))
-                    && (getBulletOwner(bullets[i]) != j))
+                    && (getBulletOwner(bullets[i]) != j) && isPlayerAlive(players[j]))
                 {
                     freeBullet(bullets[i]);
+                    if (j == *playerID)
+                    {
+                        damagePlayer(players[j], getBulletDamage(bullets[j]));
+                    }
                 }
             }
         }
-        
     }
 }
 
@@ -409,12 +450,12 @@ void sendReceivePackets(int sendDelay, int* playerID, int* oldPlayerX, int* oldP
     // Send
     static int send = 0;
     if (sendDelay) send = (send + 1) % sendDelay;
-    if (!send) // Skickar paket 30/sek
+    if (1) // Skickar paket 30/sek
     {
         // if (getPlayerX(players[*playerID]) != *oldPlayerX || getPlayerY(players[*playerID]) != *oldPlayerY)
         if (1)
         {
-            sprintf((char*)(*p)->data, "%d %d %d %d %d %d %d\n", getPlayerX(players[*playerID]), getPlayerY(players[*playerID]), getPlayerID(players[*playerID]), (int)getPlayerDirection(players[*playerID]), *shooting, *mouseX, *mouseY);
+            sprintf((char*)(*p)->data, "%d %d %d %d %d %d %d %d\n", getPlayerX(players[*playerID]), getPlayerY(players[*playerID]), getPlayerID(players[*playerID]), (int)getPlayerDirection(players[*playerID]), *shooting, *mouseX, *mouseY, isPlayerAlive(players[*playerID]));
             (*p)->address.host = srvadd->host;
             (*p)->address.port = srvadd->port;
             (*p)->len = strlen((char*)(*p)->data) + 1;
@@ -425,12 +466,34 @@ void sendReceivePackets(int sendDelay, int* playerID, int* oldPlayerX, int* oldP
     }
 
     // Receive
-    if (SDLNet_UDP_Recv(*sd, *p2))
+    /*if (SDLNet_UDP_Recv(*sd, *p2))
     {     
         int a, b, c, d, e, f, g;
         sscanf((char*)(*p2)->data, "%d %d %d %d %d %d %d\n", &a, &b, &c, &d, &e, &f, &g);
         if(c != -1) updatePlayerPosition(players[c], a, b, d);
         if (e == 1) fire(bullets, &players[c], c, f, g);
         
-    }   
+    }   */
+}
+
+static void UDPReceive(void* args)
+{
+    UDPReceiveStruct urs = (UDPReceiveStruct)args;
+
+    while (true)
+    {
+        SDL_Delay(1);
+        if (SDLNet_UDP_Recv(urs->sd, urs->p2))
+        {
+            int a, b, c, d, e, f, g, h;
+            sscanf((char*)(urs->p2)->data, "%d %d %d %d %d %d %d %d\n", &a, &b, &c, &d, &e, &f, &g, &h);
+            if (c != -1)
+            {
+                updatePlayerPosition(urs->players[c], a, b, d);
+                setPlayerAlive(urs->players[c], h);
+            }
+            if (e == 1) fire(urs->bullets, &urs->players[c], c, f, g);
+        }
+    }
+    
 }
