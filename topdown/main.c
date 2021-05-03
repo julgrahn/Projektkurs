@@ -70,7 +70,7 @@ int main(int argc, char* args[])
     if (!initSDL(&renderer)) return 1;
     initGameObjects(players, bullets);
     startPrompt(&playerID, &server, &host);
-    initClient(&sd, &srvadd, &p, &p2, ALEX_IP, &tcpsock, &localPort);
+    initClient(&sd, &srvadd, &p, &p2, ANDREAS_IP, &tcpsock, &localPort);
     loadMedia(renderer, gridTiles, &tiles, playerRect, &playerText, &cursor, &bulletTexture);
 
     // TCP för programstart. Man kan inte lämna loopen förrän man har anslutit till servern
@@ -405,11 +405,11 @@ void initGameObjects(Player players[], Bullet bullets[])
 
 void startPrompt(int* playerID, Server* server, bool* host)
 {
-    
 
-    bool check = false; 
-
-    while (!check)
+    printf("Host(h) or client(c): ");
+    char input;
+    scanf(" %c", &input);
+    if (input == 'h')
     {
         *server = createServer();
         printf("hosted!\n");
@@ -417,7 +417,6 @@ void startPrompt(int* playerID, Server* server, bool* host)
         SDL_Thread* serverThread;
         serverThread = SDL_CreateThread(TestThread, "TestThread", server);
     }
-    
 }
 
 static void TestThread(void* server)
