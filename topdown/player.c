@@ -134,11 +134,6 @@ PUBLIC double getPlayerDirection(Player p)
     return p->direction;
 }
 
-PUBLIC void playerHealth(Player p, int health)
-{
-
-}
-
 PUBLIC SDL_Rect* getPlayerRect(Player p)
 {
     return &p->pDimensions;
