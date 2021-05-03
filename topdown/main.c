@@ -369,9 +369,9 @@ void initClient(UDPsocket* sd, IPaddress* srvadd, UDPpacket** p, UDPpacket** p2,
     }
 
     // Resolve server name  
-    if (SDLNet_ResolveHost(srvadd, ip, 2000) == -1)
+    if (SDLNet_ResolveHost(srvadd, ip, PORT) == -1)
     {
-        fprintf(stderr, "SDLNet_ResolveHost(192.0.0.1 2000): %s\n", SDLNet_GetError());
+        fprintf(stderr, "SDLNet_ResolveHost(192.0.0.1 PORT): %s\n", SDLNet_GetError());
         exit(EXIT_FAILURE);
     }
 

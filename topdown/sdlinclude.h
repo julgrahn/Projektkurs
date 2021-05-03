@@ -18,6 +18,7 @@
 #define ALEX_IP "178.78.213.173"
 #define JOHAN_IP "188.149.151.240"
 #define LOCAL_IP "127.0.0.1"
+#define PORT "2000"
 #define MAX_PLAYERS 5
 
 #endif
