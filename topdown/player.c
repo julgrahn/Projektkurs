@@ -122,10 +122,10 @@ PUBLIC void movePlayer(Player p, int up, int down, int right, int left, int mous
 
 
     // Collision detection with window
-    if (p->pDimensions.y <= 0) p->pDimensions.y = p->posY = 0;
-    if (p->pDimensions.y >= WINDOWHEIGHT - p->pDimensions.h) p->pDimensions.y = p->posY = WINDOWHEIGHT - p->pDimensions.h;
-    if (p->pDimensions.x <= 0) p->pDimensions.x = p->posX = 0;
-    if (p->pDimensions.x >= WINDOWWIDTH - p->pDimensions.w) p->pDimensions.x = p->posX = WINDOWWIDTH - p->pDimensions.w;
+    if (p->pDimensions.y <= -1) p->pDimensions.y = p->posY = -1;
+    if (p->pDimensions.y >= WINDOWHEIGHT - p->pDimensions.h +1) p->pDimensions.y = p->posY = WINDOWHEIGHT - p->pDimensions.h+1;
+    if (p->pDimensions.x <= -1) p->pDimensions.x = p->posX = -1;
+    if (p->pDimensions.x >= WINDOWWIDTH - p->pDimensions.w +1) p->pDimensions.x = p->posX = WINDOWWIDTH - p->pDimensions.w+1;
 
 }
 

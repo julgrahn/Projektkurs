@@ -70,7 +70,7 @@ int main(int argc, char* args[])
     if (!initSDL(&renderer)) return 1;
     initGameObjects(players, bullets);
     startPrompt(&playerID, &server, &host);
-    initClient(&sd, &srvadd, &p, &p2, ALEX_IP, &tcpsock, &localPort);
+    initClient(&sd, &srvadd, &p, &p2, LOCAL_IP, &tcpsock, &localPort);
     loadMedia(renderer, gridTiles, &tiles, playerRect, &playerText, &cursor, &bulletTexture);
 
     // TCP för programstart. Man kan inte lämna loopen förrän man har anslutit till servern
