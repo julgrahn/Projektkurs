@@ -2,16 +2,15 @@
 #ifndef world_h
 #define world_h
 #include <stdio.h>
-
-typedef struct CreateWall* Wall;
-
-Wall CreateWall(int w, int h, int wPX, int wPY);
+#include <stdbool.h>
 
 int getTileRows();
 int getTileColumns();
 int getTileWidth();
 int getTileHeight();
 int getTileGrid(int x, int y);
-int getWallPos(Wall wall);
+int getWallCollisionPlayer(int x, int y);
+bool getWallCollisionBullet(int x, int y, int h, int w);
+void countWallHits(int i, int j);
 
 #endif /* world_h */
