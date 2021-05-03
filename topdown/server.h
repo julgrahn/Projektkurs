@@ -5,7 +5,7 @@
 
 typedef struct Server_type* Server;
 
-Server createServer(Server server);
+Server createServer();
 void startServer(Server server);
 static void UDPReceive(void* serverPtr);
 static void UDPSend(void* serverPtr);

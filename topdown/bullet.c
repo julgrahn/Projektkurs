@@ -89,6 +89,15 @@ int getBulletOwner(Bullet b)
 	return b->owner;
 }
 
+PUBLIC int getBulletX(Bullet a)
+{
+	return a->xPos;
+}
+
+PUBLIC int getBulletY(Bullet a)
+{
+	return a->yPos;
+}
 int getBulletDamage(Bullet b)
 {
 	return b->damage;
