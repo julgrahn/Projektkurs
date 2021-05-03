@@ -1,9 +1,10 @@
 #include <stdlib.h>
 #include "sdlinclude.h"
 #include "bullet.h"
+#include "world.h"
 #include <stdbool.h>
 #include <math.h>
-
+#define BULLET_DAMAGE 10
 #define BULLET_SPEED 10
 #define PUBLIC
 
@@ -17,6 +18,7 @@ struct Bullet_type {
 	double ySpeed;
 	int owner;
 	double direction;
+	int damage;
 };
 
 PUBLIC Bullet createBullet()
@@ -26,7 +28,8 @@ PUBLIC Bullet createBullet()
 	b->dimensions.w = 4;
 	b->dimensions.h = 4;
 	b->speed = BULLET_SPEED;
-  
+	b->damage = BULLET_DAMAGE;
+
 	return b;
 }
 
@@ -35,26 +38,11 @@ PUBLIC void spawnBullet(Bullet a, int xOrigin, int yOrigin, int xTarget, int yTa
 	a->active = 1;
 	a->xPos = xOrigin + 20;
 	a->yPos = yOrigin + 32;
-	a->direction = atan2(yTarget - (a->yPos+(a->dimensions.h/2)), xTarget - (a->xPos+(a->dimensions.w/2)));
+	a->direction = atan2(yTarget - (a->yPos + (a->dimensions.h / 2)), xTarget - (a->xPos + (a->dimensions.w / 2)));
 	a->xSpeed = a->speed * cos(a->direction);
 	a->ySpeed = a->speed * sin(a->direction);
 	a->owner = owner;
 }
-
-// PUBLIC void spawnBullet(Bullet bullet, int x, int y, double direction)
-// {
-// 	bullet->active = 1;
-// 	bullet->xPos = x + 20;
-// 	bullet->yPos = y + 32;	
-// 	bullet->direction = direction * M_PI / 180;
-
-// 	//printf("xSpeed: %d\n", bullet->xSpeed);
-// 	//printf("ySpeed: %d\n", bullet->ySpeed);
-
-// 	bullet->xSpeed = bullet->speed * cos(bullet->direction);
-// 	bullet->ySpeed = bullet->speed * sin(bullet->direction);
-
-// }
 
 PUBLIC bool isBulletActive(Bullet bullet)
 {
@@ -65,6 +53,11 @@ PUBLIC void moveBullet(Bullet bullet)
 {
 	bullet->xPos += bullet->xSpeed;
 	bullet->yPos += bullet->ySpeed;
+
+	if (getWallCollisionBullet(bullet->xPos, bullet->yPos, bullet->dimensions.h, bullet->dimensions.w))
+	{
+		freeBullet(bullet);
+	}
 
 	bullet->dimensions.x = round(bullet->xPos);
 	bullet->dimensions.y = round(bullet->yPos);
@@ -90,7 +83,22 @@ PUBLIC double getBulletDirection(Bullet a)
 {
 	return a->direction;
 }
-PUBLIC int getBulletOwner(Bullet b)
+
+int getBulletOwner(Bullet b)
 {
 	return b->owner;
+}
+
+PUBLIC int getBulletX(Bullet a)
+{
+	return a->xPos;
+}
+
+PUBLIC int getBulletY(Bullet a)
+{
+	return a->yPos;
+}
+int getBulletDamage(Bullet b)
+{
+	return b->damage;
 }

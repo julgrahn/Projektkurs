@@ -5,10 +5,10 @@ theGame: main.o player.o world.o bullet.o net.o server.o
 	gcc -o theGame main.o player.o world.o bullet.o net.o server.o -lSDL2 -lSDL2_image -lSDL2_net
 	
 main.o: main.c
-	gcc -c main.c
+	gcc -c main.c -g
 
 player.o: player.c
-	gcc -c player.c
+	gcc -c player.c -g
 
 world.o: world.c
 	gcc -c world.c
