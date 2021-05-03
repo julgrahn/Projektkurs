@@ -1,4 +1,6 @@
-﻿#include <stdio.h>
+﻿#pragma warning(disable : 4996)
+
+#include <stdio.h>
 #include "sdlinclude.h"
 #include <stdbool.h>
 #include <stdlib.h>
@@ -54,7 +56,7 @@ int main(int argc, char* args[])
     if (!initSDL(&renderer)) return 1;
     initGameObjects(players, bullets);
     startPrompt(&playerID, &server, &host);
-    initClient(&sd, &srvadd, &p, &p2, ANDREAS_IP, &tcpsock, &localPort);
+    initClient(&sd, &srvadd, &p, &p2, LOCAL_IP, &tcpsock, &localPort);
     loadMedia(renderer, gridTiles, &tiles, playerRect, &playerText, &cursor, &bulletTexture);
 
     // TCP för programstart. Man kan inte lämna loopen förrän man har anslutit till servern
@@ -119,7 +121,6 @@ int main(int argc, char* args[])
     }
 
     SDL_DestroyRenderer(renderer);
-    //SDL_DestroyWindow(window); // beh�vs denna?
     SDL_Quit();
     return 0;
 }
@@ -329,7 +330,17 @@ void initClient(UDPsocket* sd, IPaddress* srvadd, UDPpacket** p, UDPpacket** p2,
         exit(EXIT_FAILURE);
     }
 
+    //SDL_Delay(4000);
     *tcpsock = SDLNet_TCP_Open(srvadd);
+
+    if (!*tcpsock)
+    {
+        fprintf(stderr, "SDLNet_TCP_Open: %s\n", SDLNet_GetError());
+        exit(EXIT_FAILURE);
+    }
+
+
+    
 
     if (!((*p = SDLNet_AllocPacket(512)) && (*p2 = SDLNet_AllocPacket(512))))
     {

@@ -37,8 +37,7 @@ PUBLIC Player createPlayer(int x, int y, int id)
     a->isMoving = 0;
     a->frameCounter = 0;
     a->direction = 0;
-    a->posX = x;
-    a->posY = y;
+    a->posX = x, a->posY = y;
     a->pDimensions.x = x;
     a->pDimensions.y = y;
     a->pDimensions.w = 64;
@@ -141,40 +140,6 @@ PUBLIC void updatePlayerPosition(Player p, int x, int y, int direction)
     p->newY = y;
     p->direction = direction;
 }
-
-// PUBLIC void moveOtherPlayers(Player p)
-// {
-//     float x_vel;
-//     float y_vel;
-//     float delta_x = p->newX - p->pDimensions.x;
-//     float delta_y = p->newY - p->pDimensions.y;
-//     float distance = sqrt(delta_x * delta_x + delta_y * delta_y);
-//     x_vel = delta_x * SPEED / distance;
-//     y_vel = delta_y * SPEED / distance;
-
-
-//     // p->posX += x_vel;
-//     // p->posY += y_vel;
-
-//     // p->pDimensions.x += round(p->posX);
-//     // p->pDimensions.y += round(p->posY);
-
-//     if (distance < 1)
-//     {
-//         x_vel = y_vel = 0;
-//     }
-//     else
-//     {
-//         p->pDimensions.x += x_vel;
-//         p->pDimensions.y += y_vel;
-//     }
-
-
-//     // printf("%.2f %.2f %.2f %.2f\n", p->posX, p->posY, p->speed, p->diaSpeed);
-//     // Set new pixel pos of player
-   
-    
-// }
 
 PUBLIC void moveOtherPlayers(Player p)
 {
