@@ -390,18 +390,35 @@ void initGameObjects(Player players[], Bullet bullets[])
 
 void startPrompt(int* playerID, Server* server, bool* host)
 {
+    //int readInteger = scanf("%d", &oneMeasurement);
+    //if (readInteger)
 
-    printf("Host(h) or client(c): ");
-    char input;
-    scanf(" %c", &input);
-    if (input == 'h')
+    bool check = false; 
+
+    while (!check)
     {
-        *server = createServer(server);
-        printf("hosted!\n");
-        *host = true;
-        SDL_Thread* serverThread;
-        serverThread = SDL_CreateThread(TestThread, "TestThread", server);
+        int readInput;
+        char input;
+        printf("Host(h) or client(c): ");
+        scanf(" %c", &input);
+        readInput = input;
+
+        if (readInput == 'c' || readInput == 'h')
+        {
+            *server = createServer(server);
+            printf("hosted!\n");
+            *host = true;
+            SDL_Thread* serverThread;
+            serverThread = SDL_CreateThread(TestThread, "TestThread", server);
+            check = true;
+        }
+        else
+        {
+            printf("Wrong input\n");
+            check = false;
+        }
     }
+    
 }
 
 static void TestThread(void* server)
