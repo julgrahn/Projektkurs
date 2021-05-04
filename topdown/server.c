@@ -9,6 +9,8 @@
 #define PUBLIC /* empty */
 #define PRIVATE static
 #define SERVER_REFRESH_RATE 30  // 30 = 10/s    10 = 30/s
+PRIVATE void playerBulletCollisionCheck(Bullet bullets[], Player players[]);
+
 
 struct Server_type {
     UDPsocket sd;       /* Socket descriptor */
@@ -19,19 +21,23 @@ struct Server_type {
     IPaddress serverIP;
     IPaddress clients[MAX_PLAYERS];
     int noOfPlayers;
-    int send;
     Networkgamestate state;
     SDL_Thread* UDPreceiveThread;
     SDL_Thread* UDPsendThread;
+    Player aPlayers[MAX_PLAYERS];
+    Bullet aBullet[MAX_BULLETS];
+    SDL_Point spawnPoint[MAX_PLAYERS];
 };
 
 PUBLIC Server createServer()
 {
-
     Server server = malloc(sizeof(struct Server_type));
-    server->send=0;
     server->state = createNetworkgamestate();
-
+    setGamastateplayerpos(&server->state, 0, 1, 1);
+    setGamastateplayerpos(&server->state, 1, WINDOWWIDTH - 1, 1);
+    setGamastateplayerpos(&server->state, 2, 1, WINDOWHEIGHT - 1);
+    setGamastateplayerpos(&server->state, 3, WINDOWWIDTH - 1, WINDOWHEIGHT - 1);
+    setGamastateplayerpos(&server->state, 4, 500, 500);
     for (int i = 0; i < MAX_PLAYERS + 1; i++)
     {
         server->tcpsockClient[i] = NULL;
@@ -41,20 +47,31 @@ PUBLIC Server createServer()
     {
         server->clients[i].host = 0;
         server->clients[i].port = 0;
+        server->aPlayers[i] = createPlayer(getNetworkgamestateplayerX(&server->state, i), getNetworkgamestateplayerY(&server->state, i), i);
     }
+    for (int i = 0; i < MAX_BULLETS; i++)
+    {
+        server->aBullet[i] = createBullet();
+    }
+    
     server->noOfPlayers = 0;
 
     // Hårdkodade startpositioner för spelare
-    server->state.players[0].posX = 1;
-    server->state.players[0].posY = 1;
-    server->state.players[1].posX = WINDOWWIDTH -1;
-    server->state.players[1].posY = 1;
-    server->state.players[2].posX = 1;
-    server->state.players[2].posY = WINDOWHEIGHT -1;
-    server->state.players[3].posX = WINDOWWIDTH - 1;
-    server->state.players[3].posX = WINDOWHEIGHT - 1;
-    server->state.players[4].posX = 500;
-    server->state.players[4].posX = 500;
+    server->spawnPoint[0].x = 1;
+    server->spawnPoint[0].y = 1;
+    server->spawnPoint[1].x = WINDOWWIDTH - 1;
+    server->spawnPoint[1].y = 1;
+    server->spawnPoint[2].x = 1;
+    server->spawnPoint[2].y = WINDOWHEIGHT - 1;
+    server->spawnPoint[3].x = WINDOWWIDTH - 1;
+    server->spawnPoint[3].y = WINDOWHEIGHT - 1;
+    server->spawnPoint[4].x = 500;
+    server->spawnPoint[4].y = 500;
+    for (int i = 0; i < MAX_PLAYERS; i++)
+    {
+        setGamastateplayerpos(&server->state, i, server->spawnPoint[i].x, server->spawnPoint[i].y);
+        snapPlayer(server->aPlayers[i],server->spawnPoint[i].x, server->spawnPoint[i].y);
+    }
 
     //Initialize SDL_net 
     if (SDLNet_Init() < 0)
@@ -91,18 +108,50 @@ PUBLIC Server createServer()
 
 PUBLIC void startServer(Server server)
 {
-    //server->UDPreceiveThread = SDL_CreateThread(UDPReceive, "UDPReceive", server);
-    //server->UDPsendThread = SDL_CreateThread(UDPSend, "UDPSend", server);
-    static int TCPdelay = 0;
-    static int UDPsendDelay = 0;
-    static int UDPreceiveDelay = 0;
+    int TCPdelay = 0;
+    int UDPsendDelay = 0;
+    int UDPreceiveDelay = 0;
+    int Gamelogicdelay = 0;
+    int RespawnTimer = 0;
+    int delay[MAX_PLAYERS] = {0}; 
     // Main-loop
     while (true)
     {
         SDL_Delay(1); 
         TCPdelay = (TCPdelay + 1) % 1000;
         UDPreceiveDelay = (UDPreceiveDelay + 1) % 1;
-        UDPsendDelay = (UDPsendDelay + 1) % 100;
+        UDPsendDelay = (UDPsendDelay + 1) % 10;
+        Gamelogicdelay = (Gamelogicdelay + 1) % 16;
+        RespawnTimer = (RespawnTimer + 1) % 3000;
+
+        if(!Gamelogicdelay)
+        {
+            for (int i = 0; i < MAX_PLAYERS; i++)
+            {
+                if(isPlayershooting(server->aPlayers[i]))
+                {
+                    fire(server->aBullet, &server->aPlayers[i], i, getPlayerxtarget(server->aPlayers[i]), getPlayerytarget(server->aPlayers[i]));
+                }
+            }
+            playerBulletCollisionCheck(server->aBullet, server->aPlayers);
+            for (int i = 0; i < MAX_PLAYERS; i++)
+            {
+                if(!isPlayerAlive(server->aPlayers[i]) && server->tcpsockClient[i] != NULL)
+                {
+                    delay[i]++;
+                    snapPlayer(server->aPlayers[i], server->spawnPoint[i].x, server->spawnPoint[i].y);
+                    if(delay[i] == 180)
+                    {
+                        setPlayerAlive(server->aPlayers[i], true);
+                        delay[i]=0;
+                    }
+                }
+            }
+            for (int i = 0; i < MAX_PLAYERS; i++)
+            {
+                setNetworkgamestateplayer(&server->state, i, server->aPlayers[i]);
+            }
+        }
         
 
         // TCP
@@ -133,18 +182,23 @@ PUBLIC void startServer(Server server)
                             char msg[1024];
                             int len;
                             int newPlayerID;
-                            for (int i = 0; i < MAX_PLAYERS; i++) // Kollar vilken spelarID som är ledig
-                            {
-                                if (server->state.players[i].id == -1)
-                                {
-                                    newPlayerID = i;
-                                    server->state.players[i].id = i;
-                                    server->state.players[i].isAlive = 1;
-                                    break;
-                                }
-                            }
+                            // for (int i = 0; i < MAX_PLAYERS; i++) // Kollar vilken spelarID som är ledig
+                            // {
+                                // if (server->state.players[i].id == -1)
+                                // if(!isNetworkplayeractive(&server->state, i))
+                                // {
+                                    newPlayerID = g;
+                                    printf("%d\n", g);
+                                    // server->state.players[i].id = i;
+                                    activateNetworkgamestateplayer(&server->state, g);
+                                    reviveNetworkgamestateplayer(&server->state, g);
+                                    setPlayerAlive(server->aPlayers[g], true);
+                                    // server->state.players[i].isAlive = 1;
+                            //         break;
+                            //     }
+                            // }
                             // Tilldela spelarID och skicka startpositionerna för alla spelare
-                            SDLNet_TCP_Send(server->tcpsockClient[g], &server->state, sizeof(server->state));
+                            SDLNet_TCP_Send(server->tcpsockClient[g], server->state, getGamestatesize());
                             SDLNet_TCP_Send(server->tcpsockClient[g], &newPlayerID, sizeof(newPlayerID));
                             server->clients[g].host = SDLNet_TCP_GetPeerAddress(server->tcpsockClient[g])->host;
                             // Klienten behöver skicka sin lokala UDP-port till servern så servern vet vilken port den ska skicka UDP-paketen till.
@@ -167,8 +221,10 @@ PUBLIC void startServer(Server server)
                         server->tcpsockClient[g] = NULL; 
                         server->clients[g].host = (int)NULL;
                         server->clients[g].port = (int)NULL;
-                        server->state.players[g].isAlive = 0;
-                        server->state.players[g].id = -1;
+                        setPlayerAlive(server->aPlayers[g], false);
+                        // killNetworkgamestateplayer(&server->state, g);
+                        freeNetworkgamestateplayer(&server->state, g);
+                        snapPlayer(server->aPlayers[g], server->spawnPoint[g].x, server->spawnPoint[g].y);
                         server->noOfPlayers--;
                     }
                 }
@@ -183,7 +239,10 @@ PUBLIC void startServer(Server server)
                 {
                     if (server->pRecive->address.port == server->clients[i].port) // Kollar vem paket kom ifrån och uppdaterar endast den spelaren
                     {
-                        memcpy(&server->state.players[i], server->pRecive->data, sizeof(server->state.players[i]));
+                        memcpy(getNetworkgamestateplayer(&server->state, i), server->pRecive->data, getNetworkplayersize());
+                        setNetworkplayeralive(&server->state, i, isPlayerAlive(server->aPlayers[i]));
+                        updateServerPlayer(&server->aPlayers[i], getNetworkgamestateplayerX(&server->state, i), getNetworkgamestateplayerY(&server->state, i), getNetworkgamestateplayerDirection(&server->state, i), isNetworkgamestateplayerAlive(&server->state, i) , isNetworkgamestateplayerShooting(&server->state, i) ,getNetworkgamestateplayerXtarget(&server->state, i),getNetworkgamestateplayerYtarget(&server->state, i));                    
+                        // memcpy(&server->state.players[i], server->pRecive->data, sizeof(server->state.players[i]));
                     }
                 }
             }
@@ -197,8 +256,8 @@ PUBLIC void startServer(Server server)
                     if (i != j && (server->tcpsockClient[j] != NULL))
                     {
                         server->pSent->address = server->clients[j];	// Set the destination host 
-                        memcpy(server->pSent->data, &server->state, sizeof(server->state));
-                        server->pSent->len = sizeof(server->state);
+                        memcpy(server->pSent->data, server->state, getGamestatesize());
+                        server->pSent->len = getGamestatesize();
                         SDLNet_UDP_Send(server->sd, -1, server->pSent);
                     }
                 }
@@ -207,50 +266,41 @@ PUBLIC void startServer(Server server)
     }
 }
 
+PUBLIC bool rectCollisionTest(SDL_Rect* a, SDL_Rect* b)
+{
+    if ((a->x) > (b->x) && (a->x) < ((b->x) + (b->w)) && (a->y) > (b->y) && (a->y) < ((b->y) + (b->h)))
+        return true;
+    return false;
+}
 
-// Trådar som inte används just nu
+PUBLIC void fire(Bullet bullets[], Player* p, int playerID, int xTarget, int yTarget)
+{
+    for (int i = 0; i < MAX_BULLETS; i++)
+    {
+        if (!isBulletActive(bullets[i]))
+        {
+            spawnBullet(bullets[i], getPlayerX(*p), getPlayerY(*p), xTarget, yTarget, playerID);
+            break;
+        }
+    }
+}
 
-// PUBLIC static void UDPReceive(void* serverPtr)
-// {
-//     Server server = (Server)serverPtr;
-//     while (true)
-//     {      
-//         SDL_Delay(1); // Hur ofta servern scannar för att ta emot paket
-//         if (SDLNet_UDP_Recv(server->sd, server->pRecive))
-//         {          
-//             for (int i = 0; i < server->noOfPlayers; i++)
-//             {
-//                 if (server->pRecive->address.port == server->clients[i].port) // KOllar vem paket kom ifrån och uppdaterar endast den spelaren
-//                 {
-//                     sscanf((char*)server->pRecive->data, "%d %d %d %d\n", &server->playerX[i], &server->playerY[i], &server->playerID[i], &server->playerRotation[i]);
-//                 }
-//             }          
-//         }        
-//     }     
-// }
-
-// PUBLIC static void UDPSend(void* serverPtr)
-// {
-//     Server server = (Server)serverPtr;
-//     while (true)
-//     {
-//         SDL_Delay(100); // Hur ofta servern skickar paket
-
-//         // Spelar i's information skickas till spelare j
-//         for (int i = 0; i < server->noOfPlayers; i++)
-//         {
-//             for (int j = 0; j < server->noOfPlayers; j++)
-//             {
-//                 if (i != j)
-//                 {
-
-//                     server->pSent->address = server->clients[j];	// Set the destination host 
-//                     sprintf((char*)server->pSent->data, "%d %d %d %d\n", server->playerX[i], server->playerY[i], server->playerID[i], (int)server->playerRotation[i]);
-//                     server->pSent->len = strlen((char*)server->pSent->data) + 1;
-//                     SDLNet_UDP_Send(server->sd, -1, server->pSent);                 
-//                 }
-//             }
-//         }
-//     }
-    
-// }
+PRIVATE void playerBulletCollisionCheck(Bullet bullets[], Player players[])
+{
+    for (int i = 0; i < MAX_BULLETS; i++)
+    {
+        if (isBulletActive(bullets[i]))
+        {
+            moveBullet(bullets[i]);
+            for (int j = 0; j < MAX_PLAYERS; j++)
+            {
+                if (rectCollisionTest(getBulletRect(bullets[i]), getPlayerRect(players[j]))
+                    && (getBulletOwner(bullets[i]) != j) && isPlayerAlive(players[j]))
+                {
+                    freeBullet(bullets[i]);
+                    damagePlayer(players[j], getBulletDamage(bullets[j]));
+                }
+            }
+        }
+    }
+}

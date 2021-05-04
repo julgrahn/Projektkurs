@@ -8,6 +8,7 @@
 #define ANIMATIONSPEED 8               //lower = faster
 #define HEALTH 100
 #define ROTATION_UPDATE_SPEED 5
+#define SNAP_DISTANCE 10
 
 struct Player_type {
     int health;
@@ -134,9 +135,9 @@ PUBLIC double getPlayerDirection(Player p)
     return p->direction;
 }
 
-PUBLIC void playerHealth(Player p, int health)
-{
-
+PUBLIC int getPlayerHealth(Player p)
+{   
+    return p->health;
 }
 
 PUBLIC SDL_Rect* getPlayerRect(Player p)
@@ -175,14 +176,31 @@ PUBLIC void updatePlayerPosition(Player *p, int x, int y, int direction, bool al
     (*p)->xTarget = xTarget, (*p)->yTarget = yTarget;
 }
 
+PUBLIC void updateServerPlayer(Player *p, int x, int y, int direction, bool alive, bool isShooting, int xTarget, int yTarget)
+{
+    // (*p)->alive = alive;
+    (*p)->pDimensions.x = x;
+    (*p)->pDimensions.y = y;
+    (*p)->newDirection = direction;
+    (*p)->direction = direction;
+    (*p)->isShooting = isShooting;
+    (*p)->xTarget = xTarget, (*p)->yTarget = yTarget;
+}
+
 PUBLIC void moveOtherPlayers(Player p)
 {
     int xDelta = p->newX - p->pDimensions.x;
     int yDelta = p->newY - p->pDimensions.y;
     double distance = sqrt(xDelta*xDelta + yDelta*yDelta);
     double scaling = p->speed/(distance*(distance >= 1)+(distance < 1));
+    if (distance >= SNAP_DISTANCE)
+    {
+        snapPlayer(p, p->newX, p->newY);
+        return;
+    }
     int old = p->direction + 180+5;
     int new = p->newDirection + 180+5;
+
     if(xDelta > 1 || xDelta < -1 || yDelta > 1 || yDelta < -1)
     {
         p->xSpeed = scaling*xDelta;
@@ -267,10 +285,10 @@ PUBLIC int getPlayerytarget(Player a)
 
 PUBLIC bool isPlayershooting(Player a)
 {
-    if(a->alive)
+    // if(a->alive)
         return a->isShooting;
-    else
-        return false;
+    // else
+    //     return false;
 }
 
 PUBLIC void setPlayerShooting(Player *a, bool isShooting, int xTarget, int yTarget)
@@ -278,3 +296,4 @@ PUBLIC void setPlayerShooting(Player *a, bool isShooting, int xTarget, int yTarg
     (*a)->isShooting = isShooting;
     (*a)->xTarget = xTarget, (*a)->yTarget = yTarget;
 }
+

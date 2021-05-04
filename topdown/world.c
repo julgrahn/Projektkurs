@@ -2,6 +2,8 @@
 #include "player.h"
 #define PUBLIC
 
+#define PUBLIC
+
 enum material { bricks = 120, wall = 186, truck = 102, wall2 = 246, wall3 = 216 };
 
 int tileGrid[22][22] = {
@@ -96,7 +98,7 @@ PUBLIC bool getWallCollisionBullet(int x, int y, int h, int w) {
 
                 if (x + w >= wallCordStartX && x <= wallCordEndX && y + h >= wallCordStartY && y <= wallCordEndY)
                 {
-                    //countWallHits(i, j);  // Ta bort kommentaren om du vill förstöra väggar
+                    // countWallHits(i, j);  // Ta bort kommentaren om du vill förstöra väggar
                     return true;
                 }
             }
