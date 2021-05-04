@@ -1,6 +1,4 @@
-﻿#pragma warning(disable : 4996)
-
-#include <stdio.h>
+﻿#include <stdio.h>
 #include "sdlinclude.h"
 #include <stdbool.h>
 #include <stdlib.h>
@@ -15,31 +13,25 @@
 typedef struct UDPReceiveStruct_type* UDPReceiveStruct;
 struct UDPReceiveStruct_type {
     UDPpacket* p2;
-    Player* players;
-    Bullet* bullets;
+    Player *players;
+    Bullet *bullets;
     UDPsocket sd;
-    Networkgamestate* state;
+    Networkgamestate *state;
+    int playerID;
 };
+SDL_mutex *mutex;
 
 bool initSDL(SDL_Renderer** renderer);
 void handleEvents(SDL_Event* event, int* up, int* down, int* right, int* left, bool* isPlaying, int* mouseX, int* mouseY, bool* shooting);
 void renderGame(SDL_Renderer* renderer, SDL_Texture* mTiles, SDL_Rect gTiles[], Bullet bullets[], SDL_Texture* bulletTexture, Player players[], SDL_Texture* playerText, SDL_Rect playerRect[], SDL_Point* playerRotationPoint);
 void loadMedia(SDL_Renderer* renderer, SDL_Rect gTiles[], SDL_Texture** tiles, SDL_Rect playerRect[], SDL_Texture** pTexture, SDL_Cursor** cursor, SDL_Texture** bulletTexture);
-bool rectCollisionTest(SDL_Rect* a, SDL_Rect* b);
+// bool rectCollisionTest(SDL_Rect* a, SDL_Rect* b);
 void initClient(UDPsocket* sd, IPaddress* srvadd, UDPpacket** p, UDPpacket** p2, char* ip, TCPsocket* tcpsock, int* localPort);
 void initGameObjects(Player players[], Bullet bullets[]);
-void sendReceivePackets(int sendDelay, Networkgamestate* state, Networkplayer player, UDPsocket* sd, IPaddress* srvadd, UDPpacket** p, UDPpacket** p2, Player players[]);
-void updateplayers(Networkgamestate networkgamestate, Player players[]);
+void sendUDP(int sendDelay, void* player, UDPsocket* sd, IPaddress* srvadd, UDPpacket** p, UDPpacket** p2);
+void updateplayers(Networkgamestate networkgamestate, Player players[], int playerID);
 static void TestThread(void* server);
 void startPrompt(int* playerID, Server* server, bool* host);
-<<<<<<< Updated upstream
-void fire(Bullet bullets[], Player* p, int playerID, int xTarget, int yTarget);
-void playerBulletCollisionCheck(Bullet bullets[], Player players[], int* playerID);
-static void UDPReceive(void* args);
-
-int main(int argc, char* args[])
-{
-=======
 // void fire(Bullet bullets[], Player* p, int playerID, int xTarget, int yTarget);
 void playerBulletCollisionCheck(Bullet bullets[], Player players[]);
 void connectToServer(TCPsocket* tcpsock, Networkgamestate* networkgamestate, int* playerID, Player players[], UDPsocket* sd, bool* connected);
@@ -47,7 +39,6 @@ static void UDPReceive(void* args);
 
 int main(int argc, char* args[])
 {  
->>>>>>> Stashed changes
     // Variables
     mutex = SDL_CreateMutex();
     SDL_Event event;
@@ -59,7 +50,6 @@ int main(int argc, char* args[])
     UDPpacket* p2;
     int localPort;
     Server server = NULL;
-    int oldPlayerX = 0, oldPlayerY = 0;
     int playerID;
     SDL_Cursor* cursor = NULL;
     Player players[MAX_PLAYERS];
@@ -74,66 +64,27 @@ int main(int argc, char* args[])
     int up = 0, down = 0, left = 0, right = 0;
     SDL_Point playerRotationPoint = { 20, 32 };
     Networkgamestate networkgamestate = createNetworkgamestate();
-<<<<<<< Updated upstream
-    Networkplayer playertest;
-=======
->>>>>>> Stashed changes
     Uint32 fpsTimerStart, frameTicks;
 
     // Init functions
     if (!initSDL(&renderer)) return 1;
     initGameObjects(players, bullets);
     startPrompt(&playerID, &server, &host);
-<<<<<<< Updated upstream
-    initClient(&sd, &srvadd, &p, &p2, ALEX_IP, &tcpsock, &localPort);
-    loadMedia(renderer, gridTiles, &tiles, playerRect, &playerText, &cursor, &bulletTexture);
-
-    // TCP för programstart. Man kan inte lämna loopen förrän man har anslutit till servern
-    bool connected = false;
-    char msg[1024];
-    while (!connected)
-    {
-        printf("Connecting... \n");
-        if (SDLNet_TCP_Recv(tcpsock, &networkgamestate, sizeof(networkgamestate)))
-        {
-            SDLNet_TCP_Recv(tcpsock, &playerID, sizeof(playerID));
-            if (playerID == -1)
-            {
-                return 1; // Stäng av programmet om servern är full
-            }
-            playertest = createNetworkplayer(playerID);
-            playertest.isAlive = true;
-            setPlayerAlive(players[playerID], true);
-            for (int i = 0; i < MAX_PLAYERS; i++)
-            {
-                snapPlayer(players[i], networkgamestate.players[i].posX, networkgamestate.players[i].posY);
-            }
-
-            sprintf(msg, "%d\n", SDLNet_UDP_GetPeerAddress(sd, -1)->port);
-            SDLNet_TCP_Send(tcpsock, msg, 1024);
-
-            printf("\nConnected with playerID: %d!\n", playerID);
-
-            connected = true;
-        }
-    }
-
-=======
     initClient(&sd, &srvadd, &p, &p2, LOCAL_IP, &tcpsock, &localPort);
     loadMedia(renderer, gridTiles, &tiles, playerRect, &playerText, &cursor, &bulletTexture);  
     connectToServer(&tcpsock, networkgamestate, &playerID, players, &sd, &connected);
  
     // Prylar för UDPreceive-tråden
->>>>>>> Stashed changes
     UDPReceiveStruct urs = malloc(sizeof(struct UDPReceiveStruct_type));
     urs->sd = sd;
     urs->p2 = p2;
     urs->bullets = bullets;
     urs->players = players;
     urs->state = &networkgamestate;
+    urs->playerID = playerID;
 
     SDL_Thread* UDPReceiveThread;
-    UDPReceiveThread = SDL_CreateThread(UDPReceive, "UDPReceive", urs);
+    UDPReceiveThread = SDL_CreateThread((SDL_ThreadFunction)UDPReceive, "UDPReceive", urs);
 
     // Main loop
     while (isPlaying)
@@ -142,7 +93,7 @@ int main(int argc, char* args[])
         handleEvents(&event, &up, &down, &right, &left, &isPlaying, &mouseX, &mouseY, &shooting);
         setPlayerShooting(&players[playerID], shooting, mouseX, mouseY);
         if (isPlayerAlive(players[playerID]))
-        {
+        {            
             movePlayer(players[playerID], up, down, right, left, mouseX, mouseY);
             if (isPlayershooting(players[playerID])) fire(bullets, &players[playerID], playerID, mouseX, mouseY);
         }
@@ -155,9 +106,11 @@ int main(int argc, char* args[])
                     fire(bullets, &players[i], i, getPlayerxtarget(players[i]), getPlayerytarget(players[i]));
             }
         }
-        playerBulletCollisionCheck(bullets, players, &playerID);
-        setNetworkplayer(&playertest, players[playerID]);
-        sendReceivePackets(TICKRATE, &networkgamestate, playertest, &sd, &srvadd, &p, &p2, players);
+        playerBulletCollisionCheck(bullets, players);
+        SDL_LockMutex(mutex);
+        setNetworkgamestateplayer(&networkgamestate, playerID, players[playerID]);
+        sendUDP(TICKRATE, getNetworkgamestateplayer(&networkgamestate, playerID), &sd, &srvadd, &p, &p2);
+        SDL_UnlockMutex(mutex);
         renderGame(renderer, tiles, gridTiles, bullets, bulletTexture, players, playerText, playerRect, &playerRotationPoint);
         frameTicks = SDL_GetTicks() - fpsTimerStart;
         if (frameTicks < (1000 / 60))
@@ -172,9 +125,6 @@ int main(int argc, char* args[])
     return 0;
 }
 
-<<<<<<< Updated upstream
-void updateplayers(Networkgamestate networkgamestate, Player players[])
-=======
 void connectToServer(TCPsocket* tcpsock, Networkgamestate *networkgamestate, int* playerID, Player players[], UDPsocket* sd, bool* connected)
 {
         char msg[1024];
@@ -198,11 +148,40 @@ void connectToServer(TCPsocket* tcpsock, Networkgamestate *networkgamestate, int
 }
 
 void updateplayers(Networkgamestate networkgamestate, Player players[], int playerID)
->>>>>>> Stashed changes
 {
     for (int i = 0; i < MAX_PLAYERS; i++)
     {
-        updatePlayerPosition(&players[i], networkgamestate.players[i].posX, networkgamestate.players[i].posY, networkgamestate.players[i].direction, networkgamestate.players[i].isAlive, networkgamestate.players[i].isShooting, networkgamestate.players[i].xTarget, networkgamestate.players[i].yTarget);
+        if(i!=playerID)
+        {
+            updatePlayerPosition(&players[i], getNetworkgamestateplayerX(&networkgamestate, i), getNetworkgamestateplayerY(&networkgamestate, i), getNetworkgamestateplayerDirection(&networkgamestate, i), isNetworkgamestateplayerAlive(&networkgamestate, i), isNetworkgamestateplayerShooting(&networkgamestate, i), getNetworkgamestateplayerXtarget(&networkgamestate, i), getNetworkgamestateplayerYtarget(&networkgamestate, i));
+        }
+        else
+        {
+            setPlayerAlive(players[playerID], isNetworkgamestateplayerAlive(&networkgamestate, playerID));
+            if(!isPlayerAlive(players[playerID]))
+            {
+                snapPlayer(players[playerID], getNetworkgamestateplayerX(&networkgamestate, playerID), getNetworkgamestateplayerY(&networkgamestate, playerID));
+            }
+        }
+    }
+}
+
+void playerBulletCollisionCheck(Bullet bullets[], Player players[])
+{
+    for (int i = 0; i < MAX_BULLETS; i++)
+    {
+        if (isBulletActive(bullets[i]))
+        {
+            moveBullet(bullets[i]);
+            for (int j = 0; j < MAX_PLAYERS; j++)
+            {
+                if (rectCollisionTest(getBulletRect(bullets[i]), getPlayerRect(players[j]))
+                    && (getBulletOwner(bullets[i]) != j) && isPlayerAlive(players[j]))
+                {
+                    freeBullet(bullets[i]);
+                }
+            }
+        }
     }
 }
 
@@ -278,16 +257,9 @@ void renderGame(SDL_Renderer* renderer, SDL_Texture* mTiles, SDL_Rect gTiles[], 
         if (isPlayerAlive(players[i]))
         {
             SDL_RenderCopyEx(renderer, playerText, &playerRect[getPlayerFrame(players[i])], getPlayerRect(players[i]), getPlayerDirection(players[i]), playerRotationPoint, SDL_FLIP_NONE);
-        }
+        }    
     }
     SDL_RenderPresent(renderer);
-}
-
-bool rectCollisionTest(SDL_Rect* a, SDL_Rect* b)
-{
-    if ((a->x) > (b->x) && (a->x) < ((b->x) + (b->w)) && (a->y) > (b->y) && (a->y) < ((b->y) + (b->h)))
-        return true;
-    return false;
 }
 
 bool initSDL(SDL_Renderer** renderer)
@@ -411,8 +383,8 @@ void initClient(UDPsocket* sd, IPaddress* srvadd, UDPpacket** p, UDPpacket** p2,
 
     if (!(*sd = SDLNet_UDP_Open(0)))
     {
-        fprintf(stderr, "SDLNet_UDP_Open: %s\n", SDLNet_GetError());
-        exit(EXIT_FAILURE);
+            fprintf(stderr, "SDLNet_UDP_Open: %s\n", SDLNet_GetError());
+            exit(EXIT_FAILURE);
     }
 
     // Resolve server name  
@@ -445,7 +417,7 @@ void initGameObjects(Player players[], Bullet bullets[])
         bullets[i] = createBullet();
     }
     for (int i = 0; i < MAX_PLAYERS; i++)
-    {
+    {      
         players[i] = createPlayer(100, 100, i);
     }
 }
@@ -462,60 +434,26 @@ void startPrompt(int* playerID, Server* server, bool* host)
         printf("hosted!\n");
         *host = true;
         SDL_Thread* serverThread;
-        serverThread = SDL_CreateThread(TestThread, "TestThread", server);
+        serverThread = SDL_CreateThread((SDL_ThreadFunction)TestThread, "TestThread", server);
     }
 }
 
 static void TestThread(void* server)
 {
-    startServer(*(Server*)server);
+        startServer(*(Server*)server);
 }
 
-void fire(Bullet bullets[], Player* p, int playerID, int xTarget, int yTarget)
-{
-    for (int i = 0; i < MAX_BULLETS; i++)
-    {
-        if (!isBulletActive(bullets[i]))
-        {
-            spawnBullet(bullets[i], getPlayerX(*p), getPlayerY(*p), xTarget, yTarget, playerID);
-            break;
-        }
-    }
-}
-
-void playerBulletCollisionCheck(Bullet bullets[], Player players[], int* playerID)
-{
-    for (int i = 0; i < MAX_BULLETS; i++)
-    {
-        if (isBulletActive(bullets[i]))
-        {
-            moveBullet(bullets[i]);
-            for (int j = 0; j < MAX_PLAYERS; j++)
-            {
-                if (rectCollisionTest(getBulletRect(bullets[i]), getPlayerRect(players[j]))
-                    && (getBulletOwner(bullets[i]) != j) && isPlayerAlive(players[j]))
-                {
-                    freeBullet(bullets[i]);
-                    if (j == *playerID)
-                    {
-                        damagePlayer(players[j], getBulletDamage(bullets[j]));
-                    }
-                }
-            }
-        }
-    }
-}
-
-void sendReceivePackets(int sendDelay, Networkgamestate* state, Networkplayer player, UDPsocket* sd, IPaddress* srvadd, UDPpacket** p, UDPpacket** p2, Player players[])
+void sendUDP(int sendDelay, void* player, UDPsocket* sd, IPaddress* srvadd, UDPpacket** p, UDPpacket** p2)
 {
     // Send
     static int send = 0;
     if (sendDelay) send = (send + 1) % sendDelay;
     if (1) // Skickar paket 60/sek
     {
-        memcpy((*p)->data, &player, sizeof(player));
+        memcpy((*p)->data, player, getNetworkplayersize());
+        // memcpy((*p)->data, &player, sizeof(player));
         (*p)->address = *srvadd;
-        (*p)->len = sizeof(player);
+        (*p)->len = getNetworkplayersize();
         SDLNet_UDP_Send(*sd, -1, *p);
     }
 }
@@ -529,8 +467,12 @@ static void UDPReceive(void* args)
         SDL_Delay(1);
         if (SDLNet_UDP_Recv(urs->sd, urs->p2))
         {
-            memcpy(urs->state, urs->p2->data, sizeof(*urs->state));
-            updateplayers(*urs->state, urs->players);
+            if(SDL_TryLockMutex(mutex) != SDL_MUTEX_TIMEDOUT)
+            {   
+                memcpy(*urs->state, urs->p2->data, getGamestatesize());
+                updateplayers(*urs->state, urs->players, urs->playerID);  
+                SDL_UnlockMutex(mutex);
+            } 
         }
     }
 }

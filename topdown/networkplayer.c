@@ -51,7 +51,7 @@ PUBLIC Networkplayer createNetworkplayer(int id)
 //     return a;
 // }
 
-PUBLIC void copyPlayer(Networkplayer* dest, Networkplayer source)
+PUBLIC void copyPlayer(Networkplayer *dest, Networkplayer source)
 {
     *dest = source;
 }
@@ -72,7 +72,7 @@ PUBLIC int getNetplayerX(Networkplayer a)
 //     (*a)->posX = x;
 // }
 
-PUBLIC void setNetworkplayer(Networkplayer* a, Player b)
+PUBLIC void setNetworkplayer(Networkplayer *a, Player b)
 {
     a->isAlive = isPlayerAlive(b);
     a->posX = getPlayerX(b);

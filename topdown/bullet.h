@@ -14,5 +14,8 @@ void moveBullet(Bullet bullet);
 SDL_Rect* getBulletRect(Bullet bullet);
 void freeBullet(Bullet a);
 int getBulletOwner(Bullet b);
+int getBulletX(Bullet a);
+int getBulletY(Bullet a);
+
 int getBulletDamage(Bullet b);
 #endif
