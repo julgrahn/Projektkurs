@@ -34,7 +34,7 @@ static void TestThread(void* server);
 void startPrompt(int* playerID, Server* server, bool* host);
 // void fire(Bullet bullets[], Player* p, int playerID, int xTarget, int yTarget);
 void playerBulletCollisionCheck(Bullet bullets[], Player players[]);
-void connectToServer(TCPsocket* tcpsock, Networkgamestate* networkgamestate, int* playerID, Player players[], UDPsocket* sd, bool* connected);
+void connectToServer(TCPsocket* tcpsock, Networkgamestate networkgamestate, int* playerID, Player players[], UDPsocket* sd, bool* connected);
 static void UDPReceive(void* args);
 
 int main(int argc, char* args[])
@@ -125,7 +125,7 @@ int main(int argc, char* args[])
     return 0;
 }
 
-void connectToServer(TCPsocket* tcpsock, Networkgamestate *networkgamestate, int* playerID, Player players[], UDPsocket* sd, bool* connected)
+void connectToServer(TCPsocket* tcpsock, Networkgamestate networkgamestate, int* playerID, Player players[], UDPsocket* sd, bool* connected)
 {
         char msg[1024];
         printf("Connecting... \n");
