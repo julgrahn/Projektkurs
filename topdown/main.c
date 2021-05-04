@@ -34,12 +34,13 @@ static void TestThread(void* server);
 void startPrompt(int* playerID, Server* server, bool* host);
 // void fire(Bullet bullets[], Player* p, int playerID, int xTarget, int yTarget);
 void playerBulletCollisionCheck(Bullet bullets[], Player players[]);
+void connectToServer(TCPsocket* tcpsock, Networkgamestate networkgamestate, int* playerID, Player players[], UDPsocket* sd, bool* connected);
 static void UDPReceive(void* args);
 
 int main(int argc, char* args[])
-{
-    mutex = SDL_CreateMutex();
+{  
     // Variables
+    mutex = SDL_CreateMutex();
     SDL_Event event;
     SDL_Renderer* renderer = NULL;
     UDPsocket sd;
@@ -58,50 +59,22 @@ int main(int argc, char* args[])
     Bullet bullets[MAX_BULLETS];
     SDL_Texture* tiles = NULL;
     SDL_Rect gridTiles[900];   // Kommer innehålla alla 900 rutor från bakgrundsbilden, kan optmiseras.
-    bool isPlaying = true, shooting = false, host = false;
+    bool isPlaying = true, shooting = false, host = false, connected = false;
     SDL_Texture* bulletTexture = NULL;
     int up = 0, down = 0, left = 0, right = 0;
     SDL_Point playerRotationPoint = { 20, 32 };
-
     Networkgamestate networkgamestate = createNetworkgamestate();
-    // Networkplayer playertest;
     Uint32 fpsTimerStart, frameTicks;
+
     // Init functions
     if (!initSDL(&renderer)) return 1;
     initGameObjects(players, bullets);
     startPrompt(&playerID, &server, &host);
     initClient(&sd, &srvadd, &p, &p2, LOCAL_IP, &tcpsock, &localPort);
-    loadMedia(renderer, gridTiles, &tiles, playerRect, &playerText, &cursor, &bulletTexture);
-
-    // TCP för programstart. Man kan inte lämna loopen förrän man har anslutit till servern
-    bool connected = false;
-    char msg[1024];
-    while (!connected)
-    {
-        printf("Connecting... \n");
-        if (SDLNet_TCP_Recv(tcpsock, networkgamestate, getGamestatesize()))
-        {
-            SDLNet_TCP_Recv(tcpsock, &playerID, sizeof(playerID));
-            if (playerID == -1)
-            {
-                return 1; // Stäng av programmet om servern är full
-            }
-            printf("%d\n", playerID);
-            setPlayerAlive(players[playerID], true);
-            for (int i = 0; i < MAX_PLAYERS; i++)
-            {
-                snapPlayer(players[i], getNetworkgamestateplayerX(&networkgamestate, i), getNetworkgamestateplayerY(&networkgamestate, i));
-            }
-
-            sprintf(msg, "%d\n", SDLNet_UDP_GetPeerAddress(sd, -1)->port);
-            SDLNet_TCP_Send(tcpsock, msg, 1024);
-
-            printf("\nConnected with playerID: %d!\n", playerID);
-
-            connected = true;
-        }      
-    }
-
+    loadMedia(renderer, gridTiles, &tiles, playerRect, &playerText, &cursor, &bulletTexture);  
+    connectToServer(&tcpsock, networkgamestate, &playerID, players, &sd, &connected);
+ 
+    // Prylar för UDPreceive-tråden
     UDPReceiveStruct urs = malloc(sizeof(struct UDPReceiveStruct_type));
     urs->sd = sd;
     urs->p2 = p2;
@@ -144,13 +117,34 @@ int main(int argc, char* args[])
         {
             SDL_Delay((1000 / 60) - frameTicks);
         }
-        // printf("%u\n", frameTicks);
     }
 
     SDL_DestroyRenderer(renderer);
     //SDL_DestroyWindow(window); // beh�vs denna?
     SDL_Quit();
     return 0;
+}
+
+void connectToServer(TCPsocket* tcpsock, Networkgamestate networkgamestate, int* playerID, Player players[], UDPsocket* sd, bool* connected)
+{
+        char msg[1024];
+        printf("Connecting... \n");
+        if (SDLNet_TCP_Recv(*tcpsock, networkgamestate, getGamestatesize()))
+        {
+            SDLNet_TCP_Recv(*tcpsock, playerID, sizeof(*playerID));
+            setPlayerAlive(players[*playerID], true);
+            for (int i = 0; i < MAX_PLAYERS; i++)
+            {
+                snapPlayer(players[i], getNetworkgamestateplayerX(&networkgamestate, i), getNetworkgamestateplayerY(&networkgamestate, i));
+            }
+
+            sprintf(msg, "%d\n", SDLNet_UDP_GetPeerAddress(*sd, -1)->port);
+            SDLNet_TCP_Send(*tcpsock, msg, 1024);
+
+            printf("\nConnected with playerID: %d!\n", *playerID);
+
+            *connected = true;
+        }
 }
 
 void updateplayers(Networkgamestate networkgamestate, Player players[], int playerID)
