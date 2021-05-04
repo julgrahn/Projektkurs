@@ -252,6 +252,7 @@ PUBLIC bool isPlayerAlive(Player p)
 
 PUBLIC void setPlayerAlive(Player p, bool value)
 {
+    p->health = HEALTH;
     p->alive = value;
 }
 
