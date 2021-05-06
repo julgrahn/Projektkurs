@@ -8,12 +8,15 @@
 
 #define PUBLIC /* empty */
 #define PRIVATE static
-#define SERVER_REFRESH_RATE 30  // 30 = 10/s    10 = 30/s
-PRIVATE void playerBulletCollisionCheck(Bullet bullets[], Player players[]);
+#define SERVER_REFRESH_RATE 30  // 30 = 10/s    10 = 30//
+
+PRIVATE void runServer(void* args);
+PRIVATE void serverPlayerBulletCollisionCheck(Bullet bullets[], Player players[]);
 PRIVATE void handleGameLogic(Server server, int respawnDelay[]);
 PRIVATE void handleTCP(Server server);
 PRIVATE void handleUDPreceive(Server server);
 PRIVATE void handleUDPsend(Server server);
+
 
 
 struct Server_type {
@@ -112,11 +115,18 @@ PUBLIC Server createServer()
 
 PUBLIC void startServer(Server server)
 {
+    SDL_Thread* serverThread;
+    serverThread = SDL_CreateThread((SDL_ThreadFunction)runServer, "TestThread", server);
+}
+
+PRIVATE void runServer(void* args)
+{
+    Server server = (Server)args;
+
     int TCPdelay = 0;
     int UDPsendDelay = 0;
     int UDPreceiveDelay = 0;
     int Gamelogicdelay = 0;
-    int RespawnTimer = 0;
     int respawnDelay[MAX_PLAYERS] = {0}; 
     // Main-loop
     while (true)
@@ -128,7 +138,7 @@ PUBLIC void startServer(Server server)
         Gamelogicdelay = (Gamelogicdelay + 1) % 8;
         
         // Game logic
-        if(!Gamelogicdelay)
+        if(!Gamelogicdelay) // Måste vara 16ms intervall
         {
             //printf("%d\n", SDL_GetTicks());
             handleGameLogic(server, respawnDelay);           
@@ -244,26 +254,7 @@ PRIVATE void handleTCP(Server server)
     }
 }
 
-PUBLIC bool rectCollisionTest(SDL_Rect* a, SDL_Rect* b)
-{
-    if ((a->x) > (b->x) && (a->x) < ((b->x) + (b->w)) && (a->y) > (b->y) && (a->y) < ((b->y) + (b->h)))
-        return true;
-    return false;
-}
-
-PUBLIC void fire(Bullet bullets[], Player* p, int playerID, int xTarget, int yTarget)
-{
-    for (int i = 0; i < MAX_BULLETS; i++)
-    {
-        if (!isBulletActive(bullets[i]))
-        {
-            spawnBullet(bullets[i], getPlayerX(*p), getPlayerY(*p), xTarget, yTarget, playerID);
-            break;
-        }
-    }
-}
-
-PRIVATE void playerBulletCollisionCheck(Bullet bullets[], Player players[])
+PRIVATE void serverPlayerBulletCollisionCheck(Bullet bullets[], Player players[])
 {
     for (int i = 0; i < MAX_BULLETS; i++)
     {
@@ -296,7 +287,7 @@ PRIVATE void handleGameLogic(Server server, int respawnDelay[])
             fire(server->aBullet, &server->aPlayers[i], i, getPlayerxtarget(server->aPlayers[i]), getPlayerytarget(server->aPlayers[i]));
         }
     }
-    playerBulletCollisionCheck(server->aBullet, server->aPlayers);
+    serverPlayerBulletCollisionCheck(server->aBullet, server->aPlayers);
     for (int i = 0; i < MAX_PLAYERS; i++)
     {
         if (!isPlayerAlive(server->aPlayers[i]) && server->tcpsockClient[i] != NULL)
