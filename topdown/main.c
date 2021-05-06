@@ -16,7 +16,6 @@
 SDL_mutex *mutex;
 
 void handleEvents(SDL_Event* event, int* up, int* down, int* right, int* left, bool* isPlaying, int* mouseX, int* mouseY, bool* shooting);
-//void renderGame(SDL_Renderer* renderer, SDL_Texture* mTiles, SDL_Rect gTiles[], Bullet bullets[], SDL_Texture* bulletTexture, Player players[], SDL_Texture* playerText, SDL_Rect playerRect[], SDL_Point* playerRotationPoint);
 void startPrompt(int* playerID, Server* server, bool* host);
 
 int main(int argc, char* args[])
@@ -30,7 +29,6 @@ int main(int argc, char* args[])
     IPaddress srvadd;
     UDPpacket* p;
     UDPpacket* p2;
-    int localPort;
     Server server = NULL;
     int playerID;
     SDL_Cursor* cursor = NULL;
