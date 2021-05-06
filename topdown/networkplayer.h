@@ -7,10 +7,10 @@
 #include "bullet.h"
 
 // typedef struct Networkplayer_type *Networkplayer;
-typedef struct Networkplayer_type {
+typedef struct Networkplayer_type{
     short id, health, direction;
     short posX, posY, xTarget, yTarget;
-    bool isAlive, isShooting;
+    bool active, isShooting;
     // Networkbullet bullets[10];
 }Networkplayer;
 
@@ -19,7 +19,7 @@ Networkplayer createNetworkplayer(int id);
 // int getNetplayerX(Networkplayer a);
 // unsigned long getNetplayersize();
 // void setNetplayerX(Networkplayer *a, int x);
-void setNetworkplayer(Networkplayer* a, Player b);
+void setNetworkplayer(Networkplayer *a, Player b);
 // Networkbullet getNetworkbullet(Networkplayer *a, int n);
 
 #endif

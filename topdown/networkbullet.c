@@ -15,10 +15,10 @@
 
 PUBLIC Networkbullet createNetworkbullet()
 {
-	Networkbullet a;
+    Networkbullet a;
 	a.active = false;
 	// sizeof(*a);
-	return a;
+    return a;
 }
 
 // PUBLIC void setNetworkbullet(Networkbullet *a, Bullet b)

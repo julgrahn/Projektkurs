@@ -26,11 +26,11 @@ PUBLIC Networkplayer createNetworkplayer(int id)
     // a.health = HEALTH;
     // a.speed = SPEED;
     a.direction = 0;
-    a.posX = 0, a.posY = 0;
-    a.isAlive = false;
-    a.isShooting = false;
+    a.posX = 200;
+    a.posY = 200;
+    a.active = false;
     a.id = id;
-    a.xTarget = 0, a.yTarget = 0;
+    a.isShooting = false;
     return a;
 }
 
@@ -51,7 +51,7 @@ PUBLIC Networkplayer createNetworkplayer(int id)
 //     return a;
 // }
 
-PUBLIC void copyPlayer(Networkplayer* dest, Networkplayer source)
+PUBLIC void copyPlayer(Networkplayer *dest, Networkplayer source)
 {
     *dest = source;
 }
@@ -72,15 +72,12 @@ PUBLIC int getNetplayerX(Networkplayer a)
 //     (*a)->posX = x;
 // }
 
-PUBLIC void setNetworkplayer(Networkplayer* a, Player b)
+PUBLIC void setNetworkplayer(Networkplayer *a, Player b)
 {
-    a->isAlive = isPlayerAlive(b);
+    a->active = 1;
     a->posX = getPlayerX(b);
     a->posY = getPlayerY(b);
     a->direction = (short)getPlayerDirection(b);
-    a->xTarget = getPlayerxtarget(b);
-    a->yTarget = getPlayerytarget(b);
-    a->isShooting = isPlayershooting(b);
     // for(int i = 0; i < 10; i++)
     // {
     //     setNetworkbullet(&a->bullets[i], c[i]);
