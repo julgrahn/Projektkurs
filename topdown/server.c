@@ -40,11 +40,6 @@ PUBLIC Server createServer()
 {
     Server server = malloc(sizeof(struct Server_type));
     server->state = createNetworkgamestate();
-    setGamastateplayerpos(&server->state, 0, 1, 1);
-    setGamastateplayerpos(&server->state, 1, WINDOWWIDTH - 1, 1);
-    setGamastateplayerpos(&server->state, 2, 1, WINDOWHEIGHT - 1);
-    setGamastateplayerpos(&server->state, 3, WINDOWWIDTH - 1, WINDOWHEIGHT - 1);
-    setGamastateplayerpos(&server->state, 4, 500, 500);
     for (int i = 0; i < MAX_PLAYERS + 1; i++)
     {
         server->tcpsockClient[i] = NULL;

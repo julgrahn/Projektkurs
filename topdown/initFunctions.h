@@ -8,6 +8,7 @@
 #include "bullet.h"
 #include "player.h"
 #include "sdlinclude.h"
+#include "world.h"
 
 bool initSDL(SDL_Renderer** renderer);
 void initGameObjects(Player players[], Bullet bullets[]);
