@@ -34,6 +34,7 @@ PUBLIC void playerBulletCollisionCheck(Bullet bullets[], Player players[])
                 if (rectCollisionTest(getBulletRect(bullets[i]), getPlayerRect(players[j]))
                     && (getBulletOwner(bullets[i]) != j) && isPlayerAlive(players[j]))
                 {
+                    clientDamagePlayer(players[j]);
                     freeBullet(bullets[i]);
                 }
             }

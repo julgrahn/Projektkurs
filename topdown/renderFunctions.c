@@ -46,8 +46,8 @@ PUBLIC void renderGame(SDL_Renderer* renderer, SDL_Texture* mTiles, SDL_Rect gTi
     {
         if (isPlayershooting(players[i]))
         {
-            gunFireRect.x = getPlayerX(players[i]) + 32;
-            gunFireRect.y = getPlayerY(players[i]) + 32;
+            gunFireRect.x = getPlayerX(players[i]);
+            gunFireRect.y = getPlayerY(players[i]);
 
             SDL_RenderCopyEx(renderer, gunFireTexture, NULL, &gunFireRect, getPlayerDirection(players[i]), playerRotationPoint, SDL_FLIP_NONE);
         }
@@ -77,8 +77,10 @@ PUBLIC void renderGame(SDL_Renderer* renderer, SDL_Texture* mTiles, SDL_Rect gTi
         if (checkIfPlayerdamaged(players[i]))
         {
             printf("damage\n");
+            gunFireRect.x = getPlayerX(players[i]) + 16;
+            gunFireRect.y = getPlayerY(players[i]) + 16;
             SDL_RenderCopy(renderer, gunFireTexture, NULL, &gunFireRect);
-            // resetDamagedPlayer(players[i]);
+            resetDamagedPlayer(players[i]);
         }
     }
 

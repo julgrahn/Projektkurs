@@ -6,7 +6,7 @@
 #define PUBLIC
 #define SPEED 2
 #define ANIMATIONSPEED 8               //lower = faster
-#define HEALTH 100
+#define HEALTH 1000
 #define ROTATION_UPDATE_SPEED 5
 #define SNAP_DISTANCE 10
 
@@ -254,24 +254,23 @@ PUBLIC void snapPlayer(Player p, int x, int y)
 PUBLIC void damagePlayer(Player p, int damage)
 {
     p->health -= damage;
-    p->wasDamaged = true;
     if (p->health <= 0) p->alive = false;
+}
+
+PUBLIC void clientDamagePlayer(Player p)
+{
+    p->wasDamaged = true;
 }
 
 PUBLIC bool checkIfPlayerdamaged(Player p)
 {
-    if (p->wasDamaged)
-    {
-        p->wasDamaged = false;
-        return true;
-    }
-    return false;
+    return p->wasDamaged;
 }
 
-// PUBLIC void resetDamagedPlayer(Player p)
-// {
-//     p->wasDamaged = false;
-// }
+PUBLIC void resetDamagedPlayer(Player p)
+{
+    p->wasDamaged = false;
+}
 
 PUBLIC bool isPlayerAlive(Player p)
 {
