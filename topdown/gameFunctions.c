@@ -9,14 +9,32 @@ PUBLIC void updateplayers(Networkgamestate networkgamestate, Player players[], i
     {
         if (i != playerID)
         {
-            updatePlayerPosition(&players[i], getNetworkgamestateplayerX(&networkgamestate, i), getNetworkgamestateplayerY(&networkgamestate, i), getNetworkgamestateplayerDirection(&networkgamestate, i), isNetworkgamestateplayerAlive(&networkgamestate, i), isNetworkgamestateplayerShooting(&networkgamestate, i), getNetworkgamestateplayerXtarget(&networkgamestate, i), getNetworkgamestateplayerYtarget(&networkgamestate, i));
+            updatePlayerPosition(&players[i], getNetworkgamestateplayerX(&networkgamestate, i), getNetworkgamestateplayerY(&networkgamestate, i), getNetworkgamestateplayerDirection(&networkgamestate, i), isNetworkplayerAlive(&networkgamestate, i), isNetworkgamestateplayerShooting(&networkgamestate, i), getNetworkgamestateplayerXtarget(&networkgamestate, i), getNetworkgamestateplayerYtarget(&networkgamestate, i));
         }
         else
         {
-            setPlayerAlive(players[playerID], isNetworkgamestateplayerAlive(&networkgamestate, playerID));
+            //update player bullets
+
+
+            setPlayerAlive(players[playerID], isNetworkplayerAlive(&networkgamestate, playerID));
             if (!isPlayerAlive(players[playerID]))
             {
                 snapPlayer(players[playerID], getNetworkgamestateplayerX(&networkgamestate, playerID), getNetworkgamestateplayerY(&networkgamestate, playerID));
+            }
+        }
+    }
+}
+
+PUBLIC void updateplayerbullets(Networkgamestate networkgamestate, int playerID, Bullet bullets[])
+{
+    for (int i = 0; i < MAX_BULLETS; i++)
+    {
+        if(isBulletActive(bullets[i]))
+        {
+            if(!isNetbulletActive(networkgamestate, playerID, i))
+            {
+                printf("freebullet\n");
+                freeBullet(bullets[i]);
             }
         }
     }

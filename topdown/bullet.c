@@ -29,6 +29,7 @@ PUBLIC Bullet createBullet()
 	b->dimensions.h = 4;
 	b->speed = BULLET_SPEED;
 	b->damage = BULLET_DAMAGE;
+	// b->xPos = 0, b->yPos = 0;
 
 	return b;
 }

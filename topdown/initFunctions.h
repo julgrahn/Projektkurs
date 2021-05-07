@@ -15,5 +15,5 @@ void initGameObjects(Player players[], Bullet bullets[]);
 void initClient(UDPsocket* sd, UDPpacket** p, UDPpacket** p2);
 void loadMedia(SDL_Renderer* renderer, SDL_Rect gTiles[], SDL_Texture** tiles, SDL_Rect playerRect[], SDL_Texture** pTexture, SDL_Cursor** cursor, SDL_Texture** bulletTexture);
 
-
+// void initGameObjects(Player players[], Bullet bullets[][MAX_BULLETS]);
 #endif  // INITFUNCTIONS_H

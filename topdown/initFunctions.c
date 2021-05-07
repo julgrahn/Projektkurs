@@ -31,9 +31,10 @@ PUBLIC bool initSDL(SDL_Renderer** renderer)
 
 PUBLIC void initGameObjects(Player players[], Bullet bullets[])
 {
-    for (int i = 0; i < MAX_BULLETS; i++)
+    // for (int i = 0; i < MAX_PLAYERS; i++)
+    for (int j = 0; j < MAX_BULLETS; j++)
     {
-        bullets[i] = createBullet();
+        bullets[j] = createBullet();
     }
     for (int i = 0; i < MAX_PLAYERS; i++)
     {
@@ -55,7 +56,7 @@ PUBLIC void initClient(UDPsocket* sd, UDPpacket** p, UDPpacket** p2)
         exit(EXIT_FAILURE);
     }
 
-    if (!((*p = SDLNet_AllocPacket(512)) && (*p2 = SDLNet_AllocPacket(512))))
+    if (!((*p = SDLNet_AllocPacket(1024)) && (*p2 = SDLNet_AllocPacket(1024))))
     {
         fprintf(stderr, "SDLNet_AllocPacket: %s\n", SDLNet_GetError());
         exit(EXIT_FAILURE);

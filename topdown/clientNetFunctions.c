@@ -74,7 +74,6 @@ PUBLIC void startUDPreceiveThread(UDPsocket *sd, UDPpacket** p2, Bullet bullets[
     urs->mutex = *mutex;
     SDL_Thread* UDPReceiveThread;
     UDPReceiveThread = SDL_CreateThread((SDL_ThreadFunction)UDPReceive, "UDPReceive", urs);
-
 }
 
 PRIVATE void UDPReceive(void* args)
@@ -86,11 +85,12 @@ PRIVATE void UDPReceive(void* args)
         SDL_Delay(1);
         if (SDLNet_UDP_Recv(urs->sd, urs->p2))
         {
-            if (SDL_TryLockMutex(urs->mutex) != SDL_MUTEX_TIMEDOUT)
+            // if (SDL_TryLockMutex(urs->mutex) != SDL_MUTEX_TIMEDOUT)
             {
                 memcpy(*urs->state, urs->p2->data, getGamestatesize());
-                updateplayers(*urs->state, urs->players, urs->playerID);
-                SDL_UnlockMutex(urs->mutex);
+                // updateplayers(*urs->state, urs->players, urs->playerID);
+                updateplayerbullets(*urs->state, urs->playerID, urs->bullets);
+                // SDL_UnlockMutex(urs->mutex);
             }
         }
     }
