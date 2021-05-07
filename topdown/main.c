@@ -142,7 +142,8 @@ int main(int argc, char* args[])
         {
             SDL_Delay((1000 / 60) - frameTicks);
         }
-        // printf("%u\n", frameTicks);
+        frameTicks = SDL_GetTicks() - test;
+        //printf("%u\n", frameTicks);
     }
 
     SDL_DestroyRenderer(renderer);
@@ -327,25 +328,13 @@ void handleEvents(SDL_Event* event, int* up, int* down, int* right, int* left, b
             break;
 
 
-        case SDL_MOUSEBUTTONDOWN:
+        case SDL_MOUSEBUTTONDOWN: //KP
 
-            switch (event->button.button)
-            {
-            case SDL_BUTTON_LEFT:
-                *shooting = true;
-            default:
-                break;
-            }
+            *shooting = true;
             break;
-        case SDL_MOUSEBUTTONUP:
 
-            switch (event->button.button)
-            {
-            case SDL_BUTTON_LEFT:
-                *shooting = false;
-            default:
-                break;
-            }
+        case SDL_MOUSEBUTTONUP: //KP
+            *shooting = false;
             break;
 
         }
