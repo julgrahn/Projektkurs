@@ -52,7 +52,13 @@ int main(int argc, char* args[])
     if (!initSDL(&renderer)) return 1;
     initGameObjects(players, bullets);
     startPrompt(&playerID, &server, &host);
-    if (host)
+    initClient(&sd, &srvadd, &p, &p2, ANDREAS_IP, &tcpsock, &localPort);
+    loadMedia(renderer, gridTiles, &tiles, playerRect, &playerText, &cursor, &bulletTexture);
+
+    // TCP för programstart. Man kan inte lämna loopen förrän man har anslutit till servern
+    bool connected = false;
+    char msg[1024];
+    while (!connected)
     {
         server = createServer();
         startServer(server);
@@ -178,5 +184,7 @@ void startPrompt(int* playerID, Server* server, bool* host)
         printf("hosted!\n");
         *host = true;
     }
+    /*else if (input != 'h' || input != 'c')
+        printf("Invalid input!");*/
 }
 
