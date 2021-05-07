@@ -41,6 +41,10 @@ int main(int argc, char* args[])
     SDL_Rect gridTiles[900];   // Kommer innehålla alla 900 rutor från bakgrundsbilden, kan optmiseras.
     bool isPlaying = true, shooting = false, host = false, connected = false;
     SDL_Texture* bulletTexture = NULL;
+    SDL_Texture* gunFireTexture = NULL;
+    SDL_Rect gunFireRect;
+    gunFireRect.w = 16;
+    gunFireRect.h = 16;
     int up = 0, down = 0, left = 0, right = 0;
     SDL_Point playerRotationPoint = { 20, 32 };
     Networkgamestate networkgamestate = createNetworkgamestate();
@@ -56,7 +60,7 @@ int main(int argc, char* args[])
         startServer(server);
     }
     initClient(&sd, &p, &p2);  
-    loadMedia(renderer, gridTiles, &tiles, playerRect, &playerText, &cursor, &bulletTexture);  
+    loadMedia(renderer, gridTiles, &tiles, playerRect, &playerText, &cursor, &bulletTexture, &gunFireTexture, gunFireRect);  
     connectToServer(LOCAL_IP, &srvadd, &tcpsock, networkgamestate, &playerID, players, &sd, &connected);
     startUDPreceiveThread(&sd, &p2, bullets, players, &networkgamestate, playerID, &mutex);
 
@@ -84,7 +88,7 @@ int main(int argc, char* args[])
         setNetworkgamestateplayer(&networkgamestate, playerID, players[playerID]);
         sendUDP(getNetworkgamestateplayer(&networkgamestate, playerID), &sd, &srvadd, &p, &p2);
         SDL_UnlockMutex(mutex);
-        renderGame(renderer, tiles, gridTiles, bullets, bulletTexture, players, playerText, playerRect, &playerRotationPoint);
+        renderGame(renderer, tiles, gridTiles, bullets, bulletTexture, players, playerText, playerRect, &playerRotationPoint, gunFireTexture, gunFireRect);
     }
 
     SDL_DestroyRenderer(renderer);
@@ -156,7 +160,7 @@ void handleEvents(SDL_Event* event, int* up, int* down, int* right, int* left, b
             switch (event->button.button)
             {
             case SDL_BUTTON_LEFT:
-                *shooting = true;
+                *shooting = true;                
             default:
                 break;
             }

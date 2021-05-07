@@ -29,6 +29,7 @@ struct Player_type {
     int newDirection;
     int xTarget, yTarget;
     bool isShooting;
+    bool wasDamaged;
 };
 
 PUBLIC Player createPlayer(int x, int y, int id)
@@ -55,6 +56,7 @@ PUBLIC Player createPlayer(int x, int y, int id)
     a->xSpeed = a->ySpeed = 0;
     a->newDirection = 0;
     a->isShooting = false;
+    a->wasDamaged = false;
     return a;
 }
 
@@ -113,14 +115,6 @@ PUBLIC void movePlayer(Player p, int up, int down, int right, int left, int mous
     p->frame = (p->frame + ((p->frameCounter / ANIMATIONSPEED) * p->isMoving)) % 4;
     // Rotate player
     p->direction = (atan2(mouseY - p->pDimensions.y - 34, mouseX - p->pDimensions.x - 18) * 180 / M_PI) - 6;
-
-    // // Collision detection with walls
-    // if (getWallCollision(p->pDimensions.x, p->pDimensions.y))
-    // {
-    //     p->posX = oldX;
-    //     p->posY = oldY;
-    // }
-
 
     // Collision detection with window
     if (p->pDimensions.y <= 0) p->pDimensions.y = p->posY = 0;
@@ -260,8 +254,24 @@ PUBLIC void snapPlayer(Player p, int x, int y)
 PUBLIC void damagePlayer(Player p, int damage)
 {
     p->health -= damage;
+    p->wasDamaged = true;
     if (p->health <= 0) p->alive = false;
 }
+
+PUBLIC bool checkIfPlayerdamaged(Player p)
+{
+    if (p->wasDamaged)
+    {
+        p->wasDamaged = false;
+        return true;
+    }
+    return false;
+}
+
+// PUBLIC void resetDamagedPlayer(Player p)
+// {
+//     p->wasDamaged = false;
+// }
 
 PUBLIC bool isPlayerAlive(Player p)
 {
