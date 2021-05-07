@@ -62,7 +62,9 @@ PUBLIC void initClient(UDPsocket* sd, UDPpacket** p, UDPpacket** p2)
     }
 }
 
-PUBLIC void loadMedia(SDL_Renderer* renderer, SDL_Rect gTiles[], SDL_Texture** tiles, SDL_Rect playerRect[], SDL_Texture** pTexture, SDL_Cursor** cursor, SDL_Texture** bulletTexture)
+PUBLIC void loadMedia(SDL_Renderer* renderer, SDL_Rect gTiles[], SDL_Texture** tiles, SDL_Rect playerRect[], 
+                        SDL_Texture** pTexture, SDL_Cursor** cursor, SDL_Texture** bulletTexture, 
+                        SDL_Texture** gunFireTexture, SDL_Rect gunFireRect)
 {
     SDL_Surface* gTilesSurface = IMG_Load("resources/tilemap.png");
     *tiles = SDL_CreateTextureFromSurface(renderer, gTilesSurface);
@@ -98,4 +100,12 @@ PUBLIC void loadMedia(SDL_Renderer* renderer, SDL_Rect gTiles[], SDL_Texture** t
     SDL_Surface* bulletSurface = IMG_Load("resources/bullet.png");
     *bulletTexture = SDL_CreateTextureFromSurface(renderer, bulletSurface);
     SDL_FreeSurface(bulletSurface);
+
+    SDL_Surface* gunFireSurface = IMG_Load("resources/gunfire.png");
+    *gunFireTexture = SDL_CreateTextureFromSurface(renderer, gunFireSurface);
+    SDL_FreeSurface(gunFireSurface);
+    // gunFireRect.x = 0;
+    // gunFireRect.y = 0;
+    // gunFireRect.h = 16;
+    // gunFireRect.w = 16;
 }

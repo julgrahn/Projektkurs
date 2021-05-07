@@ -62,6 +62,9 @@ int getTileHeight() {
 int getTileGrid(int x, int y) {
     return tileGrid[x][y];
 }
+int getTileGridHits(int x, int y) {
+    return tileGridHits[x][y];
+}
 PUBLIC int getWallCollisionPlayer(int x, int y) {
     int wallCordStartX;
     int wallCordEndX;
@@ -101,7 +104,7 @@ PUBLIC bool getWallCollisionBullet(int x, int y, int h, int w) {
 
                 if (x + w >= wallCordStartX && x <= wallCordEndX && y + h >= wallCordStartY && y <= wallCordEndY)
                 {
-                    // countWallHits(i, j);  // Ta bort kommentaren om du vill förstöra väggar
+                    countWallHits(i, j);  // Ta bort kommentaren om du vill förstöra väggar
                     return true;
                 }
             }
@@ -113,11 +116,11 @@ PUBLIC bool getWallCollisionBullet(int x, int y, int h, int w) {
 void countWallHits(int i, int j)
 {
     tileGridHits[i][j]++;
-    if (tileGridHits[i][j] == 3)
+    if (tileGridHits[i][j] == 100)
     {
         tileGrid[i][j] = wall3;
     }
-    else if (tileGridHits[i][j] == 6)
+    else if (tileGridHits[i][j] == 200)
     {
         tileGrid[i][j] = bricks;
     }

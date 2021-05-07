@@ -27,6 +27,8 @@ int getPlayerxtarget(Player b);
 int getPlayerytarget(Player b);
 bool isPlayershooting(Player a);
 void setPlayerShooting(Player *a, bool isShooting, int xTarget, int yTarget);
+bool checkIfPlayerdamaged(Player p);
+void resetDamagedPlayer(Player p);
 
 void updateServerPlayer(Player *p, int x, int y, int direction, bool alive, bool isShooting, int xTarget, int yTarget);
 
