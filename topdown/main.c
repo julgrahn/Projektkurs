@@ -56,7 +56,7 @@ int main(int argc, char* args[])
     if (!initMenu(&renderMenu)) return 1;
     if (!initSDL(&renderer)) return 1;
     initGameObjects(players, bullets);
-    loadMenu(renderMenu, &buttons, cursor);
+    loadMenu(renderMenu, &buttons, &cursor);
     startPrompt(&playerID, &server, &host);
     if (host)
     {
