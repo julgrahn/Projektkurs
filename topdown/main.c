@@ -13,6 +13,7 @@
 #include "clientNetFunctions.h"
 #include "gameFunctions.h"
 #include "renderFunctions.h"
+#include "menu.h"
 
 
 SDL_mutex *mutex;
@@ -23,34 +24,39 @@ void startPrompt(int* playerID, Server* server, bool* host);
 int main(int argc, char* args[])
 { 
     // Variables
-    
+    SDL_Point playerRotationPoint = { 20, 32 };
     SDL_Event event;
     SDL_Renderer* renderer = NULL;
+    SDL_Renderer* renderMenu = NULL;
     UDPsocket sd;
     TCPsocket tcpsock = NULL;
     IPaddress srvadd;
     UDPpacket* p;
     UDPpacket* p2;
     Server server = NULL;
-    int playerID;
     SDL_Cursor* cursor = NULL;
     Player players[MAX_PLAYERS];
     SDL_Texture* playerText;
+    SDL_Texture* buttons;
     SDL_Rect playerRect[4];
-    int mouseX = 0, mouseY = 0;
     Bullet bullets[MAX_BULLETS];
     SDL_Texture* tiles = NULL;
     SDL_Rect gridTiles[900];   // Kommer innehålla alla 900 rutor från bakgrundsbilden, kan optmiseras.
-    bool isPlaying = true, shooting = false, host = false, connected = false;
+    Networkgamestate networkgamestate = createNetworkgamestate();
     SDL_Texture* bulletTexture = NULL;
     int up = 0, down = 0, left = 0, right = 0;
-    SDL_Point playerRotationPoint = { 20, 32 };
-    Networkgamestate networkgamestate = createNetworkgamestate();
+    int playerID;
+    int mouseX = 0, mouseY = 0;
+    bool isPlaying = true, shooting = false, host = false, connected = false;
+
+    
 
     // Init functions
     mutex = SDL_CreateMutex();
+    if (!initMenu(&renderMenu)) return 1;
     if (!initSDL(&renderer)) return 1;
     initGameObjects(players, bullets);
+    loadMenu(renderMenu, &buttons, cursor);
     startPrompt(&playerID, &server, &host);
     if (host)
     {

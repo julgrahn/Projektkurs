@@ -10,7 +10,6 @@ PUBLIC bool initSDL(SDL_Renderer** renderer)
         printf("error initializing SDL: %s\n", SDL_GetError());
         return false;
     }
-    SDL_Window* menu = SDL_CreateWindow("Main Menu", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOWWIDTH, WINDOWHEIGHT, 0);
     SDL_Window* window = SDL_CreateWindow("top down extreme shooter", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOWWIDTH, WINDOWHEIGHT, 0);
     if (window == NULL)
     {
@@ -19,12 +18,11 @@ PUBLIC bool initSDL(SDL_Renderer** renderer)
         return false;
     }
     Uint32 renderFlags = SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC;
-    *renderer = SDL_CreateRenderer(window, -1, renderFlags);
+    *renderer = SDL_CreateRenderer(window, 0, renderFlags);
     if (renderer == NULL)
     {
         printf("error creating renderer: %s\n", SDL_GetError());
         SDL_DestroyWindow(window);
-        SDL_DestroyWindow(menu);
         SDL_Quit();
         return false;
     }
