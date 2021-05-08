@@ -12,7 +12,7 @@
 
 PRIVATE void runServer(void* args);
 PRIVATE void serverPlayerBulletCollisionCheck(Bullet bullets[], Player players[]);
-PRIVATE void handleGameLogic(Server server, int respawnDelay[]);
+PRIVATE void handleGameLogic(Server server, int respawnDelay[], SDL_Rect *a, SDL_Rect *b);
 PRIVATE void handleTCP(Server server);
 PRIVATE void handleUDPreceive(Server server);
 PRIVATE void handleUDPsend(Server server);
@@ -34,6 +34,7 @@ struct Server_type {
     Player aPlayers[MAX_PLAYERS];
     Bullet aBullet[MAX_BULLETS];
     SDL_Point spawnPoint[MAX_PLAYERS];
+    int bulletTimers[MAX_PLAYERS][MAX_BULLETS];
 };
 
 PUBLIC Server createServer()
@@ -73,6 +74,10 @@ PUBLIC Server createServer()
     {
         setGamastateplayerpos(&server->state, i, server->spawnPoint[i].x, server->spawnPoint[i].y);
         snapPlayer(server->aPlayers[i],server->spawnPoint[i].x, server->spawnPoint[i].y);
+        for(int j = 0; j < MAX_BULLETS; j++)
+        {
+            server->bulletTimers[i][j] = 0;
+        }
     }
 
     //Initialize SDL_net 
@@ -123,21 +128,22 @@ PRIVATE void runServer(void* args)
     int UDPreceiveDelay = 0;
     int Gamelogicdelay = 0;
     int respawnDelay[MAX_PLAYERS] = {0}; 
+
+    int test = 0;
+    SDL_Rect a, b;
+    a.w = a.h = 64;
+    b.w = b.h = 4;
     // Main-loop
     while (true)
     {   
         SDL_Delay(1); 
         TCPdelay = (TCPdelay + 1) % 1000;
         UDPreceiveDelay = (UDPreceiveDelay + 1) % 1;
-        UDPsendDelay = (UDPsendDelay + 1) % 10;
-        Gamelogicdelay = (Gamelogicdelay + 1) % 8;
-        
+        UDPsendDelay = (UDPsendDelay + 1) % 30;
+        Gamelogicdelay = (Gamelogicdelay + 1) % 15;
+        test = (test + 1) % 2000;
         // Game logic
-        if(!Gamelogicdelay) // Måste vara 16ms intervall
-        {
-            //printf("%d\n", SDL_GetTicks());
-            handleGameLogic(server, respawnDelay);           
-        }
+        
         // TCP
         if (!TCPdelay)
         {
@@ -148,11 +154,20 @@ PRIVATE void runServer(void* args)
         {
             handleUDPreceive(server);
         }
+        if(!Gamelogicdelay) // Måste vara 16ms intervall
+        {
+            //printf("%d\n", SDL_GetTicks());
+            handleGameLogic(server, respawnDelay, &a, &b);           
+        }
         // UDP Send
         if(!UDPsendDelay)
         {
             handleUDPsend(server);
         }
+        // if(!test)
+        // {
+        //     printf("%d\t%d\n", server->clients[0].port, server->clients[1].port);
+        // }
     }
 }
 
@@ -178,10 +193,23 @@ PRIVATE void handleUDPreceive(Server server)
         {
             if (server->pRecive->address.port == server->clients[i].port) // Kollar vem paket kom ifrån och uppdaterar endast den spelaren
             {
-                bool alive = getNetplayerHealth(server->state, i);
-                int health = isNetworkplayerAlive(&server->state, i);
+                bool alive = isNetworkplayerAlive(&server->state, i);
+                int health = getNetplayerHealth(server->state, i);
                 memcpy(getNetworkgamestateplayer(&server->state, i), server->pRecive->data, getNetworkplayersize());
+                for(int j = 0; j < MAX_BULLETS; j++)
+                {
+                    if(netbulletStatus(server->state, i, j))
+                    {
+                        server->bulletTimers[i][j] = (server->bulletTimers[i][j] + 1) % 10;
+                    }
+                    if(server->bulletTimers[i][j])
+                    {
+                        freeNetbullet(server->state, i, j);
+                    }
+                    else netBulletclearcontrol(server->state, i, j);
+                }
                 setNetworkplayeralive(&server->state, i, alive);
+                // printf("%d\n", alive);
                 setNetplayerHealth(server->state, i, health);
                 // setNetworkplayeralive(&server->state, i, isPlayerAlive(server->aPlayers[i]));
                 // updateServerPlayer(&server->aPlayers[i], getNetworkgamestateplayerX(&server->state, i), getNetworkgamestateplayerY(&server->state, i), getNetworkgamestateplayerDirection(&server->state, i), isNetworkgamestateplayerAlive(&server->state, i), isNetworkgamestateplayerShooting(&server->state, i), getNetworkgamestateplayerXtarget(&server->state, i), getNetworkgamestateplayerYtarget(&server->state, i));
@@ -276,33 +304,40 @@ PRIVATE void serverPlayerBulletCollisionCheck(Bullet bullets[], Player players[]
 }
 
 
-PRIVATE void handleGameLogic(Server server, int respawnDelay[])
+PRIVATE void handleGameLogic(Server server, int respawnDelay[], SDL_Rect *a, SDL_Rect *b)
 {
+    // for (int i = 0; i < 2; i++)
+    // {
+    //     for (int j = 0; j < MAX_BULLETS; j++)
+    //     {
+    //         printf("%d\t%d\n", getNetbulletX(server->state, i, j), getNetbulletY(server->state, i, j));
+    //     }
+        
+    // }
+    
     // serverPlayerBulletCollisionCheck(server->aBullet, server->aPlayers);
-    SDL_Rect a, b;
-    a.h = a.w = 64;
-    b.h = b.w = 4;
     for (int i = 0; i < MAX_PLAYERS; i++)
     {
         if(isNetworkplayeractive(&server->state, i))
         {
-            for (int j = 0; j < MAX_BULLETS; j++)
+            for(int j = 0; j < MAX_BULLETS; j++)
             {
                 if(isNetbulletActive(server->state, i, j))
-                {
-                    for(int k = 0; k < MAX_PLAYERS; k++)
+                {                    
+                    for (int k = 0; k < MAX_PLAYERS; k++)
                     {
-                        if(i!=k && isNetworkplayerAlive(&server->state, k))
+                        if((i!=k) && isNetworkplayerAlive(&server->state, k))
                         {
-                            a.x = getNetworkgamestateplayerX(&server->state, k);
-                            a.y = getNetworkgamestateplayerY(&server->state, k);
-                            b.x = getNetbulletX(server->state, i, j);
-                            b.y = getNetbulletY(server->state, i, j);
-                            if(rectCollisionTest(&b,&a))
+                            a->x = getNetworkgamestateplayerX(&server->state, k);
+                            a->y = getNetworkgamestateplayerY(&server->state, k);
+                            b->x = getNetbulletX(server->state, i, j);
+                            b->y = getNetbulletY(server->state, i, j);
+                            if(rectCollisionTest(b,a))
                             {
+                                server->bulletTimers[i][j] = 1;
                                 freeNetbullet(server->state, i, j);
                                 damageNetplayer(server->state, k);
-                                // printf("damage\n");
+                                // printf("%d hit %d\n", i, k);
                             }
                         }
                     }
@@ -310,24 +345,21 @@ PRIVATE void handleGameLogic(Server server, int respawnDelay[])
             } 
         }
     }
-
-    // printf("done\n");
-    
-    
-    // for (int i = 0; i < MAX_PLAYERS; i++)
-    // {
-    //     if (!isPlayerAlive(server->aPlayers[i]) && server->tcpsockClient[i] != NULL)
-    //     {
-    //         respawnDelay[i]++;
-    //         snapPlayer(server->aPlayers[i], server->spawnPoint[i].x, server->spawnPoint[i].y);
-    //         if (respawnDelay[i] == 180)
-    //         {
-    //             printf("%d seconds | Player %d has respawned\n", SDL_GetTicks() / 1000, i);
-    //             setPlayerAlive(server->aPlayers[i], true);
-    //             respawnDelay[i] = 0;
-    //         }
-    //     }
-    // }
+    for (int i = 0; i < MAX_PLAYERS; i++)
+    {
+        if (!isNetworkplayerAlive(&server->state, i) && isNetworkplayeractive(&server->state, i))
+        {
+            respawnDelay[i]++;
+            setNetplayerPos(server->state, i, server->spawnPoint[i].x, server->spawnPoint[i].y);
+            // snapPlayer(server->aPlayers[i], server->spawnPoint[i].x, server->spawnPoint[i].y);
+            if (respawnDelay[i] == 180)
+            {
+                printf("%d seconds | Player %d has respawned\n", SDL_GetTicks() / 1000, i);
+                reviveNetworkgamestateplayer(&server->state, i);
+                respawnDelay[i] = 0;
+            }
+        }
+    }
 }
 
 // PRIVATE void handleGameLogic(Server server, int respawnDelay[])

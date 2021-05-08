@@ -19,6 +19,7 @@ PUBLIC void updateplayers(Networkgamestate networkgamestate, Player players[], i
             setPlayerAlive(players[playerID], isNetworkplayerAlive(&networkgamestate, playerID));
             if (!isPlayerAlive(players[playerID]))
             {
+                // printf("test\n");
                 snapPlayer(players[playerID], getNetworkgamestateplayerX(&networkgamestate, playerID), getNetworkgamestateplayerY(&networkgamestate, playerID));
             }
         }
@@ -29,12 +30,13 @@ PUBLIC void updateplayerbullets(Networkgamestate networkgamestate, int playerID,
 {
     for (int i = 0; i < MAX_BULLETS; i++)
     {
-        if(isBulletActive(bullets[i]))
+        if(isBulletActive(bullets[i]) && netbulletStatus(networkgamestate, playerID, i))
         {
             if(!isNetbulletActive(networkgamestate, playerID, i))
             {
-                printf("freebullet\n");
+                // printf("freebullet\n");
                 freeBullet(bullets[i]);
+                // bulletTimer(bullets[i]);
             }
         }
     }
@@ -47,14 +49,14 @@ PUBLIC void playerBulletCollisionCheck(Bullet bullets[], Player players[])
         if (isBulletActive(bullets[i]))
         {
             moveBullet(bullets[i]);
-            for (int j = 0; j < MAX_PLAYERS; j++)
-            {
-                if (rectCollisionTest(getBulletRect(bullets[i]), getPlayerRect(players[j]))
-                    && (getBulletOwner(bullets[i]) != j) && isPlayerAlive(players[j]))
-                {
-                    freeBullet(bullets[i]);
-                }
-            }
+            // for (int j = 0; j < MAX_PLAYERS; j++)
+            // {
+            //     if (rectCollisionTest(getBulletRect(bullets[i]), getPlayerRect(players[j]))
+            //         && (getBulletOwner(bullets[i]) != j) && isPlayerAlive(players[j]))
+            //     {
+            //         freeBullet(bullets[i]);
+            //     }
+            // }
         }
     }
 }

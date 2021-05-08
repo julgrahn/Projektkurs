@@ -19,6 +19,7 @@ struct Bullet_type {
 	int owner;
 	double direction;
 	int damage;
+	int timeout, shottimer;
 };
 
 PUBLIC Bullet createBullet()
@@ -29,6 +30,8 @@ PUBLIC Bullet createBullet()
 	b->dimensions.h = 4;
 	b->speed = BULLET_SPEED;
 	b->damage = BULLET_DAMAGE;
+	b->timeout = 0;
+	b->shottimer = 0;
 	// b->xPos = 0, b->yPos = 0;
 
 	return b;
@@ -40,14 +43,19 @@ PUBLIC void spawnBullet(Bullet a, int xOrigin, int yOrigin, int xTarget, int yTa
 	a->xPos = xOrigin + 20;
 	a->yPos = yOrigin + 32;
 	a->direction = atan2(yTarget - (a->yPos + (a->dimensions.h / 2)), xTarget - (a->xPos + (a->dimensions.w / 2)));
+	// printf("%.10f\n", a->direction);
 	a->xSpeed = a->speed * cos(a->direction);
 	a->ySpeed = a->speed * sin(a->direction);
 	a->owner = owner;
+	a->shottimer = 20;
 }
 
 PUBLIC bool isBulletActive(Bullet bullet)
 {
-	return bullet->active;
+	// if(bullet->timeout)
+	// 	return false;
+	// else 
+		return bullet->active;
 }
 
 PUBLIC void moveBullet(Bullet bullet)
@@ -102,4 +110,25 @@ PUBLIC int getBulletY(Bullet a)
 int getBulletDamage(Bullet b)
 {
 	return b->damage;
+}
+
+PUBLIC void bulletTimer(Bullet b)
+{
+	b->timeout = 120;
+}
+
+PUBLIC void bulletTick(Bullet b[])
+{
+	int count = 0;
+	for (int i = 0; i < MAX_BULLETS; i++)
+	{
+		count += isBulletActive(b[i]);
+	}
+}
+
+PUBLIC bool bulletShottimer(Bullet b)
+{
+	if(!--b->shottimer)
+		return true;
+	else return false;
 }

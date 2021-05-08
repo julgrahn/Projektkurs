@@ -3,16 +3,17 @@
 #define PUBLIC
 #define NETBULLETDMG 10
 typedef struct NetworkBullet_type{
-	short xPos, yPos;
-    Uint8 direction;
+	short xPos, yPos, angle;
+    // Uint8 control;
+    bool control;
     bool active;
 }Networkbullet;
 
 typedef struct NetworkPlayer_type{
     short direction, health;
-    short posX, posY, xTarget, yTarget;
-    bool isAlive, isShooting, isActive;
-    Uint8 damage;
+    short posX, posY;// xTarget, yTarget;
+    bool isAlive, isActive; //isShooting;
+    // Uint8 damage;
     // Uint8 playerstatus, damage, health;
     // short bullets[15][4];
     Networkbullet aBullet[MAX_BULLETS];
@@ -30,12 +31,14 @@ PUBLIC Networkgamestate createNetworkgamestate()
         a->aPlayer[i].direction = 0;
         a->aPlayer[i].posX = 0, a->aPlayer[i].posY = 0;
         a->aPlayer[i].isAlive = false;
-        a->aPlayer[i].isShooting = false;
+        // a->aPlayer[i].isShooting = false;
         a->aPlayer[i].isActive = false;
-        // for (int j = 0; j < 15; j++)
-        // {
-        //     a->aPlayer[i].aBullet[j].active = false;
-        // }
+        a->aPlayer[i].health = 100;
+        for (int j = 0; j < MAX_BULLETS; j++)
+        {
+            a->aPlayer[i].aBullet[j].active = false;
+            a->aPlayer[i].aBullet[j].control = false;
+        }
         
         // a->aPlayer[i].xTarget = 0, a->aPlayer[i].yTarget = 0;
     }
@@ -66,15 +69,15 @@ PUBLIC void setGamastateplayerpos(Networkgamestate *a, int n, int x, int y)
 
 PUBLIC void setNetworkgamestateplayer(Networkgamestate *a, int n, Player b)
 {
-    (*a)->aPlayer[n].isAlive = isPlayerAlive(b);
+    // (*a)->aPlayer[n].isAlive = isPlayerAlive(b);
     (*a)->aPlayer[n].posX = getPlayerX(b);
     (*a)->aPlayer[n].posY = getPlayerY(b);
     (*a)->aPlayer[n].direction = (short)getPlayerDirection(b);
-    (*a)->aPlayer[n].health = getPlayerHealth(b);
-    (*a)->aPlayer[n].xTarget = getPlayerxtarget(b);
-    (*a)->aPlayer[n].yTarget = getPlayerytarget(b);
-    if(isPlayerAlive(b)) (*a)->aPlayer[n].isShooting = isPlayershooting(b);
-    else (*a)->aPlayer[n].isShooting = false;
+    // (*a)->aPlayer[n].health = getPlayerHealth(b);
+    // (*a)->aPlayer[n].xTarget = getPlayerxtarget(b);
+    // (*a)->aPlayer[n].yTarget = getPlayerytarget(b);
+    // if(isPlayerAlive(b)) (*a)->aPlayer[n].isShooting = isPlayershooting(b);
+    // else (*a)->aPlayer[n].isShooting = false;
     (*a)->aPlayer[n].isActive = true;
     // printf("%d\n", isPlayershooting(b));
 }
@@ -100,12 +103,13 @@ PUBLIC void* getNetworkgamestateplayer(Networkgamestate *a, int playerID)
 PUBLIC void killNetworkplayer(Networkgamestate *a, int n)
 {
     (*a)->aPlayer[n].isAlive = false;
-    printf("%d died\n", n);
+    // printf("%d died\n", n);
 }
 
 PUBLIC void reviveNetworkgamestateplayer(Networkgamestate *a, int n)
 {
     (*a)->aPlayer[n].isAlive = true;
+    (*a)->aPlayer[n].health = 100;
 }
 
 PUBLIC bool isNetworkplayeractive(Networkgamestate *a, int n)
@@ -145,17 +149,17 @@ PUBLIC bool isNetworkplayerAlive(Networkgamestate *a, int n)
 
 PUBLIC bool isNetworkgamestateplayerShooting(Networkgamestate *a, int n)
 {
-    return (*a)->aPlayer[n].isShooting;
+    // return (*a)->aPlayer[n].isShooting;
 }
 
 PUBLIC int getNetworkgamestateplayerXtarget(Networkgamestate *a, int n)
 {
-    return (*a)->aPlayer[n].xTarget;
+    // return (*a)->aPlayer[n].xTarget;
 }
 
 PUBLIC int getNetworkgamestateplayerYtarget(Networkgamestate *a, int n)
 {
-    return (*a)->aPlayer[n].yTarget;
+    // return (*a)->aPlayer[n].yTarget;
 }
 
 PUBLIC bool iisplayershoot(void *player)
@@ -170,10 +174,11 @@ PUBLIC void setNetworkplayeralive(Networkgamestate *a, int n, bool alive)
 
 PUBLIC void setNetworkbullets(Networkgamestate a, int playerID, Bullet bullets[])
 {
-    for (int i = 0; i < MAX_BULLETS; i++)
+    int i;
+    for (i = 0; i < MAX_BULLETS; i++)
     {
         a->aPlayer[playerID].aBullet[i].active = isBulletActive(bullets[i]);
-        a->aPlayer[playerID].aBullet[i].direction = getBulletDirection(bullets[i]);
+        a->aPlayer[playerID].aBullet[i].angle = getBulletDirection(bullets[i])*10000;
         a->aPlayer[playerID].aBullet[i].xPos = getBulletX(bullets[i]);
         a->aPlayer[playerID].aBullet[i].yPos = getBulletY(bullets[i]);
     }
@@ -197,6 +202,7 @@ PUBLIC bool isNetbulletActive(Networkgamestate a, int playerID, int bulletNo)
 PUBLIC void damageNetplayer(Networkgamestate a, int playerID)
 {
     a->aPlayer[playerID].health -= NETBULLETDMG;
+    // printf("%d\n", playerID);
     if(a->aPlayer[playerID].health <= 0)
     {
         killNetworkplayer(&a, playerID);
@@ -216,4 +222,20 @@ PUBLIC void setNetplayerHealth(Networkgamestate a, int playerID, int health)
 PUBLIC void freeNetbullet(Networkgamestate a, int playerID, int bulletNo)
 {
     a->aPlayer[playerID].aBullet[bulletNo].active = false;
+    a->aPlayer[playerID].aBullet[bulletNo].control = true;
+}
+
+PUBLIC void setNetplayerPos(Networkgamestate a, int playerID, int x, int y)
+{
+    a->aPlayer[playerID].posX = x, a->aPlayer[playerID].posY = y;
+}
+
+PUBLIC bool netbulletStatus(Networkgamestate a, int playerID, int bulletID)
+{
+    return a->aPlayer[playerID].aBullet[bulletID].control;
+}
+
+PUBLIC void netBulletclearcontrol(Networkgamestate a, int playerID, int bulletID)
+{
+    a->aPlayer[playerID].aBullet[bulletID].control = 0;
 }

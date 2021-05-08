@@ -45,7 +45,9 @@ void damageNetplayer(Networkgamestate a, int playerID);
 int getNetplayerHealth(Networkgamestate a, int playerID);
 void setNetplayerHealth(Networkgamestate a, int playerID, int health);
 void freeNetbullet(Networkgamestate a, int playerID, int bulletNo);
-
+void setNetplayerPos(Networkgamestate a, int playerID, int x, int y);
+bool netbulletStatus(Networkgamestate a, int playerID, int bulletID);
+void netBulletclearcontrol(Networkgamestate a, int playerID, int bulletID);
 // void setGamestateplayerID(Networkplayer *a, int id);
 // int getGamestateplayerID(Networkplayer *a, int n);
 

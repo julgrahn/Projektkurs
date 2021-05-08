@@ -172,6 +172,8 @@ PUBLIC void updatePlayerPosition(Player *p, int x, int y, int direction, bool al
     (*p)->newY = y;
     (*p)->newDirection = direction;
     (*p)->direction = direction;
+
+    // buggar så spelare kan skjuta sig själva på något sätt
     (*p)->isShooting = isShooting;
     (*p)->xTarget = xTarget, (*p)->yTarget = yTarget;
 }

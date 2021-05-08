@@ -66,6 +66,7 @@ int main(int argc, char* args[])
     // Main loop
     while (isPlaying)
     {
+        bulletTick(bullets);
         handleEvents(&event, &up, &down, &right, &left, &isPlaying, &mouseX, &mouseY, &shooting);
         setPlayerShooting(&players[playerID], shooting, mouseX, mouseY);
         if (isPlayerAlive(players[playerID]))

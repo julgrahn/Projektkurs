@@ -18,4 +18,7 @@ int getBulletX(Bullet a);
 int getBulletY(Bullet a);
 
 int getBulletDamage(Bullet b);
+void bulletTimer(Bullet b);
+void bulletTick(Bullet b[]);
+bool bulletShottimer(Bullet b);
 #endif
