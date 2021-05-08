@@ -55,24 +55,18 @@ PUBLIC void connectToServer(char* ip, IPaddress* srvadd, TCPsocket* tcpsock, Net
 
 PUBLIC void sendUDP(void* player, UDPsocket* sd, IPaddress* srvadd, UDPpacket** p, UDPpacket** p2)
 { 
-    // static int delay = 0;
-    // delay = (delay + 1) % 3;
-    // if(!delay)
-    {
-        memcpy((*p)->data, player, getNetworkplayersize());
-        // memcpy((*p)->data, &player, sizeof(player));
-        (*p)->address = *srvadd;
-        (*p)->len = getNetworkplayersize();
-        SDLNet_UDP_Send(*sd, -1, *p);    
-    }
+    memcpy((*p)->data, player, getNetworkplayersize());
+    (*p)->address = *srvadd;
+    (*p)->len = getNetworkplayersize();
+    SDLNet_UDP_Send(*sd, -1, *p);    
 }
 
-PUBLIC void startUDPreceiveThread(UDPsocket *sd, UDPpacket** p2, Bullet bullets[], Player players[], Networkgamestate *networkgamestate, int playerID, SDL_mutex** mutex)
+PUBLIC void startUDPreceiveThread(UDPsocket *sd, UDPpacket** p2, Bullet bullets[][MAX_BULLETS], Player players[], Networkgamestate *networkgamestate, int playerID, SDL_mutex** mutex)
 {
     UDPReceiveStruct urs = malloc(sizeof(struct UDPReceiveStruct_type));
     urs->sd = *sd;
     urs->p2 = *p2;
-    urs->bullets = bullets;
+    urs->bullets = *bullets;
     urs->players = players;
     urs->state = networkgamestate;
     urs->playerID = playerID;
@@ -87,7 +81,7 @@ PRIVATE void UDPReceive(void* args)
 
     while (true)
     {
-        SDL_Delay(10);
+        SDL_Delay(1);
         if (SDLNet_UDP_Recv(urs->sd, urs->p2))
         {
             if (SDL_TryLockMutex(urs->mutex) != SDL_MUTEX_TIMEDOUT)

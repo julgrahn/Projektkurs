@@ -29,12 +29,14 @@ PUBLIC bool initSDL(SDL_Renderer** renderer)
     return true;
 }
 
-PUBLIC void initGameObjects(Player players[], Bullet bullets[])
+PUBLIC void initGameObjects(Player players[], Bullet bullets[][MAX_BULLETS])
 {
-    // for (int i = 0; i < MAX_PLAYERS; i++)
-    for (int j = 0; j < MAX_BULLETS; j++)
+    for (int i = 0; i < MAX_PLAYERS; i++)
     {
-        bullets[j] = createBullet();
+        for (int j = 0; j < MAX_BULLETS; j++)
+        {
+            bullets[i][j] = createBullet();
+        }
     }
     for (int i = 0; i < MAX_PLAYERS; i++)
     {

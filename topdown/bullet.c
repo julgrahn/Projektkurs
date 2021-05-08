@@ -4,9 +4,10 @@
 #include "world.h"
 #include <stdbool.h>
 #include <math.h>
-#define BULLET_DAMAGE 10
-#define BULLET_SPEED 10
 #define PUBLIC
+#define PRIVATE static
+
+PRIVATE void moveBullet(Bullet bullet);
 
 struct Bullet_type {
 	SDL_Rect dimensions;
@@ -19,7 +20,6 @@ struct Bullet_type {
 	int owner;
 	double direction;
 	int damage;
-	int timeout, shottimer;
 };
 
 PUBLIC Bullet createBullet()
@@ -30,10 +30,6 @@ PUBLIC Bullet createBullet()
 	b->dimensions.h = 4;
 	b->speed = BULLET_SPEED;
 	b->damage = BULLET_DAMAGE;
-	b->timeout = 0;
-	b->shottimer = 0;
-	// b->xPos = 0, b->yPos = 0;
-
 	return b;
 }
 
@@ -43,39 +39,34 @@ PUBLIC void spawnBullet(Bullet a, int xOrigin, int yOrigin, int xTarget, int yTa
 	a->xPos = xOrigin + 20;
 	a->yPos = yOrigin + 32;
 	a->direction = atan2(yTarget - (a->yPos + (a->dimensions.h / 2)), xTarget - (a->xPos + (a->dimensions.w / 2)));
-	// printf("%.10f\n", a->direction);
 	a->xSpeed = a->speed * cos(a->direction);
 	a->ySpeed = a->speed * sin(a->direction);
 	a->owner = owner;
-	a->shottimer = 20;
 }
 
 PUBLIC bool isBulletActive(Bullet bullet)
 {
-	// if(bullet->timeout)
-	// 	return false;
-	// else 
-		return bullet->active;
+	return bullet->active;
 }
 
-PUBLIC void moveBullet(Bullet bullet)
+PRIVATE void moveBullet(Bullet bullet)
 {
-	bullet->xPos += bullet->xSpeed;
-	bullet->yPos += bullet->ySpeed;
-
-	if (getWallCollisionBullet(bullet->xPos, bullet->yPos, bullet->dimensions.h, bullet->dimensions.w))
+	if(isBulletActive(bullet))
 	{
-		freeBullet(bullet);
+		bullet->xPos += bullet->xSpeed;
+		bullet->yPos += bullet->ySpeed;
+
+		if (getWallCollisionBullet(bullet->xPos, bullet->yPos, bullet->dimensions.h, bullet->dimensions.w))
+		{
+			freeBullet(bullet);
+		}
+
+		bullet->dimensions.x = round(bullet->xPos);
+		bullet->dimensions.y = round(bullet->yPos);
+
+		if (bullet->dimensions.x < 0 || bullet->dimensions.x > WINDOWWIDTH || bullet->dimensions.y < 0 || bullet->dimensions.y > WINDOWHEIGHT)
+			bullet->active = false;
 	}
-
-	bullet->dimensions.x = round(bullet->xPos);
-	bullet->dimensions.y = round(bullet->yPos);
-
-	if (bullet->dimensions.x < 0 ||
-		bullet->dimensions.x > WINDOWWIDTH ||
-		bullet->dimensions.y < 0 ||
-		bullet->dimensions.y > WINDOWHEIGHT) bullet->active = false;
-
 }
 
 PUBLIC SDL_Rect* getBulletRect(Bullet bullet)
@@ -107,28 +98,29 @@ PUBLIC int getBulletY(Bullet a)
 {
 	return a->yPos;
 }
-int getBulletDamage(Bullet b)
+PUBLIC int getBulletDamage(Bullet b)
 {
 	return b->damage;
 }
 
-PUBLIC void bulletTimer(Bullet b)
+PUBLIC void setBulletXY(Bullet b, int x, int y)
 {
-	b->timeout = 120;
+	b->xPos = b->dimensions.x = x, b->yPos = b->dimensions.y = y; 
 }
 
-PUBLIC void bulletTick(Bullet b[])
+PUBLIC void bulletActivate(Bullet b)
 {
-	int count = 0;
-	for (int i = 0; i < MAX_BULLETS; i++)
-	{
-		count += isBulletActive(b[i]);
-	}
+	b->active = true;
 }
 
-PUBLIC bool bulletShottimer(Bullet b)
+PUBLIC void simulateBullets(Bullet aBullets[][MAX_BULLETS])
 {
-	if(!--b->shottimer)
-		return true;
-	else return false;
+	for (int i = 0; i < MAX_PLAYERS; i++)
+		for(int j = 0; j < MAX_BULLETS; j++)
+			moveBullet(aBullets[i][j]);
+}
+
+PUBLIC void setBulletSpeed(Bullet b, double x, double y)
+{
+	b->xSpeed = x, b->ySpeed = y;
 }

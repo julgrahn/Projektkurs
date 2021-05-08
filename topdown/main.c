@@ -37,8 +37,7 @@ int main(int argc, char* args[])
     SDL_Texture* playerText;
     SDL_Rect playerRect[4];
     int mouseX = 0, mouseY = 0;
-    Bullet bullets[MAX_BULLETS];
-    // Bullet bullets[MAX_PLAYERS][MAX_BULLETS];
+    Bullet bullets[MAX_PLAYERS][MAX_BULLETS];
     SDL_Texture* tiles = NULL;
     SDL_Rect gridTiles[900];   // Kommer innehålla alla 900 rutor från bakgrundsbilden, kan optmiseras.
     bool isPlaying = true, shooting = false, host = false, connected = false;
@@ -50,9 +49,7 @@ int main(int argc, char* args[])
     // Init functions
     mutex = SDL_CreateMutex();
     if (!initSDL(&renderer)) return 1;
-    
     initGameObjects(players, bullets);
-    
     startPrompt(&playerID, &server, &host);
     if (host)
     {
@@ -66,32 +63,27 @@ int main(int argc, char* args[])
     // Main loop
     while (isPlaying)
     {
-        bulletTick(bullets);
         handleEvents(&event, &up, &down, &right, &left, &isPlaying, &mouseX, &mouseY, &shooting);
         setPlayerShooting(&players[playerID], shooting, mouseX, mouseY);
         if (isPlayerAlive(players[playerID]))
         {            
             movePlayer(players[playerID], up, down, right, left, mouseX, mouseY);
-            if (isPlayershooting(players[playerID])) fire(bullets, &players[playerID], playerID, mouseX, mouseY);
+            if (isPlayershooting(players[playerID])) fire(bullets[playerID], &players[playerID], playerID, mouseX, mouseY);
         }
         //Flytta på alla andra spelare
         for (int i = 0; i < MAX_PLAYERS; i++)
         {
             if (i != playerID) {
                 moveOtherPlayers(players[i]);
-                if (isPlayershooting(players[i]))
-                    fire(bullets, &players[i], i, getPlayerxtarget(players[i]), getPlayerytarget(players[i]));
             }
         }
-        playerBulletCollisionCheck(bullets, players);
+        simulateBullets(bullets);
         SDL_LockMutex(mutex);
         setNetworkgamestateplayer(&networkgamestate, playerID, players[playerID]);
-        setNetworkbullets(networkgamestate, playerID, bullets);
+        setNetworkbullets(networkgamestate, playerID, bullets[playerID]);
         sendUDP(getNetworkgamestateplayer(&networkgamestate, playerID), &sd, &srvadd, &p, &p2);
         SDL_UnlockMutex(mutex);
-        // printf("tryredner\n");
         renderGame(renderer, tiles, gridTiles, bullets, bulletTexture, players, playerText, playerRect, &playerRotationPoint);
-        // printf("hasrendered\n");
     }
 
     SDL_DestroyRenderer(renderer);
