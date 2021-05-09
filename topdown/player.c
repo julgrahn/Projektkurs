@@ -6,7 +6,7 @@
 #define PUBLIC
 #define SPEED 2
 #define ANIMATIONSPEED 8               //lower = faster
-#define HEALTH 100
+#define HEALTH 1000
 #define ROTATION_UPDATE_SPEED 5
 #define SNAP_DISTANCE 10
 
@@ -130,7 +130,7 @@ PUBLIC double getPlayerDirection(Player p)
 }
 
 PUBLIC int getPlayerHealth(Player p)
-{   
+{
     return p->health;
 }
 
@@ -159,7 +159,7 @@ PUBLIC int getPlayerID(Player p)
     return p->id;
 }
 
-PUBLIC void updatePlayerPosition(Player *p, int x, int y, int direction, bool alive, bool isShooting, int xTarget, int yTarget)
+PUBLIC void updatePlayerPosition(Player* p, int x, int y, int direction, bool alive, bool isShooting, int xTarget, int yTarget)
 {
     (*p)->alive = alive;
     (*p)->newX = x;
@@ -170,7 +170,7 @@ PUBLIC void updatePlayerPosition(Player *p, int x, int y, int direction, bool al
     (*p)->xTarget = xTarget, (*p)->yTarget = yTarget;
 }
 
-PUBLIC void updateServerPlayer(Player *p, int x, int y, int direction, bool alive, bool isShooting, int xTarget, int yTarget)
+PUBLIC void updateServerPlayer(Player* p, int x, int y, int direction, bool alive, bool isShooting, int xTarget, int yTarget)
 {
     // (*p)->alive = alive;
     (*p)->pDimensions.x = x;
@@ -185,20 +185,20 @@ PUBLIC void moveOtherPlayers(Player p)
 {
     int xDelta = p->newX - p->pDimensions.x;
     int yDelta = p->newY - p->pDimensions.y;
-    double distance = sqrt(xDelta*xDelta + yDelta*yDelta);
-    double scaling = p->speed/(distance*(distance >= 1)+(distance < 1));
+    double distance = sqrt(xDelta * xDelta + yDelta * yDelta);
+    double scaling = p->speed / (distance * (distance >= 1) + (distance < 1));
     if (distance >= SNAP_DISTANCE)
     {
         snapPlayer(p, p->newX, p->newY);
         return;
     }
-    int old = p->direction + 180+5;
-    int new = p->newDirection + 180+5;
+    int old = p->direction + 180 + 5;
+    int new = p->newDirection + 180 + 5;
 
-    if(xDelta > 1 || xDelta < -1 || yDelta > 1 || yDelta < -1)
+    if (xDelta > 1 || xDelta < -1 || yDelta > 1 || yDelta < -1)
     {
-        p->xSpeed = scaling*xDelta;
-        p->ySpeed = scaling*yDelta;
+        p->xSpeed = scaling * xDelta;
+        p->ySpeed = scaling * yDelta;
 
         p->posX += p->xSpeed;
         p->posY += p->ySpeed;
@@ -254,24 +254,23 @@ PUBLIC void snapPlayer(Player p, int x, int y)
 PUBLIC void damagePlayer(Player p, int damage)
 {
     p->health -= damage;
-    p->wasDamaged = true;
     if (p->health <= 0) p->alive = false;
+}
+
+PUBLIC void clientDamagePlayer(Player p)
+{
+    p->wasDamaged = true;
 }
 
 PUBLIC bool checkIfPlayerdamaged(Player p)
 {
-    if (p->wasDamaged)
-    {
-        p->wasDamaged = false;
-        return true;
-    }
-    return false;
+    return p->wasDamaged;
 }
 
-// PUBLIC void resetDamagedPlayer(Player p)
-// {
-//     p->wasDamaged = false;
-// }
+PUBLIC void resetDamagedPlayer(Player p)
+{
+    p->wasDamaged = false;
+}
 
 PUBLIC bool isPlayerAlive(Player p)
 {
@@ -297,14 +296,13 @@ PUBLIC int getPlayerytarget(Player a)
 PUBLIC bool isPlayershooting(Player a)
 {
     // if(a->alive)
-        return a->isShooting;
+    return a->isShooting;
     // else
     //     return false;
 }
 
-PUBLIC void setPlayerShooting(Player *a, bool isShooting, int xTarget, int yTarget)
+PUBLIC void setPlayerShooting(Player* a, bool isShooting, int xTarget, int yTarget)
 {
     (*a)->isShooting = isShooting;
     (*a)->xTarget = xTarget, (*a)->yTarget = yTarget;
 }
-

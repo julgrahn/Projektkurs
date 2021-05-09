@@ -15,4 +15,5 @@ void playerBulletCollisionCheck(Bullet bullets[], Player players[]);
 bool rectCollisionTest(SDL_Rect* a, SDL_Rect* b);
 void fire(Bullet bullets[], Player* p, int playerID, int xTarget, int yTarget);
 
+
 #endif  // GAMEFUNCTIONS_H

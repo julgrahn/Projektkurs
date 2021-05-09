@@ -4,9 +4,11 @@
 #define PUBLIC /* empty */
 #define PRIVATE static
 
+int oldTileGrid[22][22] = { 0 }; // används för att animera väggträffar. 
+
 PUBLIC void renderGame(SDL_Renderer* renderer, SDL_Texture* mTiles, SDL_Rect gTiles[], Bullet bullets[],
     SDL_Texture* bulletTexture, Player players[], SDL_Texture* playerText, SDL_Rect playerRect[], SDL_Point* playerRotationPoint,
-     SDL_Texture** gunFireTexture, SDL_Rect gunFireRect)
+    SDL_Texture* gunFireTexture, SDL_Rect gunFireRect, SDL_Texture* explosionTexture, SDL_Rect explosionRect, SDL_Point* muzzleRotationPoint)
 {
     SDL_RenderClear(renderer);
     // Render Background
@@ -46,17 +48,17 @@ PUBLIC void renderGame(SDL_Renderer* renderer, SDL_Texture* mTiles, SDL_Rect gTi
     {
         if (isPlayershooting(players[i]))
         {
-            gunFireRect.x = getPlayerX(players[i]) + 32;
-            gunFireRect.y = getPlayerY(players[i]) + 32;
+            gunFireRect.x = getPlayerX(players[i])+40;
+            gunFireRect.y = getPlayerY(players[i])+26;
 
-            SDL_RenderCopyEx(renderer, gunFireTexture, NULL, &gunFireRect, getPlayerDirection(players[i]), playerRotationPoint, SDL_FLIP_NONE);
+            SDL_RenderCopyEx(renderer, gunFireTexture, NULL, &gunFireRect, getPlayerDirection(players[i]), muzzleRotationPoint, SDL_FLIP_NONE);
         }
     }
 
     // Render Wallhits
-    int oldTileGrid[22][22] = { 0 };
     int tileRows = getTileRows();
     int tileColumns = getTileColumns();
+    int k = 10;
     for (int i = 0; i < tileRows; i++)
     {
         for (int j = 0; j < tileColumns; j++)
@@ -65,7 +67,8 @@ PUBLIC void renderGame(SDL_Renderer* renderer, SDL_Texture* mTiles, SDL_Rect gTi
             {
                 gunFireRect.x = j * 32;
                 gunFireRect.y = i * 32;
-                SDL_RenderCopy(renderer, gunFireTexture, NULL, &gunFireRect);
+               
+                SDL_RenderCopy(renderer, gunFireTexture, NULL, &gunFireRect); 
                 oldTileGrid[j][i] = getTileGridHits(i, j);
             }
         }
@@ -76,9 +79,11 @@ PUBLIC void renderGame(SDL_Renderer* renderer, SDL_Texture* mTiles, SDL_Rect gTi
     {
         if (checkIfPlayerdamaged(players[i]))
         {
-            printf("damage\n");
+            //printf("damage\n"); 
+            gunFireRect.x = getPlayerX(players[i]) + 16;
+            gunFireRect.y = getPlayerY(players[i]) + 16;
             SDL_RenderCopy(renderer, gunFireTexture, NULL, &gunFireRect);
-            // resetDamagedPlayer(players[i]);
+            resetDamagedPlayer(players[i]);
         }
     }
 

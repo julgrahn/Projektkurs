@@ -116,13 +116,17 @@ PUBLIC bool getWallCollisionBullet(int x, int y, int h, int w) {
 void countWallHits(int i, int j)
 {
     tileGridHits[i][j]++;
-    if (tileGridHits[i][j] == 100)
+    if (tileGridHits[i][j] == 70)
+    {
+        tileGrid[i][j] = wall2;
+    }
+    else if (tileGridHits[i][j] == 140)
     {
         tileGrid[i][j] = wall3;
     }
-    else if (tileGridHits[i][j] == 200)
-    {
-        tileGrid[i][j] = bricks;
-    }
+    //else if (tileGridHits[i][j] == 200)
+    //{
+    //   tileGrid[i][j] = bricks;
+    //}
     return;
 }
