@@ -38,7 +38,7 @@ PUBLIC void connectToServer(char* ip, IPaddress* srvadd, TCPsocket* tcpsock, Net
     if (SDLNet_TCP_Recv(*tcpsock, networkgamestate, getGamestatesize()))
     {
         SDLNet_TCP_Recv(*tcpsock, playerID, sizeof(*playerID));
-        setPlayerAlive(players[*playerID], true);
+        //setPlayerAlive(players[*playerID], true);
         for (int i = 0; i < MAX_PLAYERS; i++)
         {
             snapPlayer(players[i], getNetworkgamestateplayerX(&networkgamestate, i), getNetworkgamestateplayerY(&networkgamestate, i));
@@ -56,25 +56,23 @@ PUBLIC void connectToServer(char* ip, IPaddress* srvadd, TCPsocket* tcpsock, Net
 PUBLIC void sendUDP(void* player, UDPsocket* sd, IPaddress* srvadd, UDPpacket** p, UDPpacket** p2)
 { 
     memcpy((*p)->data, player, getNetworkplayersize());
-    // memcpy((*p)->data, &player, sizeof(player));
     (*p)->address = *srvadd;
     (*p)->len = getNetworkplayersize();
     SDLNet_UDP_Send(*sd, -1, *p);    
 }
 
-PUBLIC void startUDPreceiveThread(UDPsocket *sd, UDPpacket** p2, Bullet bullets[], Player players[], Networkgamestate *networkgamestate, int playerID, SDL_mutex** mutex)
+PUBLIC void startUDPreceiveThread(UDPsocket *sd, UDPpacket** p2, Bullet bullets[][MAX_BULLETS], Player players[], Networkgamestate *networkgamestate, int playerID, SDL_mutex** mutex)
 {
     UDPReceiveStruct urs = malloc(sizeof(struct UDPReceiveStruct_type));
     urs->sd = *sd;
     urs->p2 = *p2;
-    urs->bullets = bullets;
+    urs->bullets = *bullets;
     urs->players = players;
     urs->state = networkgamestate;
     urs->playerID = playerID;
     urs->mutex = *mutex;
     SDL_Thread* UDPReceiveThread;
     UDPReceiveThread = SDL_CreateThread((SDL_ThreadFunction)UDPReceive, "UDPReceive", urs);
-
 }
 
 PRIVATE void UDPReceive(void* args)
@@ -90,6 +88,7 @@ PRIVATE void UDPReceive(void* args)
             {
                 memcpy(*urs->state, urs->p2->data, getGamestatesize());
                 updateplayers(*urs->state, urs->players, urs->playerID);
+                updateplayerbullets(*urs->state, urs->playerID, urs->bullets);
                 SDL_UnlockMutex(urs->mutex);
             }
         }

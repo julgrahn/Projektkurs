@@ -165,20 +165,17 @@ PUBLIC int getPlayerID(Player p)
     return p->id;
 }
 
-PUBLIC void updatePlayerPosition(Player *p, int x, int y, int direction, bool alive, bool isShooting, int xTarget, int yTarget)
+PUBLIC void updatePlayerPosition(Player *p, int x, int y, int direction, bool alive) //bool isShooting, int xTarget, int yTarget)
 {
     (*p)->alive = alive;
     (*p)->newX = x;
     (*p)->newY = y;
     (*p)->newDirection = direction;
     (*p)->direction = direction;
-    (*p)->isShooting = isShooting;
-    (*p)->xTarget = xTarget, (*p)->yTarget = yTarget;
 }
 
 PUBLIC void updateServerPlayer(Player *p, int x, int y, int direction, bool alive, bool isShooting, int xTarget, int yTarget)
 {
-    // (*p)->alive = alive;
     (*p)->pDimensions.x = x;
     (*p)->pDimensions.y = y;
     (*p)->newDirection = direction;
