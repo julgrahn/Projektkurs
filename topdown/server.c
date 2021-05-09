@@ -44,7 +44,6 @@ PUBLIC Server createServer()
     for (int i = 0; i < MAX_PLAYERS + 1; i++)
     {
         server->tcpsockClient[i] = NULL;
-        //SDLNet_TCP_AddSocket(server->set, server->tcpsockClient[i]);
     }
 
     for (int i = 0; i < MAX_PLAYERS; i++)
@@ -137,7 +136,6 @@ PRIVATE void runServer(void* args)
         UDPsendDelay = (UDPsendDelay + 1) % 30;
         Gamelogicdelay = (Gamelogicdelay + 1) % 8;
         
-        //printf("%d\n", getNetworkgamestateplayerX(&server->state, 0));
         // TCP
         if (!TCPdelay)
         {
@@ -150,9 +148,8 @@ PRIVATE void runServer(void* args)
             
         }
         // Game logic
-        if(!Gamelogicdelay) // Måste vara 16ms intervall
+        if(!Gamelogicdelay)
         {
-            //printf("%d\n", SDL_GetTicks());
             handleGameLogic(server, respawnDelay, &a, &b, invulnerabilityDelay);           
         }
         // UDP Send
@@ -287,6 +284,7 @@ PRIVATE void handleTCP(Server server)
                 server->tcpsockClient[g] = NULL;
                 server->clients[g].host = (int)NULL;
                 server->clients[g].port = (int)NULL;
+                setNetplayerLives(server->state, g, -1);
                 freeNetworkgamestateplayer(&server->state, g);
                 killNetworkplayer(&server->state, g);
                 server->noOfPlayers--;
@@ -318,7 +316,7 @@ PRIVATE void startNewGame(Server server)
 
 PRIVATE void handleGameLogic(Server server, int respawnDelay[], SDL_Rect *a, SDL_Rect *b, int invulnerabilityDelay[])
 {
-    
+    // Loop för kollisionshanteringen för kulor, om spelare dör och om spelet är över
     for (int i = 0; i < MAX_PLAYERS; i++)
     {
         if(isNetworkplayeractive(&server->state, i))

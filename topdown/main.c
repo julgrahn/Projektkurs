@@ -104,37 +104,6 @@ int main(int argc, char* args[])
     SDL_Quit();
     return 0;
 }
-void handleClientTCP(TCPsocket* tcpsock, SDLNet_SocketSet* set, Networkgamestate networkgamestate, Player players[], int playerID)
-{
-    SDLNet_CheckSockets(*set, 0);
-
-    if (SDLNet_SocketReady(*tcpsock))
-    {
-        int response;
-        SDLNet_TCP_Recv(*tcpsock, &response, sizeof(response));
-        switch (response)
-        {
-            case 0:
-                break;
-            case 1:
-                SDLNet_TCP_Recv(*tcpsock, networkgamestate, getGamestatesize());
-                setPlayerAlive(players[playerID], true);
-                for (int i = 0; i < MAX_PLAYERS; i++)
-                {
-                    snapPlayer(players[i], getNetworkgamestateplayerX(&networkgamestate, i), getNetworkgamestateplayerY(&networkgamestate, i));
-                }
-                break;
-            default:
-                break;
-        }
-    }
-}
-
-void startNewGame(TCPsocket* tcpsock)
-{ 
-    int message = 1;
-    SDLNet_TCP_Send(*tcpsock, &message, sizeof(message));
-}
 
 void handleEvents(SDL_Event* event, int* up, int* down, int* right, int* left, bool* isPlaying, int* mouseX, int* mouseY, bool* shooting, bool* newGame)
 {
