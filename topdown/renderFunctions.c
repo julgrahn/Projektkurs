@@ -8,7 +8,7 @@ int oldTileGrid[22][22] = { 0 }; // används för att animera väggträffar.
 
 PUBLIC void renderGame(SDL_Renderer* renderer, SDL_Texture* mTiles, SDL_Rect gTiles[], Bullet bullets[],
     SDL_Texture* bulletTexture, Player players[], SDL_Texture* playerText, SDL_Rect playerRect[], SDL_Point* playerRotationPoint,
-    SDL_Texture* gunFireTexture, SDL_Rect gunFireRect, SDL_Texture* explosionTexture, SDL_Rect explosionRect, SDL_Point* muzzleRotationPoint)
+    SDL_Texture* gunFireTexture, SDL_Rect gunFireRect, SDL_Texture* explosionTexture, SDL_Rect explosionRect, SDL_Point* muzzleRotationPoint, SDL_Texture* gunFireTexture2, SDL_Rect gunFireRect2, SDL_Point* bulletRotationPoint)
 {
     SDL_RenderClear(renderer);
     // Render Background
@@ -32,10 +32,11 @@ PUBLIC void renderGame(SDL_Renderer* renderer, SDL_Texture* mTiles, SDL_Rect gTi
     {
         if (isBulletActive(bullets[i]))
         {
-            SDL_RenderCopy(renderer, bulletTexture, NULL, getBulletRect(bullets[i]));
+            SDL_RenderCopyEx(renderer, bulletTexture, NULL, getBulletRect(bullets[i]), getPlayerDirection(players[getBulletOwner(bullets[i])]), bulletRotationPoint, SDL_FLIP_NONE); //Ändra tillbaka till Rendercopy för att få tillbaka rätt skottlogik.
         }
     }
     // Render Players
+
     for (int i = 0; i < MAX_PLAYERS; i++)
     {
         if (isPlayerAlive(players[i]))
@@ -50,8 +51,11 @@ PUBLIC void renderGame(SDL_Renderer* renderer, SDL_Texture* mTiles, SDL_Rect gTi
         {
             gunFireRect.x = getPlayerX(players[i])+40;
             gunFireRect.y = getPlayerY(players[i])+26;
+            gunFireRect2.x = getPlayerX(players[i]) + 40;
+            gunFireRect2.y = getPlayerY(players[i]) + 26;
 
             SDL_RenderCopyEx(renderer, gunFireTexture, NULL, &gunFireRect, getPlayerDirection(players[i]), muzzleRotationPoint, SDL_FLIP_NONE);
+            //SDL_RenderCopyEx(renderer, gunFireTexture2, NULL, &gunFireRect2, getPlayerDirection(players[i]), muzzleRotationPoint, SDL_FLIP_NONE); // gunfire2 är ett försök att få elden att skifta i storlek men fungerar ej. 
         }
     }
 
@@ -65,10 +69,10 @@ PUBLIC void renderGame(SDL_Renderer* renderer, SDL_Texture* mTiles, SDL_Rect gTi
         {
             if (getTileGridHits(i, j) != oldTileGrid[j][i])
             {
-                gunFireRect.x = j * 32;
-                gunFireRect.y = i * 32;
+                explosionRect.x = j * 32;
+                explosionRect.y = i * 32;
                
-                SDL_RenderCopy(renderer, gunFireTexture, NULL, &gunFireRect); 
+                SDL_RenderCopy(renderer, explosionTexture, NULL, &explosionRect); 
                 oldTileGrid[j][i] = getTileGridHits(i, j);
             }
         }
@@ -79,7 +83,7 @@ PUBLIC void renderGame(SDL_Renderer* renderer, SDL_Texture* mTiles, SDL_Rect gTi
     {
         if (checkIfPlayerdamaged(players[i]))
         {
-            //printf("damage\n"); 
+            printf("damage\n"); 
             gunFireRect.x = getPlayerX(players[i]) + 16;
             gunFireRect.y = getPlayerY(players[i]) + 16;
             SDL_RenderCopy(renderer, gunFireTexture, NULL, &gunFireRect);

@@ -45,6 +45,10 @@ int main(int argc, char* args[])
     SDL_Rect gunFireRect;
     gunFireRect.w = 40;
     gunFireRect.h = 40;
+    SDL_Texture* gunFireTexture2 = NULL;
+    SDL_Rect gunFireRect2;
+    gunFireRect2.w = 40;
+    gunFireRect2.h = 40;
     SDL_Texture* explosionTexture = NULL;
     SDL_Rect explosionRect;
     explosionRect.w = 40;
@@ -52,6 +56,7 @@ int main(int argc, char* args[])
     int up = 0, down = 0, left = 0, right = 0;
     SDL_Point playerRotationPoint = { 20, 32 };
     SDL_Point muzzleRotationPoint = { -18, 6 };
+    SDL_Point bulletRotationPoint = { -18, -7 };
     Networkgamestate networkgamestate = createNetworkgamestate();
 
     // Init functions
@@ -65,7 +70,7 @@ int main(int argc, char* args[])
         startServer(server);
     }
     initClient(&sd, &p, &p2);
-    loadMedia(renderer, gridTiles, &tiles, playerRect, &playerText, &cursor, &bulletTexture, &gunFireTexture, gunFireRect, &explosionTexture, explosionRect);
+    loadMedia(renderer, gridTiles, &tiles, playerRect, &playerText, &cursor, &bulletTexture, &gunFireTexture, gunFireRect, &explosionTexture, explosionRect, &gunFireTexture2, gunFireRect2);
     connectToServer(LOCAL_IP, &srvadd, &tcpsock, networkgamestate, &playerID, players, &sd, &connected);
     startUDPreceiveThread(&sd, &p2, bullets, players, &networkgamestate, playerID, &mutex);
 
@@ -93,7 +98,7 @@ int main(int argc, char* args[])
         setNetworkgamestateplayer(&networkgamestate, playerID, players[playerID]);
         sendUDP(getNetworkgamestateplayer(&networkgamestate, playerID), &sd, &srvadd, &p, &p2);
         SDL_UnlockMutex(mutex);
-        renderGame(renderer, tiles, gridTiles, bullets, bulletTexture, players, playerText, playerRect, &playerRotationPoint, gunFireTexture, gunFireRect, explosionTexture, explosionRect,  &muzzleRotationPoint);
+        renderGame(renderer, tiles, gridTiles, bullets, bulletTexture, players, playerText, playerRect, &playerRotationPoint, gunFireTexture, gunFireRect, explosionTexture, explosionRect,  &muzzleRotationPoint, gunFireTexture2, gunFireRect2, &bulletRotationPoint);
     }
 
     SDL_DestroyRenderer(renderer);

@@ -55,7 +55,7 @@ PUBLIC Server createServer()
     {
         server->aBullet[i] = createBullet();
     }
-    
+
     server->noOfPlayers = 0;
 
     // Hårdkodade startpositioner för spelare
@@ -72,7 +72,7 @@ PUBLIC Server createServer()
     for (int i = 0; i < MAX_PLAYERS; i++)
     {
         setGamastateplayerpos(&server->state, i, server->spawnPoint[i].x, server->spawnPoint[i].y);
-        snapPlayer(server->aPlayers[i],server->spawnPoint[i].x, server->spawnPoint[i].y);
+        snapPlayer(server->aPlayers[i], server->spawnPoint[i].x, server->spawnPoint[i].y);
     }
 
     //Initialize SDL_net 
@@ -81,17 +81,17 @@ PUBLIC Server createServer()
         fprintf(stderr, "SDLNet_Init: %s\n", SDLNet_GetError());
         exit(EXIT_FAILURE);
     }
-    if (SDLNet_ResolveHost(&(server->serverIP), NULL, 2000) < 0) 
-    { 
+    if (SDLNet_ResolveHost(&(server->serverIP), NULL, 2000) < 0)
+    {
         fprintf(stderr, "SDLNet_ResolveHost: %s\n", SDLNet_GetError());
         exit(EXIT_FAILURE);
     }
 
     if (!(server->tcpsockServer = SDLNet_TCP_Open(&(server->serverIP))))
-    { 
+    {
         fprintf(stderr, "SDLNet_TCP_Open: %s\n", SDLNet_GetError());
-        exit(EXIT_FAILURE); 
-    } 
+        exit(EXIT_FAILURE);
+    }
 
     // Open a socket 
     if (!(server->sd = SDLNet_UDP_Open(2000)))
@@ -122,23 +122,23 @@ PRIVATE void runServer(void* args)
     int UDPsendDelay = 0;
     int UDPreceiveDelay = 0;
     int Gamelogicdelay = 0;
-    int respawnDelay[MAX_PLAYERS] = {0}; 
+    int respawnDelay[MAX_PLAYERS] = { 0 };
     // Main-loop
     while (true)
-    {   
-        SDL_Delay(1); 
+    {
+        SDL_Delay(1);
         TCPdelay = (TCPdelay + 1) % 1000;
         UDPreceiveDelay = (UDPreceiveDelay + 1) % 1;
         UDPsendDelay = (UDPsendDelay + 1) % 10;
         Gamelogicdelay = (Gamelogicdelay + 1) % 8;
-        
+
         // Game logic
-        if(!Gamelogicdelay) // Måste vara 16ms intervall
+        if (!Gamelogicdelay) // Måste vara 16ms intervall
         {
             //printf("%d\n", SDL_GetTicks());
-            handleGameLogic(server, respawnDelay);           
+            handleGameLogic(server, respawnDelay);
         }
-        
+
         // TCP
         if (!TCPdelay)
         {
@@ -150,12 +150,12 @@ PRIVATE void runServer(void* args)
             handleUDPreceive(server);
         }
         // UDP Send
-        if(!UDPsendDelay)
+        if (!UDPsendDelay)
         {
             handleUDPsend(server);
         }
     }
-    
+
 }
 
 PRIVATE void handleUDPsend(Server server)
