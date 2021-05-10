@@ -4,9 +4,10 @@
 #include "world.h"
 #include <stdbool.h>
 #include <math.h>
-#define BULLET_DAMAGE 10
-#define BULLET_SPEED 10
 #define PUBLIC
+#define PRIVATE static
+
+PRIVATE void moveBullet(Bullet bullet);
 
 struct Bullet_type {
 	SDL_Rect dimensions;
@@ -29,7 +30,6 @@ PUBLIC Bullet createBullet()
 	b->dimensions.h = 4;
 	b->speed = BULLET_SPEED;
 	b->damage = BULLET_DAMAGE;
-
 	return b;
 }
 
@@ -49,24 +49,24 @@ PUBLIC bool isBulletActive(Bullet bullet)
 	return bullet->active;
 }
 
-PUBLIC void moveBullet(Bullet bullet)
+PRIVATE void moveBullet(Bullet bullet)
 {
-	bullet->xPos += bullet->xSpeed;
-	bullet->yPos += bullet->ySpeed;
-
-	if (getWallCollisionBullet(bullet->xPos, bullet->yPos, bullet->dimensions.h, bullet->dimensions.w))
+	if(isBulletActive(bullet))
 	{
-		freeBullet(bullet);
+		bullet->xPos += bullet->xSpeed;
+		bullet->yPos += bullet->ySpeed;
+
+		if (getWallCollisionBullet(bullet->xPos, bullet->yPos, bullet->dimensions.h, bullet->dimensions.w))
+		{
+			freeBullet(bullet);
+		}
+
+		bullet->dimensions.x = round(bullet->xPos);
+		bullet->dimensions.y = round(bullet->yPos);
+
+		if (bullet->dimensions.x < 0 || bullet->dimensions.x > WINDOWWIDTH || bullet->dimensions.y < 0 || bullet->dimensions.y > WINDOWHEIGHT)
+			bullet->active = false;
 	}
-
-	bullet->dimensions.x = round(bullet->xPos);
-	bullet->dimensions.y = round(bullet->yPos);
-
-	if (bullet->dimensions.x < 0 ||
-		bullet->dimensions.x > WINDOWWIDTH ||
-		bullet->dimensions.y < 0 ||
-		bullet->dimensions.y > WINDOWHEIGHT) bullet->active = false;
-
 }
 
 PUBLIC SDL_Rect* getBulletRect(Bullet bullet)
@@ -98,7 +98,29 @@ PUBLIC int getBulletY(Bullet a)
 {
 	return a->yPos;
 }
-int getBulletDamage(Bullet b)
+PUBLIC int getBulletDamage(Bullet b)
 {
 	return b->damage;
+}
+
+PUBLIC void setBulletXY(Bullet b, int x, int y)
+{
+	b->xPos = b->dimensions.x = x, b->yPos = b->dimensions.y = y; 
+}
+
+PUBLIC void bulletActivate(Bullet b)
+{
+	b->active = true;
+}
+
+PUBLIC void simulateBullets(Bullet aBullets[][MAX_BULLETS])
+{
+	for (int i = 0; i < MAX_PLAYERS; i++)
+		for(int j = 0; j < MAX_BULLETS; j++)
+			moveBullet(aBullets[i][j]);
+}
+
+PUBLIC void setBulletSpeed(Bullet b, double x, double y)
+{
+	b->xSpeed = x, b->ySpeed = y;
 }
