@@ -36,8 +36,8 @@ PUBLIC Bullet createBullet()
 PUBLIC void spawnBullet(Bullet a, int xOrigin, int yOrigin, int xTarget, int yTarget, int owner)
 {
 	a->active = 1;
-	a->xPos = xOrigin + 20;
-	a->yPos = yOrigin + 32;
+	a->xPos = xOrigin + 43;
+	a->yPos = yOrigin + 40;
 	a->direction = atan2(yTarget - (a->yPos + (a->dimensions.h / 2)), xTarget - (a->xPos + (a->dimensions.w / 2)));
 	a->xSpeed = a->speed * cos(a->direction);
 	a->ySpeed = a->speed * sin(a->direction);

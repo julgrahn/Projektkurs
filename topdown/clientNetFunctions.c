@@ -34,7 +34,7 @@ PUBLIC void connectToServer(char* ip, IPaddress* srvadd, TCPsocket* tcpsock, Net
         exit(EXIT_FAILURE);
     }
     char msg[1024];
-    
+
     if (SDLNet_TCP_Recv(*tcpsock, networkgamestate, getGamestatesize()))
     {
         SDLNet_TCP_Recv(*tcpsock, playerID, sizeof(*playerID));
@@ -54,11 +54,11 @@ PUBLIC void connectToServer(char* ip, IPaddress* srvadd, TCPsocket* tcpsock, Net
 }
 
 PUBLIC void sendUDP(void* player, UDPsocket* sd, IPaddress* srvadd, UDPpacket** p, UDPpacket** p2)
-{ 
+{
     memcpy((*p)->data, player, getNetworkplayersize());
     (*p)->address = *srvadd;
     (*p)->len = getNetworkplayersize();
-    SDLNet_UDP_Send(*sd, -1, *p);    
+    SDLNet_UDP_Send(*sd, -1, *p);
 }
 
 PUBLIC void startUDPreceiveThread(UDPsocket *sd, UDPpacket** p2, Bullet bullets[][MAX_BULLETS], Player players[], Networkgamestate *networkgamestate, int playerID, SDL_mutex** mutex)

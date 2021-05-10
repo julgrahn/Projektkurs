@@ -49,6 +49,8 @@ PUBLIC void updateplayerbullets(Networkgamestate networkgamestate, int playerID,
                     bulletActivate(*((bullets+i*MAX_BULLETS) + j));
                     setBulletXY(*((bullets+i*MAX_BULLETS) + j), getNetbulletX(networkgamestate, i, j), getNetbulletY(networkgamestate, i, j));
                     setBulletSpeed(*((bullets+i*MAX_BULLETS) + j), getNetbulletspeedX(networkgamestate, i, j), getNetbulletspeedY(networkgamestate, i, j));
+                    // clientDamagePlayer(players[j]);
+                    // freeBullet(bullets[i]);
                 }
             }
         }
