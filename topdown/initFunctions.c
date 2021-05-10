@@ -68,9 +68,10 @@ PUBLIC void initClient(UDPsocket* sd, UDPpacket** p, UDPpacket** p2)
     }
 }
 
-PUBLIC void loadMedia(SDL_Renderer* renderer, SDL_Rect gTiles[], SDL_Texture** tiles, SDL_Rect playerRect[],
-                        SDL_Texture** pTexture, SDL_Cursor** cursor, SDL_Texture** bulletTexture,
-                        SDL_Texture** gunFireTexture, SDL_Rect gunFireRect, Mix_Chunk** sound)
+PUBLIC void loadMedia(SDL_Renderer* renderer, SDL_Rect gTiles[], SDL_Texture** tiles, SDL_Rect playerRect[], 
+                        SDL_Texture** pTexture, SDL_Cursor** cursor, SDL_Texture** bulletTexture, 
+                        SDL_Texture** gunFireTexture, SDL_Rect gunFireRect, SDL_Texture** explosionTexture, 
+                        SDL_Rect explosionRect, SDL_Texture** gunFireTexture2, SDL_Rect gunFireRect2, Mix_Chunk** sound)
 {
     SDL_Surface* gTilesSurface = IMG_Load("resources/tilemap.png");
     *tiles = SDL_CreateTextureFromSurface(renderer, gTilesSurface);
@@ -106,14 +107,23 @@ PUBLIC void loadMedia(SDL_Renderer* renderer, SDL_Rect gTiles[], SDL_Texture** t
     SDL_Surface* bulletSurface = IMG_Load("resources/bullet.png");
     *bulletTexture = SDL_CreateTextureFromSurface(renderer, bulletSurface);
     SDL_FreeSurface(bulletSurface);
+     
 
-    SDL_Surface* gunFireSurface = IMG_Load("resources/gunfire.png");
+    SDL_Surface* gunFireSurface = IMG_Load("resources/muzzle2_0007.png");
     *gunFireTexture = SDL_CreateTextureFromSurface(renderer, gunFireSurface);
     SDL_FreeSurface(gunFireSurface);
     // gunFireRect.x = 0;
     // gunFireRect.y = 0;
     // gunFireRect.h = 16;
     // gunFireRect.w = 16;
+
+    SDL_Surface* explosionSurface = IMG_Load("resources/expl_01_0002.png");
+    *explosionTexture = SDL_CreateTextureFromSurface(renderer, explosionSurface);
+    SDL_FreeSurface(explosionSurface);
+
+    SDL_Surface* gunFireSurface2 = IMG_Load("resources/muzzle2.2.png");
+    *gunFireTexture2 = SDL_CreateTextureFromSurface(renderer, gunFireSurface2);
+    SDL_FreeSurface(gunFireSurface2);
 
 
     // Gunfire Soundeffect
@@ -124,4 +134,7 @@ PUBLIC void loadMedia(SDL_Renderer* renderer, SDL_Rect gTiles[], SDL_Texture** t
     }
     // Volume
     Mix_Volume(-1, 20);
+
+
+    
 }
