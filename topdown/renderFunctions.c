@@ -6,7 +6,7 @@
 
 PUBLIC void renderGame(SDL_Renderer* renderer, SDL_Texture* mTiles, SDL_Rect gTiles[], Bullet bullets[],
     SDL_Texture* bulletTexture, Player players[], SDL_Texture* playerText, SDL_Rect playerRect[], SDL_Point* playerRotationPoint,
-     SDL_Texture** gunFireTexture, SDL_Rect gunFireRect)
+     SDL_Texture** gunFireTexture, SDL_Rect gunFireRect, Mix_Chunk* sound)
 {
     SDL_RenderClear(renderer);
     // Render Background
@@ -50,6 +50,10 @@ PUBLIC void renderGame(SDL_Renderer* renderer, SDL_Texture* mTiles, SDL_Rect gTi
             gunFireRect.y = getPlayerY(players[i]);
 
             SDL_RenderCopyEx(renderer, gunFireTexture, NULL, &gunFireRect, getPlayerDirection(players[i]), playerRotationPoint, SDL_FLIP_NONE);
+            if(Mix_PlayChannel(-1, sound, 0) == -1)
+            {
+                printf("error: %s\n",Mix_GetError());
+            }
         }
     }
 

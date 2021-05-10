@@ -9,6 +9,7 @@
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_timer.h>
 #include <SDL2/SDL_net.h>
+#include <SDL2/SDL_mixer.h>
 
 
 #define WINDOWWIDTH 704

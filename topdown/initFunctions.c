@@ -3,9 +3,9 @@
 #define PUBLIC /* empty */
 #define PRIVATE static
 
-PUBLIC bool initSDL(SDL_Renderer** renderer)
+PUBLIC bool initSDL(SDL_Renderer** renderer, Mix_Chunk** sound)
 {
-    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0)
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_AUDIO) != 0)
     {
         printf("error initializing SDL: %s\n", SDL_GetError());
         return false;
@@ -23,6 +23,12 @@ PUBLIC bool initSDL(SDL_Renderer** renderer)
     {
         printf("error creating renderer: %s\n", SDL_GetError());
         SDL_DestroyWindow(window);
+        SDL_Quit();
+        return false;
+    }
+    if( Mix_OpenAudio( 44100, MIX_DEFAULT_FORMAT, 2, 2048 ) < 0 )
+    {
+        printf( "SDL_mixer could not initialize! SDL_mixer Error: %s\n", Mix_GetError() );
         SDL_Quit();
         return false;
     }
@@ -62,9 +68,9 @@ PUBLIC void initClient(UDPsocket* sd, UDPpacket** p, UDPpacket** p2)
     }
 }
 
-PUBLIC void loadMedia(SDL_Renderer* renderer, SDL_Rect gTiles[], SDL_Texture** tiles, SDL_Rect playerRect[], 
-                        SDL_Texture** pTexture, SDL_Cursor** cursor, SDL_Texture** bulletTexture, 
-                        SDL_Texture** gunFireTexture, SDL_Rect gunFireRect)
+PUBLIC void loadMedia(SDL_Renderer* renderer, SDL_Rect gTiles[], SDL_Texture** tiles, SDL_Rect playerRect[],
+                        SDL_Texture** pTexture, SDL_Cursor** cursor, SDL_Texture** bulletTexture,
+                        SDL_Texture** gunFireTexture, SDL_Rect gunFireRect, Mix_Chunk** sound)
 {
     SDL_Surface* gTilesSurface = IMG_Load("resources/tilemap.png");
     *tiles = SDL_CreateTextureFromSurface(renderer, gTilesSurface);
@@ -108,4 +114,14 @@ PUBLIC void loadMedia(SDL_Renderer* renderer, SDL_Rect gTiles[], SDL_Texture** t
     // gunFireRect.y = 0;
     // gunFireRect.h = 16;
     // gunFireRect.w = 16;
+
+
+    // Gunfire Soundeffect
+    *sound = Mix_LoadWAV("resources/gunsound2.wav");
+    if (sound == NULL)
+    {
+        printf( "Failed to load beat music! SDL_mixer Error: %s\n", Mix_GetError() );
+    }
+    // Volume
+    Mix_Volume(-1, 20);
 }
