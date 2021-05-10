@@ -28,6 +28,6 @@ bool isPlayershooting(Player a);
 void setPlayerShooting(Player *a, bool isShooting, int xTarget, int yTarget);
 
 void updateServerPlayer(Player *p, int x, int y, int direction, bool alive, bool isShooting, int xTarget, int yTarget);
-
+bool canShoot(Player a);
 
 #endif

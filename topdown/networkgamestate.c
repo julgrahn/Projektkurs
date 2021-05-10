@@ -13,7 +13,7 @@ typedef struct NetworkPlayer_type{
     short direction, health;
     short posX, posY;// xTarget, yTarget;
     bool isAlive, isActive, invulnerable; //isShooting;
-    int lives;
+    short lives;
     // Uint8 damage;
     // Uint8 playerstatus, damage, health;
     // short bullets[15][4];

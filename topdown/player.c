@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include "player.h"
 #include "world.h"
+#include "weapon.h"
 #include <math.h>
 
 #define PUBLIC
@@ -29,6 +30,7 @@ struct Player_type {
     int newDirection;
     int xTarget, yTarget;
     bool isShooting;
+    Weapon gun;
 };
 
 PUBLIC Player createPlayer(int x, int y, int id)
@@ -55,6 +57,7 @@ PUBLIC Player createPlayer(int x, int y, int id)
     a->xSpeed = a->ySpeed = 0;
     a->newDirection = 0;
     a->isShooting = false;
+    a->gun = createWeapon();
     return a;
 }
 
@@ -295,3 +298,7 @@ PUBLIC void setPlayerShooting(Player *a, bool isShooting, int xTarget, int yTarg
     (*a)->xTarget = xTarget, (*a)->yTarget = yTarget;
 }
 
+PUBLIC bool canShoot(Player a)
+{
+    return fireWeapon(a->gun);
+}

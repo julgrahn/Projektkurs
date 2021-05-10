@@ -9,6 +9,7 @@
 #include "player.h"
 #include "sdlinclude.h"
 #include "networkgamestate.h"
+#include "weapon.h"
 
 void updateplayers(Networkgamestate networkgamestate, Player players[], int playerID);
 void playerBulletCollisionCheck(Bullet bullets[], Player players[]);

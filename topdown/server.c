@@ -133,7 +133,7 @@ PRIVATE void runServer(void* args)
         SDL_Delay(1); 
         TCPdelay = (TCPdelay + 1) % 200;
         UDPreceiveDelay = (UDPreceiveDelay + 1) % 1;
-        UDPsendDelay = (UDPsendDelay + 1) % 30;
+        UDPsendDelay = (UDPsendDelay + 1) % 10;
         Gamelogicdelay = (Gamelogicdelay + 1) % 8;
         
         // TCP
@@ -267,12 +267,13 @@ PRIVATE void handleTCP(Server server)
                     startNewGame(server);
                     for (int i = 0; i < MAX_PLAYERS; i++)
                     {
-                        if (server->tcpsockClient[i] != NULL)
-                        {
-                            ping = 1;
-                            SDLNet_TCP_Send(server->tcpsockClient[i], &ping, sizeof(ping));
-                            SDLNet_TCP_Send(server->tcpsockClient[i], server->state, getGamestatesize());
-                        }
+                        killNetworkplayer(&server->state, i);
+                        // if (server->tcpsockClient[i] != NULL)
+                        // {
+                        //     ping = 1;
+                        //     SDLNet_TCP_Send(server->tcpsockClient[i], &ping, sizeof(ping));
+                        //     SDLNet_TCP_Send(server->tcpsockClient[i], server->state, getGamestatesize());
+                        // }
                     }
                 }
                 

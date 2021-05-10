@@ -117,12 +117,15 @@ PUBLIC bool rectCollisionTest(SDL_Rect* a, SDL_Rect* b)
 
 PUBLIC void fire(Bullet bullets[], Player* p, int playerID, int xTarget, int yTarget)
 {
-    for (int i = 0; i < MAX_BULLETS; i++)
+    if(canShoot(*p))
     {
-        if (!isBulletActive(bullets[i]))
+        for (int i = 0; i < MAX_BULLETS; i++)
         {
-            spawnBullet(bullets[i], getPlayerX(*p), getPlayerY(*p), xTarget, yTarget, playerID);
-            break;
+            if (!isBulletActive(bullets[i]))
+            {
+                spawnBullet(bullets[i], getPlayerX(*p), getPlayerY(*p), xTarget, yTarget, playerID);
+                break;
+            }
         }
     }
 }
