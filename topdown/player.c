@@ -32,6 +32,7 @@ struct Player_type {
     bool isShooting;
     Weapon gun;
     bool wasDamaged;
+    int gunBarrelX, gunBarrelY;
 };
 
 PUBLIC Player createPlayer(int x, int y, int id)
@@ -310,4 +311,24 @@ PUBLIC void setPlayerShooting(Player* a, bool isShooting, int xTarget, int yTarg
 PUBLIC bool canShoot(Player a)
 {
     return fireWeapon(a->gun);
+}
+
+PUBLIC void playerTick(Player a)
+{
+    weaponTick(a->gun);
+}
+
+PUBLIC int getPlayerGunbarrelX(Player a)
+{
+    return a->pDimensions.x + 20 + (34*sin((-a->direction + 72)*M_PI/180));   
+}
+
+PUBLIC int getPlayerGunbarrelY(Player a)
+{
+    return a->pDimensions.y + 32 + (34*cos((-a->direction + 72)*M_PI/180));
+}
+
+PUBLIC int getPlayerWeapondamage(Player a)
+{
+    return getWeapondamage(a->gun);
 }

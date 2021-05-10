@@ -46,9 +46,10 @@ PUBLIC void updateplayerbullets(Networkgamestate networkgamestate, int playerID,
                 }
                 else if(isNetbulletActive(networkgamestate, i, j) && !isBulletActive(*((bullets+i*MAX_BULLETS) + j)))
                 {
-                    bulletActivate(*((bullets+i*MAX_BULLETS) + j));
-                    setBulletXY(*((bullets+i*MAX_BULLETS) + j), getNetbulletX(networkgamestate, i, j), getNetbulletY(networkgamestate, i, j));
-                    setBulletSpeed(*((bullets+i*MAX_BULLETS) + j), getNetbulletspeedX(networkgamestate, i, j), getNetbulletspeedY(networkgamestate, i, j));
+                    spawnBullet2(*((bullets+i*MAX_BULLETS) + j), getNetbulletX(networkgamestate, i, j), getNetbulletY(networkgamestate, i, j), getNetbulletAngle(networkgamestate, i, j));
+                    // bulletActivate(*((bullets+i*MAX_BULLETS) + j));
+                    // setBulletXY(*((bullets+i*MAX_BULLETS) + j), getNetbulletX(networkgamestate, i, j), getNetbulletY(networkgamestate, i, j));
+                    // setBulletSpeed(*((bullets+i*MAX_BULLETS) + j), getNetbulletspeedX(networkgamestate, i, j), getNetbulletspeedY(networkgamestate, i, j));
                     // clientDamagePlayer(players[j]);
                     // freeBullet(bullets[i]);
                 }
@@ -117,15 +118,30 @@ PUBLIC bool rectCollisionTest(SDL_Rect* a, SDL_Rect* b)
     return false;
 }
 
-PUBLIC void fire(Bullet bullets[], Player* p, int playerID, int xTarget, int yTarget)
+PUBLIC void fire2(Bullet bullets[], Player p, int playerID)
 {
-    if(canShoot(*p))
+    if(canShoot(p))
     {
         for (int i = 0; i < MAX_BULLETS; i++)
         {
             if (!isBulletActive(bullets[i]))
             {
-                spawnBullet(bullets[i], getPlayerX(*p), getPlayerY(*p), xTarget, yTarget, playerID);
+                spawnBullet2(bullets[i], getPlayerGunbarrelX(p), getPlayerGunbarrelY(p), getPlayerDirection(p));
+                break;
+            }
+        }
+    }
+}
+
+PUBLIC void fire(Bullet bullets[], Player p, int playerID, int xTarget, int yTarget)
+{
+    if(canShoot(p))
+    {
+        for (int i = 0; i < MAX_BULLETS; i++)
+        {
+            if (!isBulletActive(bullets[i]))
+            {
+                spawnBullet(bullets[i], getPlayerGunbarrelX(p), getPlayerGunbarrelY(p), xTarget, yTarget, playerID, getPlayerWeapondamage(p));
                 break;
             }
         }

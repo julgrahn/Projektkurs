@@ -10,9 +10,9 @@
 #include "sdlinclude.h"
 #include "world.h"
 
-bool initSDL(SDL_Renderer** renderer);
+// bool initSDL(SDL_Renderer** renderer);
 void initGameObjects(Player players[], Bullet bullets[][MAX_BULLETS]);
-// bool initSDL(SDL_Renderer** renderer, Mix_Chunk** sound);
+bool initSDL(SDL_Renderer** renderer, Mix_Chunk** sound);
 // void initGameObjects(Player players[], Bullet bullets[]);
 void initClient(UDPsocket* sd, UDPpacket** p, UDPpacket** p2);
 void loadMedia(SDL_Renderer* renderer, SDL_Rect gTiles[], SDL_Texture** tiles,

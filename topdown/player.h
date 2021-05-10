@@ -33,5 +33,9 @@ void clientDamagePlayer(Player p);
 
 void updateServerPlayer(Player *p, int x, int y, int direction, bool alive, bool isShooting, int xTarget, int yTarget);
 bool canShoot(Player a);
+void playerTick(Player a);
+int getPlayerGunbarrelX(Player a);
+int getPlayerGunbarrelY(Player a);
+int getPlayerWeapondamage(Player a);
 
 #endif

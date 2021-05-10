@@ -233,7 +233,7 @@ PRIVATE void handleTCP(Server server)
 
                     // Alla spelare är döda från början så de behöver ressas                   
                     activateNetworkgamestateplayer(&server->state, g);
-                    //reviveNetworkgamestateplayer(&server->state, g);
+                    reviveNetworkgamestateplayer(&server->state, g);
 
                     // Tilldela spelarID och skicka startpositionerna för alla spelare
                     int newPlayerID = g;
@@ -344,7 +344,7 @@ PRIVATE void handleGameLogic(Server server, int respawnDelay[], SDL_Rect *a, SDL
                                 freeNetbullet(server->state, i, j);
                                 if (!isNetplayerInvulnerable(server->state, k))
                                 {
-                                    damageNetplayer(server->state, k);
+                                    damageNetplayer(server->state, k, getNetbulletdamage(server->state, i, j));
                                 }
                                 if (!isNetworkplayerAlive(&server->state, k))
                                 {

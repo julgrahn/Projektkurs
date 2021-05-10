@@ -10,12 +10,12 @@
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_timer.h>
 #include <SDL2/SDL_net.h>
-// #include <SDL2/SDL_mixer.h>
+#include <SDL2/SDL_mixer.h>
 
 
 #define WINDOWWIDTH 704
 #define WINDOWHEIGHT 704
-#define MAX_BULLETS 18
+#define MAX_BULLETS 10
 #define ANDREAS_IP "78.71.16.247"
 #define ALEX_IP "178.78.213.173"
 #define JOHAN_IP "188.149.151.240"

@@ -30,7 +30,7 @@ void setNetworkbullets(Networkgamestate a, int playerID, Bullet bullets[]);
 int getNetbulletX(Networkgamestate a, int playerID, int bulletNo);
 int getNetbulletY(Networkgamestate a, int playerID, int bulletNo);
 bool isNetbulletActive(Networkgamestate a, int playerID, int bulletNo);
-void damageNetplayer(Networkgamestate a, int playerID);
+void damageNetplayer(Networkgamestate a, int playerID, int damage);
 int getNetplayerHealth(Networkgamestate a, int playerID);
 bool isNetplayerInvulnerable(Networkgamestate a, int playerID);
 void setNetplayerInvulnerable(Networkgamestate a, int playerID, bool value);
@@ -42,7 +42,8 @@ bool netbulletStatus(Networkgamestate a, int playerID, int bulletID);
 void netBulletclearcontrol(Networkgamestate a, int playerID, int bulletID);
 double getNetbulletspeedX(Networkgamestate a, int playerID, int bulletID);
 double getNetbulletspeedY(Networkgamestate a, int playerID, int bulletID);
-
+double getNetbulletAngle(Networkgamestate a, int playerID, int bulletID);
+int getNetbulletdamage(Networkgamestate a, int playerID, int bulletID);
 
 // bool isNetworkgamestateplayerShooting(Networkgamestate *a, int n);
 #endif

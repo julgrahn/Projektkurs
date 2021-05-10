@@ -60,7 +60,7 @@ int main(int argc, char* args[])
     explosionRect.h = 40;
     int up = 0, down = 0, left = 0, right = 0;
     SDL_Point playerRotationPoint = { 20, 32 };
-    SDL_Point muzzleRotationPoint = { -18, 6 };
+    SDL_Point muzzleRotationPoint = { 14, 16 };
     SDL_Point bulletRotationPoint = { -18, -7 };
     Networkgamestate networkgamestate = createNetworkgamestate();
 
@@ -86,6 +86,7 @@ int main(int argc, char* args[])
     // Main loop
     while (isPlaying)
     {
+        playerTick(players[playerID]);
         handleEvents(&event, &up, &down, &right, &left, &isPlaying, &mouseX, &mouseY, &shooting, &newGame);
         if (newGame && host)
         {
@@ -96,7 +97,7 @@ int main(int argc, char* args[])
         if (isPlayerAlive(players[playerID]))
         {
             movePlayer(players[playerID], up, down, right, left, mouseX, mouseY);
-            if (isPlayershooting(players[playerID])) fire(bullets[playerID], &players[playerID], playerID, mouseX, mouseY);
+            if (isPlayershooting(players[playerID])) fire(bullets[playerID], players[playerID], playerID, mouseX, mouseY);
         }
         //Flytta på alla andra spelare
         for (int i = 0; i < MAX_PLAYERS; i++)
@@ -113,11 +114,11 @@ int main(int argc, char* args[])
         sendUDP(getNetworkgamestateplayer(&networkgamestate, playerID), &sd, &srvadd, &p, &p2);
         handleClientTCP(&tcpsock, &set, networkgamestate, players, playerID);
         SDL_UnlockMutex(mutex);
-        renderGame(renderer, tiles, gridTiles, bullets, bulletTexture, players, playerText, playerRect, &playerRotationPoint);
-        // renderGame(renderer, tiles, gridTiles, bullets, bulletTexture, players, playerText, 
-        //             playerRect, &playerRotationPoint, gunFireTexture, gunFireRect, 
-        //             explosionTexture, explosionRect,  &muzzleRotationPoint, gunFireTexture2, 
-        //             gunFireRect2, &bulletRotationPoint, sound);
+        // renderGame(renderer, tiles, gridTiles, bullets, bulletTexture, players, playerText, playerRect, &playerRotationPoint);
+        renderGame(renderer, tiles, gridTiles, bullets, bulletTexture, players, playerText, 
+                    playerRect, &playerRotationPoint, gunFireTexture, gunFireRect, 
+                    explosionTexture, explosionRect,  &muzzleRotationPoint, gunFireTexture2, 
+                    gunFireRect2, &bulletRotationPoint, sound);
     }
 
     SDL_DestroyRenderer(renderer);

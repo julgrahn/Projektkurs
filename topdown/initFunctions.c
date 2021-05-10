@@ -32,6 +32,7 @@ PUBLIC bool initSDL(SDL_Renderer** renderer, Mix_Chunk** sound)
         SDL_Quit();
         return false;
     }
+    Mix_AllocateChannels(100);
     return true;
 }
 

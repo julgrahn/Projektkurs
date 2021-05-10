@@ -4,7 +4,7 @@
 #define NETBULLETDMG 10
 typedef struct NetworkBullet_type{
 	short xPos, yPos, angle;
-    // Uint8 control;
+    Uint8 damage;
     bool control;
     bool active;
 }Networkbullet;
@@ -158,6 +158,7 @@ PUBLIC void setNetworkbullets(Networkgamestate a, int playerID, Bullet bullets[]
         a->aPlayer[playerID].aBullet[i].angle = getBulletDirection(bullets[i])*10000;
         a->aPlayer[playerID].aBullet[i].xPos = getBulletX(bullets[i]);
         a->aPlayer[playerID].aBullet[i].yPos = getBulletY(bullets[i]);
+        a->aPlayer[playerID].aBullet[i].damage = getBulletDamage(bullets[i]);
     }
 }
 
@@ -176,9 +177,9 @@ PUBLIC bool isNetbulletActive(Networkgamestate a, int playerID, int bulletNo)
     return a->aPlayer[playerID].aBullet[bulletNo].active;
 }
 
-PUBLIC void damageNetplayer(Networkgamestate a, int playerID)
+PUBLIC void damageNetplayer(Networkgamestate a, int playerID, int damage)
 {
-    a->aPlayer[playerID].health -= NETBULLETDMG;
+    a->aPlayer[playerID].health -= damage;
     if(a->aPlayer[playerID].health <= 0)
     {
         a->aPlayer[playerID].lives -= 1;
@@ -245,4 +246,14 @@ PUBLIC double getNetbulletspeedX(Networkgamestate a, int playerID, int bulletID)
 PUBLIC double getNetbulletspeedY(Networkgamestate a, int playerID, int bulletID)
 {
     return BULLET_SPEED * sin((double)a->aPlayer[playerID].aBullet[bulletID].angle/10000);
+}
+
+PUBLIC double getNetbulletAngle(Networkgamestate a, int playerID, int bulletID)
+{
+    return (double)a->aPlayer[playerID].aBullet[bulletID].angle/10000;
+}
+
+PUBLIC int getNetbulletdamage(Networkgamestate a, int playerID, int bulletID)
+{
+    return a->aPlayer[playerID].aBullet[bulletID].damage;
 }
