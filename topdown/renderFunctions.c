@@ -70,8 +70,8 @@ PUBLIC void renderGame(SDL_Renderer* renderer, SDL_Texture* mTiles, SDL_Rect gTi
                 // SDL_RenderCopy(renderer, gunFireTexture, NULL, &gunFireRect);
                 SDL_RenderCopyEx(renderer, gunFireTexture, NULL, &gunFireRect, getPlayerDirection(players[i]), muzzleRotationPoint, SDL_FLIP_NONE);
                 
-                if(checkShot(bullets[i][j]))
-                    Mix_PlayChannel(-1, sound, 0);
+                // if(checkShot(bullets[i][j]))
+                //     Mix_PlayChannel(-1, sound, 0);
             }
         }
         // if (isPlayershooting(players[i]))

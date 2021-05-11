@@ -43,8 +43,8 @@ PUBLIC Bullet createBullet()
 PUBLIC void spawnBullet2(Bullet a, int xOrigin, int yOrigin, double angle)
 {
 	a->active = 1;
-	a->xPos = a->xOrigin = xOrigin - 2;
-	a->yPos = a->yOrigin = yOrigin - 2;
+	a->xPos = a->xOrigin = xOrigin;
+	a->yPos = a->yOrigin = yOrigin;
 	a->xSpeed = a->speed * cos(angle);
 	a->ySpeed = a->speed * sin(angle);
 	a->hit = 0;
@@ -52,11 +52,24 @@ PUBLIC void spawnBullet2(Bullet a, int xOrigin, int yOrigin, double angle)
 	a->shot = true;
 }
 
+PUBLIC void spawnBullet3(Bullet a, int xOrigin, int yOrigin, double angle, int damage)
+{
+	a->active = 1;
+	a->xPos = a->xOrigin = xOrigin ;
+	a->yPos = a->yOrigin = yOrigin ;
+	a->xSpeed = a->speed * cos(angle);
+	a->ySpeed = a->speed * sin(angle);
+	a->hit = 0;
+	a->shotTimer = 5;
+	a->shot = true;
+	a->damage = damage;
+}
+
 PUBLIC void spawnBullet(Bullet a, int xOrigin, int yOrigin, int xTarget, int yTarget, int owner, int damage)
 {
 	a->active = 1;
-	a->xPos = a->xOrigin = xOrigin - 2;
-	a->yPos = a->yOrigin = yOrigin - 2;
+	a->xPos = a->xOrigin = xOrigin ;
+	a->yPos = a->yOrigin = yOrigin ;
 	a->direction = atan2(yTarget - (a->yPos + (a->dimensions.h / 2)), xTarget - (a->xPos + (a->dimensions.w / 2)));
 	a->xSpeed = a->speed * cos(a->direction);
 	a->ySpeed = a->speed * sin(a->direction);

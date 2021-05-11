@@ -29,5 +29,6 @@ int getBulletOriginX(Bullet a);
 int getBulletOriginY(Bullet a);
 bool checkShot(Bullet a);
 void spawnBullet2(Bullet a, int xOrigin, int yOrigin, double angle);
+void spawnBullet3(Bullet a, int xOrigin, int yOrigin, double angle, int damage);
 
 #endif
