@@ -131,15 +131,18 @@ PUBLIC void loadMedia(SDL_Renderer* renderer, SDL_Rect gTiles[], SDL_Texture** t
     }
 
     // Blod
-    SDL_Surface* bloodSurface = IMG_Load("resources/blood.png");
+    SDL_Surface* bloodSurface = IMG_Load("resources/blood - right 1.png");
     *bloodTexture = SDL_CreateTextureFromSurface(renderer, bloodSurface);
     SDL_FreeSurface(bloodSurface);
-    for (int i = 0; i < 48; i++)
+    for (int i = 0; i < 4; i++)
     {
-        bloodTiles[i].x = 0 + (i * 64);
-        bloodTiles[i].y = 64;
-        bloodTiles[i].w = 64;
-        bloodTiles[i].h = 64;
+        for (int j = 0; j < 4; j++)
+        {
+            bloodTiles[i * 4 + j].x = j * 512;
+            bloodTiles[i * 4 + j].y = i * 512;
+            bloodTiles[i * 4 + j].w = 512;
+            bloodTiles[i * 4 + j].h = 512;
+        }
     }
 
 

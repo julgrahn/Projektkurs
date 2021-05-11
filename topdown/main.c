@@ -63,7 +63,6 @@ int main(int argc, char* args[])
     int up = 0, down = 0, left = 0, right = 0;
     SDL_Point playerRotationPoint = { 20, 32 };
     SDL_Point muzzleRotationPoint = { 14, 16 };
-    SDL_Point bulletRotationPoint = { -18, -7 };
     Networkgamestate networkgamestate = createNetworkgamestate();
 
     // Init functions
@@ -121,7 +120,7 @@ int main(int argc, char* args[])
         renderGame(renderer, tiles, gridTiles, bullets, bulletTexture, players, playerText, 
                     playerRect, &playerRotationPoint, gunFireTexture, gunFireRect, 
                     explosionTexture, explosionRect,  &muzzleRotationPoint, bloodTexture, 
-                    bloodRect, &bulletRotationPoint, sound, explosionTiles, bloodTiles);
+                    bloodRect, sound, explosionTiles, bloodTiles);
     }
 
     SDL_DestroyRenderer(renderer);

@@ -30,8 +30,8 @@ PUBLIC Bullet createBullet()
 {
 	Bullet b = malloc(sizeof(struct Bullet_type));
 	b->active = false;
-	b->dimensions.w = 5;
-	b->dimensions.h = 5;
+	b->dimensions.w = 4;
+	b->dimensions.h = 4;
 	b->speed = BULLET_SPEED;
 	b->damage = BULLET_DAMAGE;
 	b->hit = 0;
