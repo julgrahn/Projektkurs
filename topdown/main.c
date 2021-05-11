@@ -71,8 +71,8 @@ int main(int argc, char* args[])
         startServer(server);
     }
     initClient(&sd, &p, &p2);
-    loadMedia(renderer, gridTiles, &tiles, playerRect, &playerText, &cursor, &bulletTexture, 
-            &gunFireTexture, gunFireRect, &explosionTexture, explosionRect, &gunFireTexture2, gunFireRect2, &sound);
+    loadMedia(renderer, gridTiles, &tiles, playerRect, &playerText, &cursor, &bulletTexture,
+        &gunFireTexture, gunFireRect, &explosionTexture, explosionRect, &gunFireTexture2, gunFireRect2, &sound);
     connectToServer(LOCAL_IP, &srvadd, &tcpsock, networkgamestate, &playerID, players, &sd, &connected);
     startUDPreceiveThread(&sd, &p2, bullets, players, &networkgamestate, playerID, &mutex);
 
@@ -100,10 +100,10 @@ int main(int argc, char* args[])
         setNetworkgamestateplayer(&networkgamestate, playerID, players[playerID]);
         sendUDP(getNetworkgamestateplayer(&networkgamestate, playerID), &sd, &srvadd, &p, &p2);
         SDL_UnlockMutex(mutex);
-        renderGame(renderer, tiles, gridTiles, bullets, bulletTexture, players, playerText, 
-                    playerRect, &playerRotationPoint, gunFireTexture, gunFireRect, 
-                    explosionTexture, explosionRect,  &muzzleRotationPoint, gunFireTexture2, 
-                    gunFireRect2, &bulletRotationPoint, sound);
+        renderGame(renderer, tiles, gridTiles, bullets, bulletTexture, players, playerText,
+            playerRect, &playerRotationPoint, gunFireTexture, gunFireRect,
+            explosionTexture, explosionRect, &muzzleRotationPoint, gunFireTexture2,
+            gunFireRect2, &bulletRotationPoint, sound);
     }
 
     SDL_DestroyRenderer(renderer);
