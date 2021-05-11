@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include "player.h"
 #include "world.h"
+#include "weapon.h"
 #include <math.h>
 
 #define PUBLIC
@@ -29,7 +30,9 @@ struct Player_type {
     int newDirection;
     int xTarget, yTarget;
     bool isShooting;
+    Weapon gun;
     bool wasDamaged;
+    int gunBarrelX, gunBarrelY;
 };
 
 PUBLIC Player createPlayer(int x, int y, int id)
@@ -56,6 +59,7 @@ PUBLIC Player createPlayer(int x, int y, int id)
     a->xSpeed = a->ySpeed = 0;
     a->newDirection = 0;
     a->isShooting = false;
+    a->gun = createWeapon();
     a->wasDamaged = false;
     return a;
 }
@@ -159,20 +163,17 @@ PUBLIC int getPlayerID(Player p)
     return p->id;
 }
 
-PUBLIC void updatePlayerPosition(Player* p, int x, int y, int direction, bool alive, bool isShooting, int xTarget, int yTarget)
+PUBLIC void updatePlayerPosition(Player *p, int x, int y, int direction, bool alive) //bool isShooting, int xTarget, int yTarget)
 {
     (*p)->alive = alive;
     (*p)->newX = x;
     (*p)->newY = y;
     (*p)->newDirection = direction;
     (*p)->direction = direction;
-    (*p)->isShooting = isShooting;
-    (*p)->xTarget = xTarget, (*p)->yTarget = yTarget;
 }
 
 PUBLIC void updateServerPlayer(Player* p, int x, int y, int direction, bool alive, bool isShooting, int xTarget, int yTarget)
 {
-    // (*p)->alive = alive;
     (*p)->pDimensions.x = x;
     (*p)->pDimensions.y = y;
     (*p)->newDirection = direction;
@@ -305,4 +306,29 @@ PUBLIC void setPlayerShooting(Player* a, bool isShooting, int xTarget, int yTarg
 {
     (*a)->isShooting = isShooting;
     (*a)->xTarget = xTarget, (*a)->yTarget = yTarget;
+}
+
+PUBLIC bool canShoot(Player a)
+{
+    return fireWeapon(a->gun);
+}
+
+PUBLIC void playerTick(Player a)
+{
+    weaponTick(a->gun);
+}
+
+PUBLIC int getPlayerGunbarrelX(Player a)
+{
+    return a->pDimensions.x + 20 + (34*sin((-a->direction + 72)*M_PI/180));   
+}
+
+PUBLIC int getPlayerGunbarrelY(Player a)
+{
+    return a->pDimensions.y + 32 + (34*cos((-a->direction + 72)*M_PI/180));
+}
+
+PUBLIC int getPlayerWeapondamage(Player a)
+{
+    return getWeapondamage(a->gun);
 }

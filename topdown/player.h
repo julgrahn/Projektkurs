@@ -16,8 +16,7 @@ int getPlayerY(Player p);
 int getPlayerID(Player p);
 void activatePlayer(Player p);
 int getPlayerHealth(Player p);
-// void updatePlayerPosition(Player *p, int x, int y, int direction, bool alive, bool isShooting);
-void updatePlayerPosition(Player *p, int x, int y, int direction, bool alive, bool isShooting, int xTarget, int yTarget);
+void updatePlayerPosition(Player *p, int x, int y, int direction, bool alive);
 void moveOtherPlayers(Player p);
 void snapPlayer(Player p, int x, int y);
 void damagePlayer(Player p, int damage);
@@ -33,6 +32,10 @@ void resetDamagedPlayer(Player p);
 void clientDamagePlayer(Player p);
 
 void updateServerPlayer(Player *p, int x, int y, int direction, bool alive, bool isShooting, int xTarget, int yTarget);
-
+bool canShoot(Player a);
+void playerTick(Player a);
+int getPlayerGunbarrelX(Player a);
+int getPlayerGunbarrelY(Player a);
+int getPlayerWeapondamage(Player a);
 
 #endif
