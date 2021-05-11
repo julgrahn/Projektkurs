@@ -27,7 +27,6 @@ int main(int argc, char* args[])
     SDL_Point playerRotationPoint = { 20, 32 };
     SDL_Event event;
     SDL_Renderer* renderer = NULL;
-    //SDL_Renderer* renderMenu = NULL;
     UDPsocket sd;
     TCPsocket tcpsock = NULL;
     IPaddress srvadd;
@@ -37,7 +36,6 @@ int main(int argc, char* args[])
     SDL_Cursor* cursor = NULL;
     Player players[MAX_PLAYERS];
     Button buttons[3];
-    //SDL_Texture* buttons;
     SDL_Rect playerRect[4];
     Bullet bullets[MAX_BULLETS];
     SDL_Rect gridTiles[900];   // Kommer innehålla alla 900 rutor från bakgrundsbilden, kan optmiseras.
@@ -59,20 +57,12 @@ int main(int argc, char* args[])
 
     // Init functions
     mutex = SDL_CreateMutex();
-    //if (!initMenu(&renderMenu)) return 1;
     if (!initSDL(&renderer)) return 1;
     initGameObjects(players, bullets);
     loadMenu(renderer, &connectTextures, &hostTextures, &quitTextures);
-    //startPrompt(&playerID, &server, &host);
-    /*if (host)
-    {
-        server = createServer();
-        startServer(server);
-    }*/
+    
     initClient(&sd, &p, &p2); 
     loadMedia(renderer, gridTiles, &tiles, playerRect, &playerText, &cursor, &bulletTexture);  
-    //connectToServer(LOCAL_IP, &srvadd, &tcpsock, networkgamestate, &playerID, players, &sd, &connected);
-    //startUDPreceiveThread(&sd, &p2, bullets, players, &networkgamestate, playerID, &mutex);
 
 
     //Menu loop
@@ -84,7 +74,7 @@ int main(int argc, char* args[])
         handleEvents(&event, &up, &down, &right, &left, &isPlaying, &mouseX, &mouseY, &shooting);
         renderMenu(renderer, connectTextures, hostTextures, quitTextures, buttons, mouseX, mouseY, shooting);
 
-        // Connect button
+        
         if (mouseX >= (WINDOWWIDTH / 2) - BUTTON_HEIGHT && mouseX <= (WINDOWWIDTH / 2) + BUTTON_HEIGHT)
         {
             // Connect button
@@ -94,7 +84,6 @@ int main(int argc, char* args[])
                 setButtonPressed(buttons[0], true);
                 connectToServer(LOCAL_IP, &srvadd, &tcpsock, networkgamestate, &playerID, players, &sd, &connected);
                 startUDPreceiveThread(&sd, &p2, bullets, players, &networkgamestate, playerID, &mutex);
-                //printf("Connect clicked\n"); 
             }
 
             // Host button
@@ -109,7 +98,6 @@ int main(int argc, char* args[])
                 startUDPreceiveThread(&sd, &p2, bullets, players, &networkgamestate, playerID, &mutex);
                 
                 
-                //printf("Host clicked\n");
             }
 
             // Quit button
@@ -120,9 +108,7 @@ int main(int argc, char* args[])
                 setButtonPressed(buttons[2], true);
                 isPlaying = false;
             }
-        }
-        // if mouseClick(connect) connected = true
-        
+        }        
     }
     
     // Main loop
@@ -154,7 +140,6 @@ int main(int argc, char* args[])
     }
 
     SDL_DestroyRenderer(renderer);
-    //SDL_DestroyWindow(window); // beh�vs denna?
     SDL_Quit();
     return 0;
 }
@@ -240,19 +225,5 @@ void handleEvents(SDL_Event* event, int* up, int* down, int* right, int* left, b
         }
     }
     return;
-}
-
-
-// Ska ersättas med menyn
-void startPrompt(int* playerID, Server* server, bool* host)
-{
-    printf("Host(h) or client(c): ");
-    char input;
-    scanf(" %c", &input);
-    if (input == 'h')
-    {
-        printf("hosted!\n");
-        *host = true;
-    }
 }
 
