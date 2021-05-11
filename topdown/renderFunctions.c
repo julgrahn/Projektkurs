@@ -10,8 +10,9 @@
 
 PUBLIC void renderGame(SDL_Renderer* renderer, SDL_Texture* mTiles, SDL_Rect gTiles[], Bullet bullets[][MAX_BULLETS],
     SDL_Texture* bulletTexture, Player players[], SDL_Texture* playerText, SDL_Rect playerRect[], SDL_Point* playerRotationPoint,
-    SDL_Texture* gunFireTexture, SDL_Rect gunFireRect, SDL_Texture* explosionTexture, SDL_Rect explosionRect,
-    SDL_Point* muzzleRotationPoint, SDL_Texture* gunFireTexture2, SDL_Rect gunFireRect2, SDL_Point* bulletRotationPoint, Mix_Chunk* sound)
+    SDL_Texture* gunFireTexture, SDL_Rect gunFireRect, SDL_Texture* explosionTexture, SDL_Rect explosionRect, 
+    SDL_Point* muzzleRotationPoint, SDL_Texture* bloodTexture, SDL_Rect bloodRect, SDL_Point* bulletRotationPoint, Mix_Chunk* sound,
+    SDL_Rect explosionTiles[], SDL_Rect bloodTiles[])
 {
     SDL_RenderClear(renderer);
     // Render Background
@@ -60,7 +61,33 @@ PUBLIC void renderGame(SDL_Renderer* renderer, SDL_Texture* mTiles, SDL_Rect gTi
             {
                 gunFireRect.x = getBulletX(bullets[i][j]) - 14;
                 gunFireRect.y = getBulletY(bullets[i][j]) - 16;
-                SDL_RenderCopy(renderer, gunFireTexture, NULL, &gunFireRect);
+                if (getWallCollisionBullet( getBulletX(bullets[i][j]), getBulletY(bullets[i][j]), 4, 4))
+                {
+                    if (getBulletHitValue(bullets[i][j]) > 12)
+                    {
+                        SDL_RenderCopyEx(renderer, explosionTexture, &explosionTiles[45], &gunFireRect, 0, NULL, SDL_FLIP_NONE);
+                    }
+                    else if (getBulletHitValue(bullets[i][j]) > 9)
+                    {
+                        SDL_RenderCopyEx(renderer, explosionTexture, &explosionTiles[34], &gunFireRect, 0, NULL, SDL_FLIP_NONE);
+                    }
+                    else if (getBulletHitValue(bullets[i][j]) > 6)
+                    {
+                        SDL_RenderCopyEx(renderer, explosionTexture, &explosionTiles[23], &gunFireRect, 0, NULL, SDL_FLIP_NONE);
+                    }
+                    else if (getBulletHitValue(bullets[i][j]) > 3)
+                    {
+                        SDL_RenderCopyEx(renderer, explosionTexture, &explosionTiles[12], &gunFireRect, 0, NULL, SDL_FLIP_NONE);
+                    }
+                    else if (getBulletHitValue(bullets[i][j]) > 0)
+                    {
+                        SDL_RenderCopyEx(renderer, explosionTexture, &explosionTiles[1], &gunFireRect, 0, NULL, SDL_FLIP_NONE);
+                    }
+                }
+                else
+                {
+                    SDL_RenderCopyEx(renderer, gunFireTexture, NULL, &gunFireRect, 0, NULL, SDL_FLIP_NONE);
+                }
                 // SDL_RenderCopyEx(renderer, gunFireTexture, NULL, &gunFireRect, NULL, NULL, SDL_FLIP_NONE);
             }
             if(bulletShot(bullets[i][j]))

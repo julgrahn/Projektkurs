@@ -30,8 +30,8 @@ PUBLIC Bullet createBullet()
 {
 	Bullet b = malloc(sizeof(struct Bullet_type));
 	b->active = false;
-	b->dimensions.w = 10;
-	b->dimensions.h = 10;
+	b->dimensions.w = 5;
+	b->dimensions.h = 5;
 	b->speed = BULLET_SPEED;
 	b->damage = BULLET_DAMAGE;
 	b->hit = 0;
@@ -113,7 +113,7 @@ PUBLIC SDL_Rect* getBulletRect(Bullet bullet)
 PUBLIC void freeBullet(Bullet a)
 {
 	a->active = false;
-	a->hit = 3;
+	a->hit = 15;
 }
 
 PUBLIC double getBulletDirection(Bullet a)
@@ -170,6 +170,11 @@ PUBLIC bool bulletHit(Bullet b)
 		return true;
 	}
 	else return false;
+}
+
+PUBLIC int getBulletHitValue(Bullet b)
+{
+	return b->hit;
 }
 
 PUBLIC bool bulletShot(Bullet a)

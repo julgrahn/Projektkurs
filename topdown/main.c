@@ -50,14 +50,16 @@ int main(int argc, char* args[])
     Mix_Chunk* sound;
     gunFireRect.w = 40;
     gunFireRect.h = 40;
-    SDL_Texture* gunFireTexture2 = NULL;
-    SDL_Rect gunFireRect2;
-    gunFireRect2.w = 40;
-    gunFireRect2.h = 40;
+    SDL_Texture* bloodTexture = NULL;
+    SDL_Rect bloodRect;
+    bloodRect.w = 64;
+    bloodRect.h = 64;
+    SDL_Rect bloodTiles[48];
     SDL_Texture* explosionTexture = NULL;
     SDL_Rect explosionRect;
     explosionRect.w = 40;
     explosionRect.h = 40;
+    SDL_Rect explosionTiles[121]; // Rutor från explosions.png
     int up = 0, down = 0, left = 0, right = 0;
     SDL_Point playerRotationPoint = { 20, 32 };
     SDL_Point muzzleRotationPoint = { 14, 16 };
@@ -76,8 +78,9 @@ int main(int argc, char* args[])
         startServer(server);
     }
     initClient(&sd, &p, &p2);
-    loadMedia(renderer, gridTiles, &tiles, playerRect, &playerText, &cursor, &bulletTexture,
-        &gunFireTexture, gunFireRect, &explosionTexture, explosionRect, &gunFireTexture2, gunFireRect2, &sound);
+    loadMedia(renderer, gridTiles, &tiles, playerRect, &playerText, &cursor, &bulletTexture, 
+            &gunFireTexture, &explosionTexture, &bloodTexture, 
+            &sound, explosionTiles, bloodTiles);
     connectToServer(LOCAL_IP, &srvadd, &tcpsock, networkgamestate, &playerID, players, &sd, &connected);
     startUDPreceiveThread(&sd, &p2, bullets, players, &networkgamestate, playerID, &mutex);
 
@@ -117,8 +120,8 @@ int main(int argc, char* args[])
         // renderGame(renderer, tiles, gridTiles, bullets, bulletTexture, players, playerText, playerRect, &playerRotationPoint);
         renderGame(renderer, tiles, gridTiles, bullets, bulletTexture, players, playerText, 
                     playerRect, &playerRotationPoint, gunFireTexture, gunFireRect, 
-                    explosionTexture, explosionRect,  &muzzleRotationPoint, gunFireTexture2, 
-                    gunFireRect2, &bulletRotationPoint, sound);
+                    explosionTexture, explosionRect,  &muzzleRotationPoint, bloodTexture, 
+                    bloodRect, &bulletRotationPoint, sound, explosionTiles, bloodTiles);
     }
 
     SDL_DestroyRenderer(renderer);
