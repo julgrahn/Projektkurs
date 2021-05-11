@@ -13,7 +13,6 @@
 #include "clientNetFunctions.h"
 #include "gameFunctions.h"
 #include "renderFunctions.h"
-#include "menu.h"
 #include "button.h"
 
 
@@ -77,44 +76,9 @@ int main(int argc, char* args[])
     {
         handleEvents(&event, &up, &down, &right, &left, &isPlaying, &mouseX, &mouseY, &shooting);
         renderMenu(renderer, connectTextures, hostTextures, quitTextures, buttons, mouseX, mouseY, shooting);
+        handleMenu(mouseX, mouseY, shooting, buttons, bullets, &srvadd, &tcpsock, networkgamestate, &playerID,
+            players, &sd, &connected, mutex, &isPlaying, &p2, server, &host);
 
-        // Connect button
-        if (mouseX >= (WINDOWWIDTH / 2) - BUTTON_HEIGHT && mouseX <= (WINDOWWIDTH / 2) + BUTTON_HEIGHT)
-        {
-            // Connect button
-
-            if (mouseY > CONNECT_Y_POS && mouseY < CONNECT_Y_POS + BUTTON_HEIGHT && shooting)
-            {
-                setButtonPressed(buttons[0]);
-                connectToServer(LOCAL_IP, &srvadd, &tcpsock, networkgamestate, &playerID, players, &sd, &connected);
-                startUDPreceiveThread(&sd, &p2, bullets, players, &networkgamestate, playerID, &mutex);
-                //printf("Connect clicked\n"); 
-            }
-
-            // Host button
-
-            if (mouseY > HOST_Y_POS && mouseY < HOST_Y_POS + BUTTON_HEIGHT && shooting)
-            {
-                server = createServer();
-                startServer(server);
-                host = true;
-                setButtonPressed(buttons[1]);
-                connectToServer(LOCAL_IP, &srvadd, &tcpsock, networkgamestate, &playerID, players, &sd, &connected);
-                startUDPreceiveThread(&sd, &p2, bullets, players, &networkgamestate, playerID, &mutex);
-                
-                
-                //printf("Host clicked\n");
-            }
-
-            // Quit button
-
-            if (mouseY > QUIT_Y_POS && mouseY < QUIT_Y_POS + BUTTON_HEIGHT && shooting)
-            {
-
-                setButtonPressed(buttons[2], true);
-                isPlaying = false;
-            }
-        }
         // if mouseClick(connect) connected = true
         
     }
