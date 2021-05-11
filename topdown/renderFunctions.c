@@ -3,6 +3,19 @@
 #define PUBLIC /* empty */
 #define PRIVATE static
 
+PUBLIC void renderMenu(SDL_Renderer* renderer, SDL_Texture* connectTexture, SDL_Texture* hostTexture, SDL_Texture* quitTexture, Button buttons[])
+{
+    SDL_Rect testRect = { 5, 10, 50, 100 };
+    SDL_RenderClear(renderer);
+    //SDL_RenderCopy(renderer, buttonTexture, NULL, &testRect);
+    SDL_RenderCopy(renderer, connectTexture, NULL, getButtonRect(buttons[0]));
+    SDL_RenderCopy(renderer, hostTexture, NULL, getButtonRect(buttons[1]));
+    SDL_RenderCopy(renderer, quitTexture, NULL, getButtonRect(buttons[2]));
+
+    SDL_RenderPresent(renderer);
+
+}
+
 PUBLIC void renderGame(SDL_Renderer* renderer, SDL_Texture* mTiles, SDL_Rect gTiles[], Bullet bullets[],
     SDL_Texture* bulletTexture, Player players[], SDL_Texture* playerText, SDL_Rect playerRect[], SDL_Point* playerRotationPoint)
 {

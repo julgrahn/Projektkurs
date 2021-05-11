@@ -14,6 +14,7 @@
 #include "gameFunctions.h"
 #include "renderFunctions.h"
 #include "menu.h"
+#include "button.h"
 
 
 SDL_mutex *mutex;
@@ -27,7 +28,7 @@ int main(int argc, char* args[])
     SDL_Point playerRotationPoint = { 20, 32 };
     SDL_Event event;
     SDL_Renderer* renderer = NULL;
-    SDL_Renderer* renderMenu = NULL;
+    //SDL_Renderer* renderMenu = NULL;
     UDPsocket sd;
     TCPsocket tcpsock = NULL;
     IPaddress srvadd;
@@ -36,28 +37,35 @@ int main(int argc, char* args[])
     Server server = NULL;
     SDL_Cursor* cursor = NULL;
     Player players[MAX_PLAYERS];
-    SDL_Texture* playerText;
-    SDL_Texture* buttons;
+    Button buttons[3];
+    //SDL_Texture* buttons;
     SDL_Rect playerRect[4];
     Bullet bullets[MAX_BULLETS];
-    SDL_Texture* tiles = NULL;
     SDL_Rect gridTiles[900];   // Kommer innehålla alla 900 rutor från bakgrundsbilden, kan optmiseras.
     Networkgamestate networkgamestate = createNetworkgamestate();
     SDL_Texture* bulletTexture = NULL;
+    SDL_Texture* connectTexture = NULL;
+    SDL_Texture* hostTexture = NULL;
+    SDL_Texture* quitTexture = NULL;
+    SDL_Texture* tiles = NULL;
+    SDL_Texture* playerText;
+
+
     int up = 0, down = 0, left = 0, right = 0;
-    int playerID;
+    int playerID = 1;
     int mouseX = 0, mouseY = 0;
-    bool isPlaying = true, shooting = false, host = false, connected = false;
+    int connected = 0, hosted = 0, quit = 0;
+    bool isPlaying = false, shooting = false, host = false;
 
     
 
     // Init functions
     mutex = SDL_CreateMutex();
-    if (!initMenu(&renderMenu)) return 1;
+    //if (!initMenu(&renderMenu)) return 1;
     if (!initSDL(&renderer)) return 1;
     initGameObjects(players, bullets);
-    loadMenu(renderMenu, &buttons, &cursor);
-    startPrompt(&playerID, &server, &host);
+    loadMenu(renderer, &connectTexture, &hostTexture, &quitTexture);
+    //startPrompt(&playerID, &server, &host);
     if (host)
     {
         server = createServer();
@@ -65,9 +73,21 @@ int main(int argc, char* args[])
     }
     initClient(&sd, &p, &p2);  
     loadMedia(renderer, gridTiles, &tiles, playerRect, &playerText, &cursor, &bulletTexture);  
-    connectToServer(LOCAL_IP, &srvadd, &tcpsock, networkgamestate, &playerID, players, &sd, &connected);
-    startUDPreceiveThread(&sd, &p2, bullets, players, &networkgamestate, playerID, &mutex);
+    //connectToServer(LOCAL_IP, &srvadd, &tcpsock, networkgamestate, &playerID, players, &sd, &connected);
+    //startUDPreceiveThread(&sd, &p2, bullets, players, &networkgamestate, playerID, &mutex);
 
+
+    //Menu loop
+    buttons[0] = createButton((WINDOWWIDTH / 2) - 64, 100);
+    buttons[1] = createButton((WINDOWWIDTH / 2) - 64, 200);
+    buttons[2] = createButton((WINDOWWIDTH / 2) - 64, 300);
+    while (connected == 0)
+    {
+        handleEvents(&event, &up, &down, &right, &left, &isPlaying, &mouseX, &mouseY, &shooting);
+        renderMenu(renderer, connectTexture, hostTexture, quitTexture, buttons);
+        
+    }
+    
     // Main loop
     while (isPlaying)
     {

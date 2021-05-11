@@ -1,7 +1,7 @@
 #include "menu.h"
 #define PUBLIC
 
-PUBLIC bool initMenu(SDL_Renderer** renderMenu)
+/*PUBLIC bool initMenu(SDL_Renderer** renderMenu)
 {
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0)
     {
@@ -36,20 +36,8 @@ PUBLIC void loadMenu(SDL_Renderer* renderMenu, SDL_Texture** buttons, SDL_Cursor
 {
     SDL_Surface* background = SDL_CreateRGBSurface(0, WINDOWWIDTH, WINDOWHEIGHT, 1, 0, 0, 0, 0);
 
-    SDL_Surface* connectButton = IMG_Load("reources/ConnectGrey.png");
-    SDL_Surface* connectButtonHover = IMG_Load("reources/ConnectWhite.png");
-    SDL_Surface* connectButtonClick = IMG_Load("reources/ConnectGreen.png");
-
-    SDL_Surface* hostButton = IMG_Load("resources/HostGrey.png");
-    SDL_Surface* hostButtonHover = IMG_Load("resources/HostWhite.png");
-    SDL_Surface* hostButtonClick = IMG_Load("resources/HostGreen.png");
-
-    SDL_Surface* quitButton = IMG_Load("resources/QuitGrey.png");
-    SDL_Surface* quitButtonHover = IMG_Load("resources/QuitWhite.png");
-    SDL_Surface* quitButtonClick = IMG_Load("resources/QuitRed.png");
+    
 
     *buttons = SDL_CreateTextureFromSurface(renderMenu, connectButton);
 
-
-
-}
+}*/

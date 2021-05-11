@@ -39,6 +39,7 @@ PUBLIC void initGameObjects(Player players[], Bullet bullets[])
     {
         players[i] = createPlayer(100, 100, i);
     }
+    //button = createButton(50, 50);
 }
 
 PUBLIC void initClient(UDPsocket* sd, UDPpacket** p, UDPpacket** p2)
@@ -60,6 +61,35 @@ PUBLIC void initClient(UDPsocket* sd, UDPpacket** p, UDPpacket** p2)
         fprintf(stderr, "SDLNet_AllocPacket: %s\n", SDLNet_GetError());
         exit(EXIT_FAILURE);
     }
+}
+
+PUBLIC void loadMenu(SDL_Renderer* renderer, SDL_Texture** connectTexture, SDL_Texture** hostTexture, SDL_Texture** quitTexture)
+{
+    SDL_Surface* connectButton = IMG_Load("resources/ConnectGrey.png");
+    SDL_Surface* connectButtonHover = IMG_Load("resources/ConnectWhite.png");
+    SDL_Surface* connectButtonClick = IMG_Load("resources/ConnectGreen.png");
+
+    SDL_Surface* hostButton = IMG_Load("resources/HostGrey.png");
+    SDL_Surface* hostButtonHover = IMG_Load("resources/HostWhite.png");
+    SDL_Surface* hostButtonClick = IMG_Load("resources/HostGreen.png");
+
+    SDL_Surface* quitButton = IMG_Load("resources/QuitGrey.png");
+    SDL_Surface* quitButtonHover = IMG_Load("resources/QuitWhite.png");
+    SDL_Surface* quitButtonClick = IMG_Load("resources/QuitRed.png");
+
+
+    *connectTexture = SDL_CreateTextureFromSurface(renderer, connectButton);
+    SDL_FreeSurface(connectButton);
+
+    *hostTexture = SDL_CreateTextureFromSurface(renderer, hostButton);
+    SDL_FreeSurface(hostButton);
+
+    *quitTexture = SDL_CreateTextureFromSurface(renderer, quitButton);
+    SDL_FreeSurface(quitButton);
+
+    /*if (connectTexture == NULL) printf("Finns ingen bild\n");
+    else printf("texturen har laddats\n");*/
+
 }
 
 PUBLIC void loadMedia(SDL_Renderer* renderer, SDL_Rect gTiles[], SDL_Texture** tiles, SDL_Rect playerRect[], SDL_Texture** pTexture, SDL_Cursor** cursor, SDL_Texture** bulletTexture)

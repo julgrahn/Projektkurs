@@ -4,7 +4,11 @@
 #include "sdlinclude.h"
 #include <stdio.h>
 
-enum ButtonState { NORMAL = 0, HOVER = 1, PRESSED = 2 };
+typedef struct Button_Type* Button;
+Button createButton(int xButtonPos, int yButtonpos);
+SDL_Rect* getButtonRect(Button button);
+
+//enum ButtonState { NORMAL = 0, HOVER = 1, PRESSED = 2 };
 
 
 

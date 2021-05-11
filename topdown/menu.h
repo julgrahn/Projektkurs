@@ -10,8 +10,8 @@
 #include "bullet.h"
 #include "player.h"
 
-bool initMenu(SDL_Renderer* renderMenu);
-void loadMenu(SDL_Renderer* renderMenu, SDL_Texture** buttons, SDL_Cursor** cursor);
+/*bool initMenu(SDL_Renderer* renderMenu);
+void loadMenu(SDL_Renderer* renderMenu, SDL_Texture** buttons, SDL_Cursor** cursor);*/
 
 
 
