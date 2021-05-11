@@ -10,47 +10,6 @@
 #define PUBLIC /* empty */
 #define PRIVATE static
 
-PUBLIC void handleMenu(int* mouseX, int* mouseY, bool shooting, Button buttons[], Bullet bullets[], IPaddress* srvadd, TCPsocket* tcpsock, Networkgamestate networkgamestate, int* playerID,
-    Player players[], UDPsocket* sd, bool* connected, SDL_mutex* mutex, bool* isPlaying, UDPpacket** p2, Server server, bool* host)
-{
-    // Connect button
-    if (mouseX >= (WINDOWWIDTH / 2) - BUTTON_HEIGHT && mouseX <= (WINDOWWIDTH / 2) + BUTTON_HEIGHT)
-    {
-        // Connect button
-
-        if (mouseY > CONNECT_Y_POS && mouseY < CONNECT_Y_POS + BUTTON_HEIGHT && shooting)
-        {
-            setButtonPressed(buttons[0]);
-            connectToServer(LOCAL_IP, srvadd, tcpsock, networkgamestate, playerID, players, sd, connected);
-            startUDPreceiveThread(sd, p2, bullets, players, &networkgamestate, playerID, &mutex);
-            //printf("Connect clicked\n"); 
-        }
-
-        // Host button
-
-        if (mouseY > HOST_Y_POS && mouseY < HOST_Y_POS + BUTTON_HEIGHT && shooting)
-        {
-            server = createServer();
-            startServer(server);
-            *host = true;
-            setButtonPressed(buttons[1]);
-            connectToServer(LOCAL_IP, srvadd, tcpsock, networkgamestate, playerID, players, sd, connected);
-            startUDPreceiveThread(sd, p2, bullets, players, &networkgamestate, playerID, &mutex);
-
-
-            //printf("Host clicked\n");
-        }
-
-        // Quit button
-
-        if (mouseY > QUIT_Y_POS && mouseY < QUIT_Y_POS + BUTTON_HEIGHT && shooting)
-        {
-
-            setButtonPressed(buttons[2], true);
-            *isPlaying = false;
-        }
-    }
-}
 
 PUBLIC void updateplayers(Networkgamestate networkgamestate, Player players[], int playerID)
 {

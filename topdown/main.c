@@ -76,24 +76,20 @@ int main(int argc, char* args[])
 
 
     //Menu loop
-    buttons[0] = createButton((WINDOWWIDTH / 2) - 64, 100);
-    buttons[1] = createButton((WINDOWWIDTH / 2) - 64, 200);
-    buttons[2] = createButton((WINDOWWIDTH / 2) - 64, 300);
+    buttons[0] = createButton((WINDOWWIDTH / 2) - BUTTON_HEIGHT, CONNECT_Y_POS);
+    buttons[1] = createButton((WINDOWWIDTH / 2) - BUTTON_HEIGHT, HOST_Y_POS);
+    buttons[2] = createButton((WINDOWWIDTH / 2) - BUTTON_HEIGHT, QUIT_Y_POS);
     while (isPlaying && !connected)
     {
         handleEvents(&event, &up, &down, &right, &left, &isPlaying, &mouseX, &mouseY, &shooting);
         renderMenu(renderer, connectTextures, hostTextures, quitTextures, buttons, mouseX, mouseY, shooting);
-        handleMenu(mouseX, mouseY, shooting, buttons, bullets, &srvadd, &tcpsock, networkgamestate, &playerID,
-            players, &sd, &connected, mutex, &isPlaying, &p2, server, &host);
 
-<<<<<<< HEAD
-=======
         // Connect button
-        if (mouseX >= (WINDOWWIDTH / 2) - 64 && mouseX <= (WINDOWWIDTH / 2) + 64)
+        if (mouseX >= (WINDOWWIDTH / 2) - BUTTON_HEIGHT && mouseX <= (WINDOWWIDTH / 2) + BUTTON_HEIGHT)
         {
             // Connect button
 
-            if (mouseY > 100 && mouseY < 164 && shooting)
+            if (mouseY > CONNECT_Y_POS && mouseY < CONNECT_Y_POS + BUTTON_HEIGHT && shooting)
             {
                 setButtonPressed(buttons[0], true);
                 connectToServer(LOCAL_IP, &srvadd, &tcpsock, networkgamestate, &playerID, players, &sd, &connected);
@@ -103,7 +99,7 @@ int main(int argc, char* args[])
 
             // Host button
 
-            if (mouseY > 200 && mouseY < 264 && shooting)
+            if (mouseY > HOST_Y_POS && mouseY < HOST_Y_POS + BUTTON_HEIGHT && shooting)
             {
                 server = createServer();
                 startServer(server);
@@ -118,14 +114,13 @@ int main(int argc, char* args[])
 
             // Quit button
 
-            if (mouseY > 300 && mouseY < 364 && shooting)
+            if (mouseY > QUIT_Y_POS && mouseY < QUIT_Y_POS + BUTTON_HEIGHT && shooting)
             {
 
                 setButtonPressed(buttons[2], true);
                 isPlaying = false;
             }
         }
->>>>>>> parent of 454b6d0 (cleanup)
         // if mouseClick(connect) connected = true
         
     }
