@@ -38,7 +38,7 @@ PUBLIC void renderMenu(SDL_Renderer* renderer, SDL_Texture* connectTextures[], S
     SDL_RenderClear(renderer);
     
     // Connect button
-    if (mouseX >= (WINDOWWIDTH / 2) - BUTTON_HEIGHT && mouseX <= (WINDOWWIDTH / 2) + BUTTON_HEIGHT)
+    if (mouseX >= (WINDOWWIDTH / 2) - 64 && mouseX <= (WINDOWWIDTH / 2) + 64)
     {
         SDL_RenderCopy(renderer, connectTextures[0], NULL, getButtonRect(buttons[0]));
         SDL_RenderCopy(renderer, hostTextures[0], NULL, getButtonRect(buttons[1]));
@@ -46,12 +46,12 @@ PUBLIC void renderMenu(SDL_Renderer* renderer, SDL_Texture* connectTextures[], S
 
         // Connect button
 
-        if (mouseY > CONNECT_Y_POS && mouseY < CONNECT_Y_POS + BUTTON_HEIGHT)
+        if (mouseY > 100 && mouseY < 164)
         {
             SDL_RenderCopy(renderer, connectTextures[1], NULL, getButtonRect(buttons[0]));
         }
 
-        if (mouseY > CONNECT_Y_POS && mouseY < CONNECT_Y_POS + BUTTON_HEIGHT && shooting)
+        if (mouseY > 100 && mouseY < 164 && shooting)
         {
 
             SDL_RenderCopy(renderer, connectTextures[2], NULL, getButtonRect(buttons[0]));
@@ -59,12 +59,12 @@ PUBLIC void renderMenu(SDL_Renderer* renderer, SDL_Texture* connectTextures[], S
 
         // Host button
 
-        if (mouseY > HOST_Y_POS && mouseY < HOST_Y_POS + BUTTON_HEIGHT)
+        if (mouseY > 200 && mouseY < 264)
         {
             SDL_RenderCopy(renderer, hostTextures[1], NULL, getButtonRect(buttons[1]));
         }
 
-        if (mouseY > HOST_Y_POS && mouseY < HOST_Y_POS + BUTTON_HEIGHT && shooting)
+        if (mouseY > 200 && mouseY < 264 && shooting)
         {
 
             SDL_RenderCopy(renderer, hostTextures[2], NULL, getButtonRect(buttons[1]));
@@ -72,12 +72,12 @@ PUBLIC void renderMenu(SDL_Renderer* renderer, SDL_Texture* connectTextures[], S
 
         // Quit button
 
-        if (mouseY > QUIT_Y_POS && mouseY < QUIT_Y_POS + BUTTON_HEIGHT)
+        if (mouseY > 300 && mouseY < 364)
         {
             SDL_RenderCopy(renderer, quitTextures[1], NULL, getButtonRect(buttons[2]));
         }
 
-        if (mouseY > QUIT_Y_POS && mouseY < QUIT_Y_POS + BUTTON_HEIGHT && shooting)
+        if (mouseY > 300 && mouseY < 364 && shooting)
         {
 
             SDL_RenderCopy(renderer, quitTextures[2], NULL, getButtonRect(buttons[2]));

@@ -59,19 +59,26 @@ int main(int argc, char* args[])
 
     // Init functions
     mutex = SDL_CreateMutex();
+    //if (!initMenu(&renderMenu)) return 1;
     if (!initSDL(&renderer)) return 1;
     initGameObjects(players, bullets);
     loadMenu(renderer, &connectTextures, &hostTextures, &quitTextures);
+    //startPrompt(&playerID, &server, &host);
+    /*if (host)
+    {
+        server = createServer();
+        startServer(server);
+    }*/
     initClient(&sd, &p, &p2); 
     loadMedia(renderer, gridTiles, &tiles, playerRect, &playerText, &cursor, &bulletTexture);  
+    //connectToServer(LOCAL_IP, &srvadd, &tcpsock, networkgamestate, &playerID, players, &sd, &connected);
+    //startUDPreceiveThread(&sd, &p2, bullets, players, &networkgamestate, playerID, &mutex);
 
 
     //Menu loop
-    buttons[0] = createButton((WINDOWWIDTH / 2) - BUTTON_HEIGHT, CONNECT_Y_POS);
-    buttons[1] = createButton((WINDOWWIDTH / 2) - BUTTON_HEIGHT, HOST_Y_POS);
-    buttons[2] = createButton((WINDOWWIDTH / 2) - BUTTON_HEIGHT, QUIT_Y_POS);
-
-
+    buttons[0] = createButton((WINDOWWIDTH / 2) - 64, 100);
+    buttons[1] = createButton((WINDOWWIDTH / 2) - 64, 200);
+    buttons[2] = createButton((WINDOWWIDTH / 2) - 64, 300);
     while (isPlaying && !connected)
     {
         handleEvents(&event, &up, &down, &right, &left, &isPlaying, &mouseX, &mouseY, &shooting);
@@ -79,6 +86,46 @@ int main(int argc, char* args[])
         handleMenu(mouseX, mouseY, shooting, buttons, bullets, &srvadd, &tcpsock, networkgamestate, &playerID,
             players, &sd, &connected, mutex, &isPlaying, &p2, server, &host);
 
+<<<<<<< HEAD
+=======
+        // Connect button
+        if (mouseX >= (WINDOWWIDTH / 2) - 64 && mouseX <= (WINDOWWIDTH / 2) + 64)
+        {
+            // Connect button
+
+            if (mouseY > 100 && mouseY < 164 && shooting)
+            {
+                setButtonPressed(buttons[0], true);
+                connectToServer(LOCAL_IP, &srvadd, &tcpsock, networkgamestate, &playerID, players, &sd, &connected);
+                startUDPreceiveThread(&sd, &p2, bullets, players, &networkgamestate, playerID, &mutex);
+                //printf("Connect clicked\n"); 
+            }
+
+            // Host button
+
+            if (mouseY > 200 && mouseY < 264 && shooting)
+            {
+                server = createServer();
+                startServer(server);
+                host = true;
+                setButtonPressed(buttons[1], true);
+                connectToServer(LOCAL_IP, &srvadd, &tcpsock, networkgamestate, &playerID, players, &sd, &connected);
+                startUDPreceiveThread(&sd, &p2, bullets, players, &networkgamestate, playerID, &mutex);
+                
+                
+                //printf("Host clicked\n");
+            }
+
+            // Quit button
+
+            if (mouseY > 300 && mouseY < 364 && shooting)
+            {
+
+                setButtonPressed(buttons[2], true);
+                isPlaying = false;
+            }
+        }
+>>>>>>> parent of 454b6d0 (cleanup)
         // if mouseClick(connect) connected = true
         
     }
