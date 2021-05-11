@@ -3,17 +3,94 @@
 #define PUBLIC /* empty */
 #define PRIVATE static
 
-PUBLIC void renderMenu(SDL_Renderer* renderer, SDL_Texture* connectTexture, SDL_Texture* hostTexture, SDL_Texture* quitTexture, Button buttons[])
+
+/*PUBLIC void quitButton(SDL_Renderer* renderer, SDL_Texture* quitTextures[], Button buttons[], int mouseX, int mouseY, bool shooting)
 {
-    SDL_Rect testRect = { 5, 10, 50, 100 };
     SDL_RenderClear(renderer);
-    //SDL_RenderCopy(renderer, buttonTexture, NULL, &testRect);
-    SDL_RenderCopy(renderer, connectTexture, NULL, getButtonRect(buttons[0]));
-    SDL_RenderCopy(renderer, hostTexture, NULL, getButtonRect(buttons[1]));
-    SDL_RenderCopy(renderer, quitTexture, NULL, getButtonRect(buttons[2]));
+
+    if (mouseX >= (WINDOWWIDTH / 2) - 64 && mouseX <= (WINDOWWIDTH / 2) + 64)
+    {
+        SDL_RenderCopy(renderer, quitTextures[0], NULL, getButtonRect(buttons[2]));
+
+        if (mouseY > 300 && mouseY < 364)
+        {
+            SDL_RenderCopy(renderer, quitTextures[1], NULL, getButtonRect(buttons[2]));
+        }
+
+        if (mouseY > 300 && mouseY < 364 && shooting)
+        {
+
+            SDL_RenderCopy(renderer, quitTextures[2], NULL, getButtonRect(buttons[2]));
+        }
+    }
+    else
+    {
+        SDL_RenderCopy(renderer, quitTextures[0], NULL, getButtonRect(buttons[2]));
+    }
 
     SDL_RenderPresent(renderer);
 
+}*/
+
+PUBLIC void renderMenu(SDL_Renderer* renderer, SDL_Texture* connectTextures[], SDL_Texture* hostTextures[], SDL_Texture* quitTextures[], Button buttons[], int mouseX, int mouseY, bool shooting)
+{
+    
+    SDL_RenderClear(renderer);
+    
+    // Connect button
+    if (mouseX >= (WINDOWWIDTH / 2) - 64 && mouseX <= (WINDOWWIDTH / 2) + 64)
+    {
+        SDL_RenderCopy(renderer, connectTextures[0], NULL, getButtonRect(buttons[0]));
+        SDL_RenderCopy(renderer, hostTextures[0], NULL, getButtonRect(buttons[1]));
+        SDL_RenderCopy(renderer, quitTextures[0], NULL, getButtonRect(buttons[2]));
+
+        // Connect button
+
+        if (mouseY > 100 && mouseY < 164)
+        {
+            SDL_RenderCopy(renderer, connectTextures[1], NULL, getButtonRect(buttons[0]));
+        }
+
+        if (mouseY > 100 && mouseY < 164 && shooting)
+        {
+
+            SDL_RenderCopy(renderer, connectTextures[2], NULL, getButtonRect(buttons[0]));
+        }
+
+        // Host button
+
+        if (mouseY > 200 && mouseY < 264)
+        {
+            SDL_RenderCopy(renderer, hostTextures[1], NULL, getButtonRect(buttons[1]));
+        }
+
+        if (mouseY > 200 && mouseY < 264 && shooting)
+        {
+
+            SDL_RenderCopy(renderer, hostTextures[2], NULL, getButtonRect(buttons[1]));
+        }
+
+        // Quit button
+
+        if (mouseY > 300 && mouseY < 364)
+        {
+            SDL_RenderCopy(renderer, quitTextures[1], NULL, getButtonRect(buttons[2]));
+        }
+
+        if (mouseY > 300 && mouseY < 364 && shooting)
+        {
+
+            SDL_RenderCopy(renderer, quitTextures[2], NULL, getButtonRect(buttons[2]));
+        }
+    }
+    else
+    {
+        SDL_RenderCopy(renderer, connectTextures[0], NULL, getButtonRect(buttons[0]));
+        SDL_RenderCopy(renderer, hostTextures[0], NULL, getButtonRect(buttons[1]));
+        SDL_RenderCopy(renderer, quitTextures[0], NULL, getButtonRect(buttons[2]));
+    }
+    
+    SDL_RenderPresent(renderer);
 }
 
 PUBLIC void renderGame(SDL_Renderer* renderer, SDL_Texture* mTiles, SDL_Rect gTiles[], Bullet bullets[],

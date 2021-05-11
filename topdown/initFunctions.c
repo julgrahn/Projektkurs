@@ -63,7 +63,7 @@ PUBLIC void initClient(UDPsocket* sd, UDPpacket** p, UDPpacket** p2)
     }
 }
 
-PUBLIC void loadMenu(SDL_Renderer* renderer, SDL_Texture** connectTexture, SDL_Texture** hostTexture, SDL_Texture** quitTexture)
+PUBLIC void loadMenu(SDL_Renderer* renderer, SDL_Texture* connectTextures[], SDL_Texture* hostTextures[], SDL_Texture* quitTextures[])
 {
     SDL_Surface* connectButton = IMG_Load("resources/ConnectGrey.png");
     SDL_Surface* connectButtonHover = IMG_Load("resources/ConnectWhite.png");
@@ -77,15 +77,37 @@ PUBLIC void loadMenu(SDL_Renderer* renderer, SDL_Texture** connectTexture, SDL_T
     SDL_Surface* quitButtonHover = IMG_Load("resources/QuitWhite.png");
     SDL_Surface* quitButtonClick = IMG_Load("resources/QuitRed.png");
 
+    connectTextures[0] = SDL_CreateTextureFromSurface(renderer, connectButton);
+    connectTextures[1] = SDL_CreateTextureFromSurface(renderer, connectButtonHover);
+    connectTextures[2] = SDL_CreateTextureFromSurface(renderer, connectButtonClick);
 
-    *connectTexture = SDL_CreateTextureFromSurface(renderer, connectButton);
+    hostTextures[0] = SDL_CreateTextureFromSurface(renderer, hostButton);
+    hostTextures[1] = SDL_CreateTextureFromSurface(renderer, hostButtonHover);
+    hostTextures[2] = SDL_CreateTextureFromSurface(renderer, hostButtonClick);
+
+    quitTextures[0] = SDL_CreateTextureFromSurface(renderer, quitButton);
+    quitTextures[1] = SDL_CreateTextureFromSurface(renderer, quitButtonHover);
+    quitTextures[2] = SDL_CreateTextureFromSurface(renderer, quitButtonClick);
+
+
+
+
     SDL_FreeSurface(connectButton);
+    SDL_FreeSurface(connectButtonHover);
+    SDL_FreeSurface(connectButtonClick);
 
-    *hostTexture = SDL_CreateTextureFromSurface(renderer, hostButton);
     SDL_FreeSurface(hostButton);
+    SDL_FreeSurface(hostButtonHover);
+    SDL_FreeSurface(hostButtonClick);
 
-    *quitTexture = SDL_CreateTextureFromSurface(renderer, quitButton);
     SDL_FreeSurface(quitButton);
+    SDL_FreeSurface(quitButtonHover);
+    SDL_FreeSurface(quitButtonClick);
+
+
+    
+
+
 
     /*if (connectTexture == NULL) printf("Finns ingen bild\n");
     else printf("texturen har laddats\n");*/
