@@ -4,16 +4,11 @@
 #define PUBLIC /* empty */
 #define PRIVATE static
 
-<<<<<<< Updated upstream
-PUBLIC void renderGame(SDL_Renderer* renderer, SDL_Texture* mTiles, SDL_Rect gTiles[], Bullet bullets[],
-    SDL_Texture* bulletTexture, Player players[], SDL_Texture* playerText, SDL_Rect playerRect[], SDL_Point* playerRotationPoint)
-=======
 PUBLIC void renderGame(SDL_Renderer* renderer, SDL_Texture* mTiles, SDL_Rect gTiles[], Bullet bullets[][MAX_BULLETS],
     SDL_Texture* bulletTexture, Player players[], SDL_Texture* playerText, SDL_Rect playerRect[], SDL_Point* playerRotationPoint,
     SDL_Texture* gunFireTexture, SDL_Rect gunFireRect, SDL_Texture* explosionTexture, SDL_Rect explosionRect, 
     SDL_Point* muzzleRotationPoint, SDL_Texture* bloodTexture, SDL_Rect bloodRect, Mix_Chunk* sound,
     SDL_Rect explosionTiles[], SDL_Rect bloodTiles[])
->>>>>>> Stashed changes
 {
     SDL_RenderClear(renderer);
     // Render Background
@@ -33,16 +28,6 @@ PUBLIC void renderGame(SDL_Renderer* renderer, SDL_Texture* mTiles, SDL_Rect gTi
         }
     }
     // Render Bullets
-<<<<<<< Updated upstream
-    for (int i = 0; i < MAX_BULLETS; i++)
-    {
-        if (isBulletActive(bullets[i]))
-        {
-            SDL_RenderCopy(renderer, bulletTexture, NULL, getBulletRect(bullets[i]));
-        }
-    }
-    // Render Players
-=======
     for (int i = 0; i < MAX_PLAYERS; i++)
     {
         for(int j = 0; j < MAX_BULLETS; j++)
@@ -55,7 +40,6 @@ PUBLIC void renderGame(SDL_Renderer* renderer, SDL_Texture* mTiles, SDL_Rect gTi
     }
     // Render Players
 
->>>>>>> Stashed changes
     for (int i = 0; i < MAX_PLAYERS; i++)
     {
         if (isPlayerAlive(players[i]))
@@ -63,8 +47,6 @@ PUBLIC void renderGame(SDL_Renderer* renderer, SDL_Texture* mTiles, SDL_Rect gTi
             SDL_RenderCopyEx(renderer, playerText, &playerRect[getPlayerFrame(players[i])], getPlayerRect(players[i]), getPlayerDirection(players[i]), playerRotationPoint, SDL_FLIP_NONE);
         }
     }
-<<<<<<< Updated upstream
-=======
     // Render Gunfire
     for (int i = 0; i < MAX_PLAYERS; i++)
     {
@@ -189,6 +171,5 @@ PUBLIC void renderMenu(SDL_Renderer* renderer, SDL_Texture* connectTextures[], S
         SDL_RenderCopy(renderer, quitTextures[0], NULL, getButtonRect(buttons[2]));
     }
 
->>>>>>> Stashed changes
     SDL_RenderPresent(renderer);
 }

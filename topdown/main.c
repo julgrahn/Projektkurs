@@ -24,11 +24,7 @@ void handleClientTCP(TCPsocket* tcpsock, SDLNet_SocketSet* set, Networkgamestate
 int main(int argc, char* args[])
 {
     // Variables
-<<<<<<< Updated upstream
-    
-=======
 
->>>>>>> Stashed changes
     SDL_Event event;
     SDL_Renderer* renderer = NULL;
     UDPsocket sd;
@@ -44,16 +40,6 @@ int main(int argc, char* args[])
     SDL_Texture* playerText;
     SDL_Rect playerRect[4];
     int mouseX = 0, mouseY = 0;
-<<<<<<< Updated upstream
-    Bullet bullets[MAX_BULLETS];
-    SDL_Texture* tiles = NULL;
-    SDL_Rect gridTiles[900];   // Kommer innehålla alla 900 rutor från bakgrundsbilden, kan optmiseras.
-    bool isPlaying = true, shooting = false, host = false, connected = false;
-    SDL_Texture* bulletTexture = NULL;
-    int up = 0, down = 0, left = 0, right = 0;
-    SDL_Point playerRotationPoint = { 20, 32 };
-    Networkgamestate networkgamestate = createNetworkgamestate();
-=======
     Bullet bullets[MAX_PLAYERS][MAX_BULLETS];
     SDL_Texture* tiles = NULL;
     SDL_Rect gridTiles[900];   // Kommer innehålla alla 900 rutor från bakgrundsbilden, kan optmiseras.
@@ -82,30 +68,12 @@ int main(int argc, char* args[])
     SDL_Texture* connectTextures[3];
     SDL_Texture* hostTextures[3];
     SDL_Texture* quitTextures[3];
->>>>>>> Stashed changes
 
     // Init functions
     set = SDLNet_AllocSocketSet(1);
     mutex = SDL_CreateMutex();
     if (!initSDL(&renderer, &sound)) return 1;
     initGameObjects(players, bullets);
-<<<<<<< Updated upstream
-    startPrompt(&playerID, &server, &host);
-    if (host)
-    {
-        server = createServer();
-        startServer(server);
-    }
-    initClient(&sd, &p, &p2);  
-    loadMedia(renderer, gridTiles, &tiles, playerRect, &playerText, &cursor, &bulletTexture);  
-    connectToServer(LOCAL_IP, &srvadd, &tcpsock, networkgamestate, &playerID, players, &sd, &connected);
-    startUDPreceiveThread(&sd, &p2, bullets, players, &networkgamestate, playerID, &mutex);
-
-    // Main loop
-    while (isPlaying)
-    {
-        handleEvents(&event, &up, &down, &right, &left, &isPlaying, &mouseX, &mouseY, &shooting);
-=======
     loadMenu(renderer, &connectTextures, &hostTextures, &quitTextures);
     //startPrompt(&playerID, &server, &host);
     /*if (host)
@@ -168,7 +136,6 @@ int main(int argc, char* args[])
             startNewGame(&tcpsock);
             newGame = false;
         }
->>>>>>> Stashed changes
         setPlayerShooting(&players[playerID], shooting, mouseX, mouseY);
         if (isPlayerAlive(players[playerID]))
         {

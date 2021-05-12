@@ -72,15 +72,11 @@ PUBLIC void initClient(UDPsocket* sd, UDPpacket** p, UDPpacket** p2)
     }
 }
 
-<<<<<<< Updated upstream
-PUBLIC void loadMedia(SDL_Renderer* renderer, SDL_Rect gTiles[], SDL_Texture** tiles, SDL_Rect playerRect[], SDL_Texture** pTexture, SDL_Cursor** cursor, SDL_Texture** bulletTexture)
-=======
 PUBLIC void loadMedia(SDL_Renderer* renderer, SDL_Rect gTiles[], SDL_Texture** tiles, SDL_Rect playerRect[], 
                         SDL_Texture** pTexture, SDL_Cursor** cursor, SDL_Texture** bulletTexture, 
                         SDL_Texture** gunFireTexture, SDL_Texture** explosionTexture, 
                         SDL_Texture** bloodTexture, Mix_Chunk** sound,
                         SDL_Rect explosionTiles[], SDL_Rect bloodTiles[])
->>>>>>> Stashed changes
 {
     SDL_Surface* gTilesSurface = IMG_Load("resources/tilemap.png");
     *tiles = SDL_CreateTextureFromSurface(renderer, gTilesSurface);
@@ -94,10 +90,6 @@ PUBLIC void loadMedia(SDL_Renderer* renderer, SDL_Rect gTiles[], SDL_Texture** t
             gTiles[i * 30 + j].w = getTileWidth();
             gTiles[i * 30 + j].h = getTileHeight();
         }
-<<<<<<< Updated upstream
-
-=======
->>>>>>> Stashed changes
     }
 
     SDL_Surface* playerSurface = IMG_Load("resources/playerRifle.png");
@@ -116,11 +108,6 @@ PUBLIC void loadMedia(SDL_Renderer* renderer, SDL_Rect gTiles[], SDL_Texture** t
     SDL_FreeSurface(cursorSurface);
     SDL_SetCursor(*cursor);
 
-<<<<<<< Updated upstream
-    SDL_Surface* bulletSurface = IMG_Load("resources/bullet.png");
-    *bulletTexture = SDL_CreateTextureFromSurface(renderer, bulletSurface);
-    SDL_FreeSurface(bulletSurface);
-=======
     SDL_Surface* bulletSurface = IMG_Load("resources/expl_04_0014.png");
     *bulletTexture = SDL_CreateTextureFromSurface(renderer, bulletSurface);
     SDL_FreeSurface(bulletSurface);
@@ -211,5 +198,4 @@ PUBLIC void loadMenu(SDL_Renderer* renderer, SDL_Texture* connectTextures[], SDL
     /*if (connectTexture == NULL) printf("Finns ingen bild\n");
     else printf("texturen har laddats\n");*/
 
->>>>>>> Stashed changes
 }

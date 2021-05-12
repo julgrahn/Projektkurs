@@ -15,15 +15,11 @@
 
 #define WINDOWWIDTH 704
 #define WINDOWHEIGHT 704
-<<<<<<< Updated upstream
-#define MAX_BULLETS 1000
-=======
 #define MAX_BULLETS 10
 #define BUTTON_HEIGHT 64
 #define CONNECT_Y_POS 100
 #define HOST_Y_POS 200
 #define QUIT_Y_POS 300
->>>>>>> Stashed changes
 #define ANDREAS_IP "78.71.16.247"
 #define ALEX_IP "178.78.213.173"
 #define JOHAN_IP "188.149.151.240"
