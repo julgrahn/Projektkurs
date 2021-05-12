@@ -3,9 +3,9 @@
 #define PUBLIC /* empty */
 #define PRIVATE static
 
-PUBLIC bool initSDL(SDL_Renderer** renderer)
+PUBLIC bool initSDL(SDL_Renderer** renderer, Mix_Chunk** sound)
 {
-    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0)
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_AUDIO) != 0)
     {
         printf("error initializing SDL: %s\n", SDL_GetError());
         return false;
@@ -26,14 +26,24 @@ PUBLIC bool initSDL(SDL_Renderer** renderer)
         SDL_Quit();
         return false;
     }
+    if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0)
+    {
+        printf("SDL_mixer could not initialize! SDL_mixer Error: %s\n", Mix_GetError());
+        SDL_Quit();
+        return false;
+    }
+    Mix_AllocateChannels(100);
     return true;
 }
 
-PUBLIC void initGameObjects(Player players[], Bullet bullets[])
+PUBLIC void initGameObjects(Player players[], Bullet bullets[][MAX_BULLETS])
 {
-    for (int i = 0; i < MAX_BULLETS; i++)
+    for (int i = 0; i < MAX_PLAYERS; i++)
     {
-        bullets[i] = createBullet();
+        for (int j = 0; j < MAX_BULLETS; j++)
+        {
+            bullets[i][j] = createBullet();
+        }
     }
     for (int i = 0; i < MAX_PLAYERS; i++)
     {
@@ -55,14 +65,22 @@ PUBLIC void initClient(UDPsocket* sd, UDPpacket** p, UDPpacket** p2)
         exit(EXIT_FAILURE);
     }
 
-    if (!((*p = SDLNet_AllocPacket(512)) && (*p2 = SDLNet_AllocPacket(512))))
+    if (!((*p = SDLNet_AllocPacket(1024)) && (*p2 = SDLNet_AllocPacket(1024))))
     {
         fprintf(stderr, "SDLNet_AllocPacket: %s\n", SDLNet_GetError());
         exit(EXIT_FAILURE);
     }
 }
 
+<<<<<<< Updated upstream
 PUBLIC void loadMedia(SDL_Renderer* renderer, SDL_Rect gTiles[], SDL_Texture** tiles, SDL_Rect playerRect[], SDL_Texture** pTexture, SDL_Cursor** cursor, SDL_Texture** bulletTexture)
+=======
+PUBLIC void loadMedia(SDL_Renderer* renderer, SDL_Rect gTiles[], SDL_Texture** tiles, SDL_Rect playerRect[], 
+                        SDL_Texture** pTexture, SDL_Cursor** cursor, SDL_Texture** bulletTexture, 
+                        SDL_Texture** gunFireTexture, SDL_Texture** explosionTexture, 
+                        SDL_Texture** bloodTexture, Mix_Chunk** sound,
+                        SDL_Rect explosionTiles[], SDL_Rect bloodTiles[])
+>>>>>>> Stashed changes
 {
     SDL_Surface* gTilesSurface = IMG_Load("resources/tilemap.png");
     *tiles = SDL_CreateTextureFromSurface(renderer, gTilesSurface);
@@ -76,7 +94,10 @@ PUBLIC void loadMedia(SDL_Renderer* renderer, SDL_Rect gTiles[], SDL_Texture** t
             gTiles[i * 30 + j].w = getTileWidth();
             gTiles[i * 30 + j].h = getTileHeight();
         }
+<<<<<<< Updated upstream
 
+=======
+>>>>>>> Stashed changes
     }
 
     SDL_Surface* playerSurface = IMG_Load("resources/playerRifle.png");
@@ -95,7 +116,100 @@ PUBLIC void loadMedia(SDL_Renderer* renderer, SDL_Rect gTiles[], SDL_Texture** t
     SDL_FreeSurface(cursorSurface);
     SDL_SetCursor(*cursor);
 
+<<<<<<< Updated upstream
     SDL_Surface* bulletSurface = IMG_Load("resources/bullet.png");
     *bulletTexture = SDL_CreateTextureFromSurface(renderer, bulletSurface);
     SDL_FreeSurface(bulletSurface);
+=======
+    SDL_Surface* bulletSurface = IMG_Load("resources/expl_04_0014.png");
+    *bulletTexture = SDL_CreateTextureFromSurface(renderer, bulletSurface);
+    SDL_FreeSurface(bulletSurface);
+
+    SDL_Surface* gunFireSurface = IMG_Load("resources/muzzle2_0007.png");
+    *gunFireTexture = SDL_CreateTextureFromSurface(renderer, gunFireSurface);
+    SDL_FreeSurface(gunFireSurface);
+
+    SDL_Surface* explosionSurface = IMG_Load("resources/explosions.png");
+    *explosionTexture = SDL_CreateTextureFromSurface(renderer, explosionSurface);
+    SDL_FreeSurface(explosionSurface);
+    for (int i = 0; i < 11; i++)
+    {
+        for (int j = 0; j < 11; j++)
+        {
+            explosionTiles[i * 11 + j].x = j * 93;
+            explosionTiles[i * 11 + j].y = i * 93;
+            explosionTiles[i * 11 + j].w = 93;
+            explosionTiles[i * 11 + j].h = 93;
+        }
+    }
+
+    // Blod
+    SDL_Surface* bloodSurface = IMG_Load("resources/blood - right 1.png");
+    *bloodTexture = SDL_CreateTextureFromSurface(renderer, bloodSurface);
+    SDL_FreeSurface(bloodSurface);
+    for (int i = 0; i < 4; i++)
+    {
+        for (int j = 0; j < 4; j++)
+        {
+            bloodTiles[i * 4 + j].x = j * 512;
+            bloodTiles[i * 4 + j].y = i * 512;
+            bloodTiles[i * 4 + j].w = 512;
+            bloodTiles[i * 4 + j].h = 512;
+        }
+    }
+
+
+    // Gunfire Soundeffect
+    *sound = Mix_LoadWAV("resources/gunsound2.wav");
+    if (sound == NULL)
+    {
+        printf("Failed to load beat music! SDL_mixer Error: %s\n", Mix_GetError());
+    }
+    // Volume
+    Mix_Volume(-1, 20);
+
+}
+
+PUBLIC void loadMenu(SDL_Renderer* renderer, SDL_Texture* connectTextures[], SDL_Texture* hostTextures[], SDL_Texture* quitTextures[])
+{
+    SDL_Surface* connectButton = IMG_Load("resources/ConnectGrey.png");
+    SDL_Surface* connectButtonHover = IMG_Load("resources/ConnectWhite.png");
+    SDL_Surface* connectButtonClick = IMG_Load("resources/ConnectGreen.png");
+
+    SDL_Surface* hostButton = IMG_Load("resources/HostGrey.png");
+    SDL_Surface* hostButtonHover = IMG_Load("resources/HostWhite.png");
+    SDL_Surface* hostButtonClick = IMG_Load("resources/HostGreen.png");
+
+    SDL_Surface* quitButton = IMG_Load("resources/QuitGrey.png");
+    SDL_Surface* quitButtonHover = IMG_Load("resources/QuitWhite.png");
+    SDL_Surface* quitButtonClick = IMG_Load("resources/QuitRed.png");
+
+    connectTextures[0] = SDL_CreateTextureFromSurface(renderer, connectButton);
+    connectTextures[1] = SDL_CreateTextureFromSurface(renderer, connectButtonHover);
+    connectTextures[2] = SDL_CreateTextureFromSurface(renderer, connectButtonClick);
+
+    hostTextures[0] = SDL_CreateTextureFromSurface(renderer, hostButton);
+    hostTextures[1] = SDL_CreateTextureFromSurface(renderer, hostButtonHover);
+    hostTextures[2] = SDL_CreateTextureFromSurface(renderer, hostButtonClick);
+
+    quitTextures[0] = SDL_CreateTextureFromSurface(renderer, quitButton);
+    quitTextures[1] = SDL_CreateTextureFromSurface(renderer, quitButtonHover);
+    quitTextures[2] = SDL_CreateTextureFromSurface(renderer, quitButtonClick);
+
+    SDL_FreeSurface(connectButton);
+    SDL_FreeSurface(connectButtonHover);
+    SDL_FreeSurface(connectButtonClick);
+
+    SDL_FreeSurface(hostButton);
+    SDL_FreeSurface(hostButtonHover);
+    SDL_FreeSurface(hostButtonClick);
+
+    SDL_FreeSurface(quitButton);
+    SDL_FreeSurface(quitButtonHover);
+    SDL_FreeSurface(quitButtonClick);
+
+    /*if (connectTexture == NULL) printf("Finns ingen bild\n");
+    else printf("texturen har laddats\n");*/
+
+>>>>>>> Stashed changes
 }
