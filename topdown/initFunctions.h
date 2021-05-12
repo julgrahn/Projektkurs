@@ -22,5 +22,8 @@ void loadMedia(SDL_Renderer* renderer, SDL_Rect gTiles[], SDL_Texture** tiles,
                 SDL_Texture** gunFireTexture2, SDL_Rect gunFireRect2, Mix_Chunk** sound);
 
 void initGameHUD(SDL_Renderer *renderer, SDL_Rect textRect[], SDL_Texture **textTexture, SDL_Rect *healthBar, SDL_Rect *reloadTimer);
+                SDL_Texture** explosionTexture, SDL_Texture** bloodTexture, Mix_Chunk** sound,
+                SDL_Rect explosionTiles[], SDL_Rect bloodTiles[]);
+void loadMenu(SDL_Renderer* renderer, SDL_Texture* connectTextures[], SDL_Texture* hostTexture[], SDL_Texture* quitTexture[]);
 
 #endif  // INITFUNCTIONS_H

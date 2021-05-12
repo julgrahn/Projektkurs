@@ -1,8 +1,8 @@
 #Compile SDL project
 
 
-theGame: main.o player.o world.o bullet.o server.o networkgamestate.o initFunctions.o gameFunctions.o clientNetFunctions.o renderFunctions.o weapon.o
-	gcc -o theGame main.o player.o world.o bullet.o server.o networkgamestate.o initFunctions.o gameFunctions.o clientNetFunctions.o renderFunctions.o weapon.o -lSDL2 -lSDL2_image -lSDL2_net -lSDL2_mixer -lSDL2_ttf
+theGame: main.o player.o world.o bullet.o server.o networkgamestate.o initFunctions.o gameFunctions.o clientNetFunctions.o renderFunctions.o weapon.o button.o
+	gcc -o theGame main.o player.o world.o bullet.o server.o networkgamestate.o initFunctions.o gameFunctions.o clientNetFunctions.o renderFunctions.o weapon.o button.o -lSDL2 -lSDL2_image -lSDL2_net -lSDL2_mixer
 	
 main.o: main.c
 	gcc -c main.c
@@ -36,3 +36,6 @@ renderFunctions.o: renderFunctions.c
 
 weapon.o: weapon.c
 	gcc -c weapon.c
+
+button.o: button.c
+	gcc -c button.c

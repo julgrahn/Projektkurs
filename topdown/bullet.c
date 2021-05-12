@@ -55,6 +55,18 @@ PUBLIC void spawnBullet2(Bullet a, int xOrigin, int yOrigin, double angle)
 PUBLIC void spawnBullet3(Bullet a, int xOrigin, int yOrigin, double angle, int damage)
 {
 	a->active = 1;
+	a->xPos = a->xOrigin = xOrigin;
+	a->yPos = a->yOrigin = yOrigin;
+	a->xSpeed = a->speed * cos(angle);
+	a->ySpeed = a->speed * sin(angle);
+	a->hit = 0;
+	a->shotTimer = 5;
+	a->shot = true;
+}
+
+PUBLIC void spawnBullet3(Bullet a, int xOrigin, int yOrigin, double angle, int damage)
+{
+	a->active = 1;
 	a->xPos = a->xOrigin = xOrigin ;
 	a->yPos = a->yOrigin = yOrigin ;
 	a->xSpeed = a->speed * cos(angle);
@@ -113,7 +125,7 @@ PUBLIC SDL_Rect* getBulletRect(Bullet bullet)
 PUBLIC void freeBullet(Bullet a)
 {
 	a->active = false;
-	a->hit = 3;
+	a->hit = 15;
 }
 
 PUBLIC double getBulletDirection(Bullet a)
@@ -170,6 +182,11 @@ PUBLIC bool bulletHit(Bullet b)
 		return true;
 	}
 	else return false;
+}
+
+PUBLIC int getBulletHitValue(Bullet b)
+{
+	return b->hit;
 }
 
 PUBLIC bool bulletShot(Bullet a)

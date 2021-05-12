@@ -7,7 +7,7 @@
 #define PUBLIC
 #define SPEED 2
 #define ANIMATIONSPEED 8               //lower = faster
-#define HEALTH 100
+#define HEALTH 1000
 #define ROTATION_UPDATE_SPEED 5
 #define SNAP_DISTANCE 10
 

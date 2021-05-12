@@ -24,6 +24,7 @@ void setBulletSpeed(Bullet b, double x, double y);
 
 
 bool bulletHit(Bullet b);
+int getBulletHitValue(Bullet b);
 bool bulletShot(Bullet a);
 int getBulletOriginX(Bullet a);
 int getBulletOriginY(Bullet a);
