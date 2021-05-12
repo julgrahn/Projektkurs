@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include "player.h"
 #include "world.h"
+#include "weapon.h"
 #include <math.h>
 
 #define PUBLIC
@@ -29,6 +30,10 @@ struct Player_type {
     int newDirection;
     int xTarget, yTarget;
     bool isShooting;
+    Weapon gun;
+    bool wasDamaged;
+    int gunBarrelX, gunBarrelY;
+    int lives;
 };
 
 PUBLIC Player createPlayer(int x, int y, int id)
@@ -55,6 +60,8 @@ PUBLIC Player createPlayer(int x, int y, int id)
     a->xSpeed = a->ySpeed = 0;
     a->newDirection = 0;
     a->isShooting = false;
+    a->gun = createWeapon();
+    a->wasDamaged = false;
     return a;
 }
 
@@ -63,8 +70,9 @@ PUBLIC int getPlayerFrame(Player p)
     return p->frame;
 }
 
-PUBLIC void movePlayer(Player p, int up, int down, int right, int left, int mouseX, int mouseY)
+PUBLIC void movePlayer(Player p, int up, int down, int right, int left, int mouseX, int mouseY, bool reload)
 {
+    if(reload) reloadWeapon(p->gun);
     int newX = 0, newY = 0, diagonal, oldX = p->posX, oldY = p->posY;
     p->isMoving = 0;
     p->xTarget = mouseX;
@@ -114,14 +122,6 @@ PUBLIC void movePlayer(Player p, int up, int down, int right, int left, int mous
     // Rotate player
     p->direction = (atan2(mouseY - p->pDimensions.y - 34, mouseX - p->pDimensions.x - 18) * 180 / M_PI) - 6;
 
-    // // Collision detection with walls
-    // if (getWallCollision(p->pDimensions.x, p->pDimensions.y))
-    // {
-    //     p->posX = oldX;
-    //     p->posY = oldY;
-    // }
-
-
     // Collision detection with window
     if (p->pDimensions.y <= 0) p->pDimensions.y = p->posY = 0;
     if (p->pDimensions.y >= WINDOWHEIGHT - p->pDimensions.h) p->pDimensions.y = p->posY = WINDOWHEIGHT - p->pDimensions.h;
@@ -136,7 +136,7 @@ PUBLIC double getPlayerDirection(Player p)
 }
 
 PUBLIC int getPlayerHealth(Player p)
-{   
+{
     return p->health;
 }
 
@@ -174,7 +174,7 @@ PUBLIC void updatePlayerPosition(Player *p, int x, int y, int direction, bool al
     (*p)->direction = direction;
 }
 
-PUBLIC void updateServerPlayer(Player *p, int x, int y, int direction, bool alive, bool isShooting, int xTarget, int yTarget)
+PUBLIC void updateServerPlayer(Player* p, int x, int y, int direction, bool alive, bool isShooting, int xTarget, int yTarget)
 {
     (*p)->pDimensions.x = x;
     (*p)->pDimensions.y = y;
@@ -188,20 +188,20 @@ PUBLIC void moveOtherPlayers(Player p)
 {
     int xDelta = p->newX - p->pDimensions.x;
     int yDelta = p->newY - p->pDimensions.y;
-    double distance = sqrt(xDelta*xDelta + yDelta*yDelta);
-    double scaling = p->speed/(distance*(distance >= 1)+(distance < 1));
+    double distance = sqrt(xDelta * xDelta + yDelta * yDelta);
+    double scaling = p->speed / (distance * (distance >= 1) + (distance < 1));
     if (distance >= SNAP_DISTANCE)
     {
         snapPlayer(p, p->newX, p->newY);
         return;
     }
-    int old = p->direction + 180+5;
-    int new = p->newDirection + 180+5;
+    int old = p->direction + 180 + 5;
+    int new = p->newDirection + 180 + 5;
 
-    if(xDelta > 1 || xDelta < -1 || yDelta > 1 || yDelta < -1)
+    if (xDelta > 1 || xDelta < -1 || yDelta > 1 || yDelta < -1)
     {
-        p->xSpeed = scaling*xDelta;
-        p->ySpeed = scaling*yDelta;
+        p->xSpeed = scaling * xDelta;
+        p->ySpeed = scaling * yDelta;
 
         p->posX += p->xSpeed;
         p->posY += p->ySpeed;
@@ -260,6 +260,21 @@ PUBLIC void damagePlayer(Player p, int damage)
     if (p->health <= 0) p->alive = false;
 }
 
+PUBLIC void clientDamagePlayer(Player p)
+{
+    p->wasDamaged = true;
+}
+
+PUBLIC bool checkIfPlayerdamaged(Player p)
+{
+    return p->wasDamaged;
+}
+
+PUBLIC void resetDamagedPlayer(Player p)
+{
+    p->wasDamaged = false;
+}
+
 PUBLIC bool isPlayerAlive(Player p)
 {
     return p->alive;
@@ -284,14 +299,68 @@ PUBLIC int getPlayerytarget(Player a)
 PUBLIC bool isPlayershooting(Player a)
 {
     // if(a->alive)
-        return a->isShooting;
+    return a->isShooting;
     // else
     //     return false;
 }
 
-PUBLIC void setPlayerShooting(Player *a, bool isShooting, int xTarget, int yTarget)
+PUBLIC void setPlayerShooting(Player* a, bool isShooting, int xTarget, int yTarget)
 {
     (*a)->isShooting = isShooting;
     (*a)->xTarget = xTarget, (*a)->yTarget = yTarget;
 }
 
+PUBLIC bool canShoot(Player a)
+{
+    return fireWeapon(a->gun);
+}
+
+PUBLIC void playerTick(Player a)
+{
+    weaponTick(a->gun);
+}
+
+PUBLIC int getPlayerGunbarrelX(Player a)
+{
+    return a->pDimensions.x + 20 + (34*sin((-a->direction + 72)*M_PI/180));   
+}
+
+PUBLIC int getPlayerGunbarrelY(Player a)
+{
+    return a->pDimensions.y + 32 + (34*cos((-a->direction + 72)*M_PI/180));
+}
+
+PUBLIC int getPlayerWeapondamage(Player a)
+{
+    return getWeapondamage(a->gun);
+}
+
+PUBLIC int getPlayerweaponMag(Player a)
+{
+    return getMag(a->gun);
+}
+
+PUBLIC void setPlayerhealth(Player a, int health)
+{
+    a->health = health;
+}
+
+PUBLIC void setPlayerLives(Player a, int lives)
+{
+    a->lives = lives;
+}
+
+PUBLIC int getPlayerlives(Player a)
+{
+    return a->lives;
+}
+
+PUBLIC int getPlayerReloadprogress(Player a)
+{
+    return getReloadprogress(a->gun);
+}
+
+PUBLIC void resetPlayer(Player a)
+{
+    resetWeapon(a->gun);
+}

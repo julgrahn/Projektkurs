@@ -20,6 +20,10 @@ struct Bullet_type {
 	int owner;
 	double direction;
 	int damage;
+	int hit;
+	int shotTimer;
+	bool shot;
+	int xOrigin, yOrigin;
 };
 
 PUBLIC Bullet createBullet()
@@ -30,18 +34,50 @@ PUBLIC Bullet createBullet()
 	b->dimensions.h = 4;
 	b->speed = BULLET_SPEED;
 	b->damage = BULLET_DAMAGE;
+	b->hit = 0;
+	b->shotTimer = 0;
+	b->shot = false;
 	return b;
 }
 
-PUBLIC void spawnBullet(Bullet a, int xOrigin, int yOrigin, int xTarget, int yTarget, int owner)
+PUBLIC void spawnBullet2(Bullet a, int xOrigin, int yOrigin, double angle)
 {
 	a->active = 1;
-	a->xPos = xOrigin + 20;
-	a->yPos = yOrigin + 32;
+	a->xPos = a->xOrigin = xOrigin;
+	a->yPos = a->yOrigin = yOrigin;
+	a->xSpeed = a->speed * cos(angle);
+	a->ySpeed = a->speed * sin(angle);
+	a->hit = 0;
+	a->shotTimer = 5;
+	a->shot = true;
+}
+
+PUBLIC void spawnBullet3(Bullet a, int xOrigin, int yOrigin, double angle, int damage)
+{
+	a->active = 1;
+	a->xPos = a->xOrigin = xOrigin ;
+	a->yPos = a->yOrigin = yOrigin ;
+	a->xSpeed = a->speed * cos(angle);
+	a->ySpeed = a->speed * sin(angle);
+	a->hit = 0;
+	a->shotTimer = 5;
+	a->shot = true;
+	a->damage = damage;
+}
+
+PUBLIC void spawnBullet(Bullet a, int xOrigin, int yOrigin, int xTarget, int yTarget, int owner, int damage)
+{
+	a->active = 1;
+	a->xPos = a->xOrigin = xOrigin ;
+	a->yPos = a->yOrigin = yOrigin ;
 	a->direction = atan2(yTarget - (a->yPos + (a->dimensions.h / 2)), xTarget - (a->xPos + (a->dimensions.w / 2)));
 	a->xSpeed = a->speed * cos(a->direction);
 	a->ySpeed = a->speed * sin(a->direction);
 	a->owner = owner;
+	a->hit = 0;
+	a->shotTimer = 5;
+	a->shot = true;
+	a->damage = damage;
 }
 
 PUBLIC bool isBulletActive(Bullet bullet)
@@ -77,6 +113,7 @@ PUBLIC SDL_Rect* getBulletRect(Bullet bullet)
 PUBLIC void freeBullet(Bullet a)
 {
 	a->active = false;
+	a->hit = 3;
 }
 
 PUBLIC double getBulletDirection(Bullet a)
@@ -123,4 +160,44 @@ PUBLIC void simulateBullets(Bullet aBullets[][MAX_BULLETS])
 PUBLIC void setBulletSpeed(Bullet b, double x, double y)
 {
 	b->xSpeed = x, b->ySpeed = y;
+}
+
+PUBLIC bool bulletHit(Bullet b)
+{
+	if(b->hit)
+	{
+		b->hit--;
+		return true;
+	}
+	else return false;
+}
+
+PUBLIC bool bulletShot(Bullet a)
+{
+	if(a->shotTimer)
+	{
+		a->shotTimer--;
+		return true;
+	}
+	else return false;
+}
+
+PUBLIC int getBulletOriginX(Bullet a)
+{
+	return a->xOrigin;
+}
+
+PUBLIC int getBulletOriginY(Bullet a)
+{
+	return a->yOrigin;
+}
+
+PUBLIC bool checkShot(Bullet a)
+{
+	if(a->shot)
+	{
+		a->shot = false;
+		return true;
+	}
+	else return false;
 }

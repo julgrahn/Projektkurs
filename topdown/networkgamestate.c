@@ -4,7 +4,7 @@
 #define NETBULLETDMG 10
 typedef struct NetworkBullet_type{
 	short xPos, yPos, angle;
-    // Uint8 control;
+    Uint8 damage;
     bool control;
     bool active;
 }Networkbullet;
@@ -12,7 +12,9 @@ typedef struct NetworkBullet_type{
 typedef struct NetworkPlayer_type{
     short direction, health;
     short posX, posY;// xTarget, yTarget;
-    bool isAlive, isActive; //isShooting;
+    bool isAlive, isActive, invulnerable; //isShooting;
+    // Uint8 status;
+    short lives;
     // Uint8 damage;
     // Uint8 playerstatus, damage, health;
     // short bullets[15][4];
@@ -33,6 +35,8 @@ PUBLIC Networkgamestate createNetworkgamestate()
         a->aPlayer[i].isAlive = false;
         a->aPlayer[i].isActive = false;
         a->aPlayer[i].health = 100;
+        a->aPlayer[i].lives = 0;
+        a->aPlayer[i].invulnerable = false;
         for (int j = 0; j < MAX_BULLETS; j++)
         {
             a->aPlayer[i].aBullet[j].active = false;
@@ -41,6 +45,7 @@ PUBLIC Networkgamestate createNetworkgamestate()
     }
     return a;
 }
+
 
 PUBLIC Uint32 getGamestatesize()
 {
@@ -154,6 +159,7 @@ PUBLIC void setNetworkbullets(Networkgamestate a, int playerID, Bullet bullets[]
         a->aPlayer[playerID].aBullet[i].angle = getBulletDirection(bullets[i])*10000;
         a->aPlayer[playerID].aBullet[i].xPos = getBulletX(bullets[i]);
         a->aPlayer[playerID].aBullet[i].yPos = getBulletY(bullets[i]);
+        a->aPlayer[playerID].aBullet[i].damage = getBulletDamage(bullets[i]);
     }
 }
 
@@ -172,11 +178,12 @@ PUBLIC bool isNetbulletActive(Networkgamestate a, int playerID, int bulletNo)
     return a->aPlayer[playerID].aBullet[bulletNo].active;
 }
 
-PUBLIC void damageNetplayer(Networkgamestate a, int playerID)
+PUBLIC void damageNetplayer(Networkgamestate a, int playerID, int damage)
 {
-    a->aPlayer[playerID].health -= NETBULLETDMG;
+    a->aPlayer[playerID].health -= damage;
     if(a->aPlayer[playerID].health <= 0)
     {
+        a->aPlayer[playerID].lives -= 1;
         killNetworkplayer(&a, playerID);
     }
 }
@@ -186,9 +193,29 @@ PUBLIC int getNetplayerHealth(Networkgamestate a, int playerID)
     return a->aPlayer[playerID].health;
 }
 
+PUBLIC bool isNetplayerInvulnerable(Networkgamestate a, int playerID)
+{
+    return a->aPlayer[playerID].invulnerable;
+}
+
+PUBLIC void setNetplayerInvulnerable(Networkgamestate a, int playerID, bool value)
+{
+    a->aPlayer[playerID].invulnerable = value;
+}
+
+PUBLIC int getNetplayerLives(Networkgamestate a, int playerID)
+{
+    return a->aPlayer[playerID].lives;
+}
+
 PUBLIC void setNetplayerHealth(Networkgamestate a, int playerID, int health)
 {
     a->aPlayer[playerID].health = health;
+}
+
+PUBLIC void setNetplayerLives(Networkgamestate a, int playerID, int lives)
+{
+    a->aPlayer[playerID].lives = lives;
 }
 
 PUBLIC void freeNetbullet(Networkgamestate a, int playerID, int bulletNo)
@@ -220,4 +247,14 @@ PUBLIC double getNetbulletspeedX(Networkgamestate a, int playerID, int bulletID)
 PUBLIC double getNetbulletspeedY(Networkgamestate a, int playerID, int bulletID)
 {
     return BULLET_SPEED * sin((double)a->aPlayer[playerID].aBullet[bulletID].angle/10000);
+}
+
+PUBLIC double getNetbulletAngle(Networkgamestate a, int playerID, int bulletID)
+{
+    return (double)a->aPlayer[playerID].aBullet[bulletID].angle/10000;
+}
+
+PUBLIC int getNetbulletdamage(Networkgamestate a, int playerID, int bulletID)
+{
+    return a->aPlayer[playerID].aBullet[bulletID].damage;
 }

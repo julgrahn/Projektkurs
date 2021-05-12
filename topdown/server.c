@@ -11,10 +11,11 @@
 #define SERVER_REFRESH_RATE 30  // 30 = 10/s    10 = 30//
 
 PRIVATE void runServer(void* args);
-PRIVATE void handleGameLogic(Server server, int respawnDelay[], SDL_Rect *a, SDL_Rect *b);
+PRIVATE void handleGameLogic(Server server, int respawnDelay[], SDL_Rect *a, SDL_Rect *b, int invulnerabilityDelay[]);
 PRIVATE void handleTCP(Server server);
 PRIVATE void handleUDPreceive(Server server);
 PRIVATE void handleUDPsend(Server server);
+PRIVATE void startNewGame(Server server);
 
 
 
@@ -32,12 +33,14 @@ struct Server_type {
     SDL_Point spawnPoint[MAX_PLAYERS];
     short noOfPlayers;
     short bulletTimers[MAX_PLAYERS][MAX_BULLETS];
+    SDLNet_SocketSet set;
 };
 
 PUBLIC Server createServer()
 {
     Server server = malloc(sizeof(struct Server_type));
     server->state = createNetworkgamestate();
+    server->set = SDLNet_AllocSocketSet(MAX_PLAYERS);
     for (int i = 0; i < MAX_PLAYERS + 1; i++)
     {
         server->tcpsockClient[i] = NULL;
@@ -118,6 +121,7 @@ PRIVATE void runServer(void* args)
     int UDPsendDelay = 0;
     int UDPreceiveDelay = 0;
     int Gamelogicdelay = 0;
+    int invulnerabilityDelay[MAX_PLAYERS] = {0};
     int respawnDelay[MAX_PLAYERS] = {0}; 
 
     SDL_Rect a, b;
@@ -127,11 +131,10 @@ PRIVATE void runServer(void* args)
     while (true)
     {   
         SDL_Delay(1); 
-        TCPdelay = (TCPdelay + 1) % 1000;
+        TCPdelay = (TCPdelay + 1) % 200;
         UDPreceiveDelay = (UDPreceiveDelay + 1) % 1;
-        UDPsendDelay = (UDPsendDelay + 1) % 30;
-        Gamelogicdelay = (Gamelogicdelay + 1) % 15;
-        
+        UDPsendDelay = (UDPsendDelay + 1) % 10;
+        Gamelogicdelay = (Gamelogicdelay + 1) % 8;
         
         // TCP
         if (!TCPdelay)
@@ -142,12 +145,12 @@ PRIVATE void runServer(void* args)
         if (!UDPreceiveDelay)
         {
             handleUDPreceive(server);
+            
         }
         // Game logic
-        if(!Gamelogicdelay) // Måste vara 16ms intervall
+        if(!Gamelogicdelay)
         {
-            //printf("%d\n", SDL_GetTicks());
-            handleGameLogic(server, respawnDelay, &a, &b);           
+            handleGameLogic(server, respawnDelay, &a, &b, invulnerabilityDelay);           
         }
         // UDP Send
         if(!UDPsendDelay)
@@ -181,6 +184,9 @@ PRIVATE void handleUDPreceive(Server server)
             {
                 bool alive = isNetworkplayerAlive(&server->state, i);
                 int health = getNetplayerHealth(server->state, i);
+                int lives = getNetplayerLives(server->state, i);
+                bool invulnerable = isNetplayerInvulnerable(server->state, i);
+
                 memcpy(getNetworkgamestateplayer(&server->state, i), server->pRecive->data, getNetworkplayersize());
                 for(int j = 0; j < MAX_BULLETS; j++)
                 {
@@ -196,10 +202,13 @@ PRIVATE void handleUDPreceive(Server server)
                 }
                 setNetworkplayeralive(&server->state, i, alive);
                 setNetplayerHealth(server->state, i, health);
+                setNetplayerLives(server->state, i, lives);
+                setNetplayerInvulnerable(server->state, i, invulnerable);
             }
         }
     }
 }
+
 
 PRIVATE void handleTCP(Server server)
 {
@@ -237,6 +246,7 @@ PRIVATE void handleTCP(Server server)
                     SDLNet_TCP_Recv(server->tcpsockClient[g], msg, 1024);
                     sscanf((char*)msg, "%hd\n", &(server->clients[g].port));
                     server->noOfPlayers++;
+                    SDLNet_TCP_AddSocket(server->set, server->tcpsockClient[g]);
                 }
             }
         }
@@ -244,22 +254,70 @@ PRIVATE void handleTCP(Server server)
              // Servern "Pingar" alla uppkopplade spelare. Om TCP_Send returnerar en int mindre än "sizeof(ping)" så betyder det att klienten inte svarar och servern gör en plats ledig.
         {
             int ping = 0;
+            int response = 0;
+          
+            //printf("%d\n", SDLNet_CheckSockets(server->set, 0));
+            SDLNet_CheckSockets(server->set, 0);
 
+            if (SDLNet_SocketReady(server->tcpsockClient[g]))
+            {
+                SDLNet_TCP_Recv(server->tcpsockClient[g], &response, sizeof(response));
+                if (response == 1)
+                {
+                    startNewGame(server);
+                    for (int i = 0; i < MAX_PLAYERS; i++)
+                    {
+                        killNetworkplayer(&server->state, i);
+                        // if (server->tcpsockClient[i] != NULL)
+                        // {
+                        //     ping = 1;
+                        //     SDLNet_TCP_Send(server->tcpsockClient[i], &ping, sizeof(ping));
+                        //     SDLNet_TCP_Send(server->tcpsockClient[i], server->state, getGamestatesize());
+                        // }
+                    }
+                }
+                
+            }
+            ping = 0;
             if (SDLNet_TCP_Send(server->tcpsockClient[g], &ping, sizeof(ping)) < sizeof(ping))
             {
-                printf("%d seconds | Client %d has disconneted\n", SDL_GetTicks() / 1000, g);
+                printf("%d seconds | Client %d has disconnected\n", SDL_GetTicks() / 1000, g);
                 server->tcpsockClient[g] = NULL;
                 server->clients[g].host = (int)NULL;
                 server->clients[g].port = (int)NULL;
+                setNetplayerLives(server->state, g, -1);
                 freeNetworkgamestateplayer(&server->state, g);
+                killNetworkplayer(&server->state, g);
                 server->noOfPlayers--;
             }
         }
     }
 }
 
-PRIVATE void handleGameLogic(Server server, int respawnDelay[], SDL_Rect *a, SDL_Rect *b)
+PRIVATE void startNewGame(Server server)
 {
+    printf("New game!\n");
+    for (int i = 0; i < MAX_PLAYERS; i++)
+    {
+        if (server->tcpsockClient[i] != NULL)
+        {
+            setGamastateplayerpos(&server->state, i, server->spawnPoint[i].x, server->spawnPoint[i].y);
+            reviveNetworkgamestateplayer(&server->state, i);
+            activateNetworkgamestateplayer(&server->state, i);
+            setNetplayerLives(server->state, i, START_LIVES);
+            for (int j = 0; j < MAX_BULLETS; j++)
+            {
+                server->bulletTimers[i][j] = 0;
+                freeNetbullet(server->state, i, j);
+            }
+        }
+        
+    }
+}
+
+PRIVATE void handleGameLogic(Server server, int respawnDelay[], SDL_Rect *a, SDL_Rect *b, int invulnerabilityDelay[])
+{
+    // Loop för kollisionshanteringen för kulor, om spelare dör och om spelet är över
     for (int i = 0; i < MAX_PLAYERS; i++)
     {
         if(isNetworkplayeractive(&server->state, i))
@@ -272,6 +330,10 @@ PRIVATE void handleGameLogic(Server server, int respawnDelay[], SDL_Rect *a, SDL
                     {
                         if((i!=k) && isNetworkplayerAlive(&server->state, k))
                         {
+                            if (isNetplayerInvulnerable(server->state, i))
+                            {
+                                setNetplayerInvulnerable(server->state, i, false);
+                            }
                             a->x = getNetworkgamestateplayerX(&server->state, k);
                             a->y = getNetworkgamestateplayerY(&server->state, k);
                             b->x = getNetbulletX(server->state, i, j);
@@ -280,7 +342,32 @@ PRIVATE void handleGameLogic(Server server, int respawnDelay[], SDL_Rect *a, SDL
                             {
                                 server->bulletTimers[i][j] = 1;
                                 freeNetbullet(server->state, i, j);
-                                damageNetplayer(server->state, k);
+                                if (!isNetplayerInvulnerable(server->state, k))
+                                {
+                                    damageNetplayer(server->state, k, getNetbulletdamage(server->state, i, j));
+                                }
+                                if (!isNetworkplayerAlive(&server->state, k))
+                                {
+                                    printf("%d seconds | Player %d killed player %d\n", SDL_GetTicks() / 1000, i, k);
+                                    if (getNetplayerLives(server->state, k) <= 0)
+                                    {
+                                        printf("%d seconds | Player %d is out of lives!\n", SDL_GetTicks() / 1000, k);
+                                        int noOfPlayersAlive = 0;
+                                        for (int l = 0; l < MAX_PLAYERS; l++)
+                                        {
+                                            if (getNetplayerLives(server->state, l) > 0)
+                                            {
+                                                noOfPlayersAlive++;
+                                            }
+                                        }
+                                        if (noOfPlayersAlive == 1)
+                                        {
+                                            printf("----------------------------------------\n");
+                                            printf("%d seconds | Player % d has won!!!\n", SDL_GetTicks() / 1000, i);
+                                            printf("----------------------------------------\n");
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
@@ -288,17 +375,33 @@ PRIVATE void handleGameLogic(Server server, int respawnDelay[], SDL_Rect *a, SDL
             } 
         }
     }
+    // Loop för respawn
     for (int i = 0; i < MAX_PLAYERS; i++)
     {
-        if (!isNetworkplayerAlive(&server->state, i) && isNetworkplayeractive(&server->state, i))
-        {
+        if (!isNetworkplayerAlive(&server->state, i) && isNetworkplayeractive(&server->state, i) && (getNetplayerLives(server->state, i) > 0))
+        {          
             respawnDelay[i]++;
             setNetplayerPos(server->state, i, server->spawnPoint[i].x, server->spawnPoint[i].y);
             if (respawnDelay[i] == 180)
             {
-                printf("%d seconds | Player %d has respawned\n", SDL_GetTicks() / 1000, i);
+                //printf("%d seconds | Player %d has respawned\n", SDL_GetTicks() / 1000, i);
                 reviveNetworkgamestateplayer(&server->state, i);
+                setNetplayerInvulnerable(server->state, i, true);
+                
                 respawnDelay[i] = 0;
+            }
+        }
+    }
+    // Loop för odödlighet
+    for (int i = 0; i < MAX_PLAYERS; i++)
+    {
+        if (isNetplayerInvulnerable(server->state, i))
+        {
+            invulnerabilityDelay[i]++;
+            if (invulnerabilityDelay[i] == 180)
+            {
+                setNetplayerInvulnerable(server->state, i, false);
+                invulnerabilityDelay[i] = 0;
             }
         }
     }
