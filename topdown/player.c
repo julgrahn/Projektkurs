@@ -7,7 +7,7 @@
 #define PUBLIC
 #define SPEED 2
 #define ANIMATIONSPEED 8               //lower = faster
-#define HEALTH 1000
+#define HEALTH 100
 #define ROTATION_UPDATE_SPEED 5
 #define SNAP_DISTANCE 10
 
@@ -33,6 +33,7 @@ struct Player_type {
     Weapon gun;
     bool wasDamaged;
     int gunBarrelX, gunBarrelY;
+    int lives;
 };
 
 PUBLIC Player createPlayer(int x, int y, int id)
@@ -69,8 +70,9 @@ PUBLIC int getPlayerFrame(Player p)
     return p->frame;
 }
 
-PUBLIC void movePlayer(Player p, int up, int down, int right, int left, int mouseX, int mouseY)
+PUBLIC void movePlayer(Player p, int up, int down, int right, int left, int mouseX, int mouseY, bool reload)
 {
+    if(reload) reloadWeapon(p->gun);
     int newX = 0, newY = 0, diagonal, oldX = p->posX, oldY = p->posY;
     p->isMoving = 0;
     p->xTarget = mouseX;
@@ -331,4 +333,34 @@ PUBLIC int getPlayerGunbarrelY(Player a)
 PUBLIC int getPlayerWeapondamage(Player a)
 {
     return getWeapondamage(a->gun);
+}
+
+PUBLIC int getPlayerweaponMag(Player a)
+{
+    return getMag(a->gun);
+}
+
+PUBLIC void setPlayerhealth(Player a, int health)
+{
+    a->health = health;
+}
+
+PUBLIC void setPlayerLives(Player a, int lives)
+{
+    a->lives = lives;
+}
+
+PUBLIC int getPlayerlives(Player a)
+{
+    return a->lives;
+}
+
+PUBLIC int getPlayerReloadprogress(Player a)
+{
+    return getReloadprogress(a->gun);
+}
+
+PUBLIC void resetPlayer(Player a)
+{
+    resetWeapon(a->gun);
 }

@@ -2,7 +2,7 @@
 
 
 theGame: main.o player.o world.o bullet.o server.o networkgamestate.o initFunctions.o gameFunctions.o clientNetFunctions.o renderFunctions.o weapon.o
-	gcc -o theGame main.o player.o world.o bullet.o server.o networkgamestate.o initFunctions.o gameFunctions.o clientNetFunctions.o renderFunctions.o weapon.o -lSDL2 -lSDL2_image -lSDL2_net -lSDL2_mixer
+	gcc -o theGame main.o player.o world.o bullet.o server.o networkgamestate.o initFunctions.o gameFunctions.o clientNetFunctions.o renderFunctions.o weapon.o -lSDL2 -lSDL2_image -lSDL2_net -lSDL2_mixer -lSDL2_ttf
 	
 main.o: main.c
 	gcc -c main.c

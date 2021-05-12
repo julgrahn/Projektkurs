@@ -11,12 +11,13 @@
 #include "clientNetFunctions.h"
 #include "gameFunctions.h"
 #include "renderFunctions.h"
+#include <string.h>
 
 
 SDL_mutex* mutex;
 
 
-void handleEvents(SDL_Event* event, int* up, int* down, int* right, int* left, bool* isPlaying, int* mouseX, int* mouseY, bool* shooting, bool* newGame);
+void handleEvents(SDL_Event* event, int* up, int* down, int* right, int* left, bool* isPlaying, int* mouseX, int* mouseY, bool* shooting, bool* newGame, bool *reload);
 void startPrompt(int* playerID, Server* server, bool* host);
 void startNewGame(TCPsocket* tcpsock);
 void handleClientTCP(TCPsocket* tcpsock, SDLNet_SocketSet* set, Networkgamestate networkgamestate, Player players[], int playerID);
@@ -43,7 +44,7 @@ int main(int argc, char* args[])
     Bullet bullets[MAX_PLAYERS][MAX_BULLETS];
     SDL_Texture* tiles = NULL;
     SDL_Rect gridTiles[900];   // Kommer innehålla alla 900 rutor från bakgrundsbilden, kan optmiseras.
-    bool isPlaying = true, shooting = false, host = false, connected = false, newGame = false;
+    bool isPlaying = true, shooting = false, host = false, connected = false, newGame = false, reload = false;
     SDL_Texture* bulletTexture = NULL;
     SDL_Texture* gunFireTexture = NULL;
     SDL_Rect gunFireRect;
@@ -63,12 +64,17 @@ int main(int argc, char* args[])
     SDL_Point muzzleRotationPoint = { 14, 16 };
     SDL_Point bulletRotationPoint = { -18, -7 };
     Networkgamestate networkgamestate = createNetworkgamestate();
+    SDL_Texture *textTexture;
+    SDL_Rect textRect[15];
+    SDL_Rect healthBar;
+    SDL_Rect reloadTimer;
 
     // Init functions
     set = SDLNet_AllocSocketSet(1);
     mutex = SDL_CreateMutex();
     if (!initSDL(&renderer, &sound)) return 1;
     initGameObjects(players, bullets);
+    initGameHUD(renderer, textRect, &textTexture, &healthBar, &reloadTimer);
     startPrompt(&playerID, &server, &host);
     if (host)
     {
@@ -80,14 +86,13 @@ int main(int argc, char* args[])
             &gunFireTexture, gunFireRect, &explosionTexture, explosionRect, &gunFireTexture2, gunFireRect2, &sound);
     connectToServer(LOCAL_IP, &srvadd, &tcpsock, networkgamestate, &playerID, players, &sd, &connected);
     startUDPreceiveThread(&sd, &p2, bullets, players, &networkgamestate, playerID, &mutex);
-
     SDLNet_TCP_AddSocket(set, tcpsock);
 
     // Main loop
     while (isPlaying)
     {
         playerTick(players[playerID]);
-        handleEvents(&event, &up, &down, &right, &left, &isPlaying, &mouseX, &mouseY, &shooting, &newGame);
+        handleEvents(&event, &up, &down, &right, &left, &isPlaying, &mouseX, &mouseY, &shooting, &newGame, &reload);
         if (newGame && host)
         {
             startNewGame(&tcpsock);
@@ -96,7 +101,7 @@ int main(int argc, char* args[])
         setPlayerShooting(&players[playerID], shooting, mouseX, mouseY);
         if (isPlayerAlive(players[playerID]))
         {
-            movePlayer(players[playerID], up, down, right, left, mouseX, mouseY);
+            movePlayer(players[playerID], up, down, right, left, mouseX, mouseY, reload);
             if (isPlayershooting(players[playerID])) fire(bullets[playerID], players[playerID], playerID, mouseX, mouseY);
         }
         //Flytta på alla andra spelare
@@ -107,18 +112,18 @@ int main(int argc, char* args[])
             }
         }
         simulateBullets(bullets);
-        // playerBulletCollisionCheck(bullets, players);
         SDL_LockMutex(mutex);
         setNetworkgamestateplayer(&networkgamestate, playerID, players[playerID]);
         setNetworkbullets(networkgamestate, playerID, bullets[playerID]);
         sendUDP(getNetworkgamestateplayer(&networkgamestate, playerID), &sd, &srvadd, &p, &p2);
         handleClientTCP(&tcpsock, &set, networkgamestate, players, playerID);
         SDL_UnlockMutex(mutex);
-        // renderGame(renderer, tiles, gridTiles, bullets, bulletTexture, players, playerText, playerRect, &playerRotationPoint);
         renderGame(renderer, tiles, gridTiles, bullets, bulletTexture, players, playerText, 
                     playerRect, &playerRotationPoint, gunFireTexture, gunFireRect, 
                     explosionTexture, explosionRect,  &muzzleRotationPoint, gunFireTexture2, 
                     gunFireRect2, &bulletRotationPoint, sound);
+        renderHUD(renderer, players[playerID], textRect, textTexture, &healthBar, &reloadTimer);
+        SDL_RenderPresent(renderer);
     }
 
     SDL_DestroyRenderer(renderer);
@@ -127,7 +132,7 @@ int main(int argc, char* args[])
     return 0;
 }
 
-void handleEvents(SDL_Event* event, int* up, int* down, int* right, int* left, bool* isPlaying, int* mouseX, int* mouseY, bool* shooting, bool* newGame)
+void handleEvents(SDL_Event* event, int* up, int* down, int* right, int* left, bool* isPlaying, int* mouseX, int* mouseY, bool* shooting, bool* newGame, bool *reload)
 {
     SDL_GetMouseState(mouseX, mouseY);
     while (SDL_PollEvent(event))
@@ -159,6 +164,9 @@ void handleEvents(SDL_Event* event, int* up, int* down, int* right, int* left, b
             case SDL_SCANCODE_P:
                 *newGame = true;
                 break;
+            case SDL_SCANCODE_R:
+                *reload = true;
+                break;
             default:
                 break;
             }
@@ -181,6 +189,9 @@ void handleEvents(SDL_Event* event, int* up, int* down, int* right, int* left, b
             case SDL_SCANCODE_D:
             case SDL_SCANCODE_RIGHT:
                 *right = 0;
+                break;
+            case SDL_SCANCODE_R:
+                *reload = false;
                 break;
             default:
                 break;

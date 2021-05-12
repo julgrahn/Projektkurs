@@ -7,7 +7,7 @@ typedef struct Player_type* Player;
 
 
 Player createPlayer(int x, int y, int id);
-void movePlayer(Player p, int up, int down, int right, int left, int mouseX, int mouseY);
+void movePlayer(Player p, int up, int down, int right, int left, int mouseX, int mouseY, bool reload);
 SDL_Rect* getPlayerRect(Player p);
 int getPlayerFrame(Player p);
 double getPlayerDirection(Player p);
@@ -37,5 +37,11 @@ void playerTick(Player a);
 int getPlayerGunbarrelX(Player a);
 int getPlayerGunbarrelY(Player a);
 int getPlayerWeapondamage(Player a);
+int getPlayerweaponMag(Player a);
+void setPlayerhealth(Player a, int health);
+void setPlayerLives(Player a, int lives);
+int getPlayerlives(Player a);
+int getPlayerReloadprogress(Player a);
+void resetPlayer(Player a);
 
 #endif

@@ -4,7 +4,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-
+#include <string.h>
 #include "bullet.h"
 #include "player.h"
 #include "sdlinclude.h"
@@ -20,5 +20,7 @@ void loadMedia(SDL_Renderer* renderer, SDL_Rect gTiles[], SDL_Texture** tiles,
                 SDL_Texture** bulletTexture, SDL_Texture** gunFireTexture, 
                 SDL_Rect gunFireRect, SDL_Texture** explosionTexture, SDL_Rect explosionRect, 
                 SDL_Texture** gunFireTexture2, SDL_Rect gunFireRect2, Mix_Chunk** sound);
+
+void initGameHUD(SDL_Renderer *renderer, SDL_Rect textRect[], SDL_Texture **textTexture, SDL_Rect *healthBar, SDL_Rect *reloadTimer);
 
 #endif  // INITFUNCTIONS_H
