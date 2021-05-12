@@ -74,7 +74,7 @@ int main(int argc, char* args[])
     mutex = SDL_CreateMutex();
     if (!initSDL(&renderer, &sound)) return 1;
     initGameObjects(players, bullets);
-    loadMenu(renderer, &connectTextures, &hostTextures, &quitTextures);
+    loadMenu(renderer, connectTextures, hostTextures, quitTextures);
     //startPrompt(&playerID, &server, &host);
     /*if (host)
     {
