@@ -26,6 +26,7 @@ PUBLIC bool initSDL(SDL_Renderer** renderer, Mix_Chunk** sound)
         SDL_Quit();
         return false;
     }
+    SDL_SetRenderDrawBlendMode(*renderer, SDL_BLENDMODE_BLEND);
     if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0)
     {
         printf("SDL_mixer could not initialize! SDL_mixer Error: %s\n", Mix_GetError());
@@ -194,6 +195,7 @@ PUBLIC void initGameHUD(SDL_Renderer *renderer, SDL_Rect textRect[], SDL_Texture
         textRect[11].y = 0;
         textRect[11].w = width/15*4;
         textRect[11].h = height;
+        TTF_CloseFont(font);
     }
 }
 

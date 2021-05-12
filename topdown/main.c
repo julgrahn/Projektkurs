@@ -11,8 +11,6 @@
 #include "clientNetFunctions.h"
 #include "gameFunctions.h"
 #include "renderFunctions.h"
-#include <string.h>
-
 
 SDL_mutex* mutex;
 
@@ -60,11 +58,6 @@ int main(int argc, char* args[])
     SDL_Rect explosionRect;
     explosionRect.w = 40;
     explosionRect.h = 40;
-    // int up = 0, down = 0, left = 0, right = 0;
-    // SDL_Point playerRotationPoint = { 20, 32 };
-    // SDL_Point muzzleRotationPoint = { 14, 16 };
-    // SDL_Point bulletRotationPoint = { -18, -7 };
-    // Networkgamestate networkgamestate = createNetworkgamestate();
     SDL_Texture *textTexture;
     SDL_Rect textRect[15];
     SDL_Rect healthBar;
@@ -115,7 +108,7 @@ int main(int argc, char* args[])
     buttons[2] = createButton((WINDOWWIDTH / 2) - BUTTON_HEIGHT, QUIT_Y_POS);
     while (isPlaying && !connected)
     {
-        handleEvents(&event, &up, &down, &right, &left, &isPlaying, &mouseX, &mouseY, &shooting, &newGame);
+        handleEvents(&event, &up, &down, &right, &left, &isPlaying, &mouseX, &mouseY, &shooting, &newGame, &reload);
         renderMenu(renderer, connectTextures, hostTextures, quitTextures, buttons, mouseX, mouseY, shooting);
 
         if (mouseX >= (WINDOWWIDTH / 2) - BUTTON_HEIGHT && mouseX <= (WINDOWWIDTH / 2) + BUTTON_HEIGHT)
@@ -180,16 +173,13 @@ int main(int argc, char* args[])
         sendUDP(getNetworkgamestateplayer(&networkgamestate, playerID), &sd, &srvadd, &p, &p2);
         handleClientTCP(&tcpsock, &set, networkgamestate, players, playerID);
         SDL_UnlockMutex(mutex);
-        // renderGame(renderer, tiles, gridTiles, bullets, bulletTexture, players, playerText, 
-        //             playerRect, &playerRotationPoint, gunFireTexture, gunFireRect, 
-        //             explosionTexture, explosionRect,  &muzzleRotationPoint, gunFireTexture2, 
-        //             gunFireRect2, &bulletRotationPoint, sound);
-        // renderGame(renderer, tiles, gridTiles, bullets, bulletTexture, players, playerText, playerRect, &playerRotationPoint);
+
         renderGame(renderer, tiles, gridTiles, bullets, bulletTexture, players, playerText, 
                     playerRect, &playerRotationPoint, gunFireTexture, gunFireRect, 
                     explosionTexture, explosionRect,  &muzzleRotationPoint, bloodTexture, 
                     bloodRect, sound, explosionTiles, bloodTiles);
         renderHUD(renderer, players[playerID], textRect, textTexture, &healthBar, &reloadTimer);
+
         SDL_RenderPresent(renderer);
     }
 

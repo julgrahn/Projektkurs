@@ -52,17 +52,17 @@ PUBLIC void spawnBullet2(Bullet a, int xOrigin, int yOrigin, double angle)
 	a->shot = true;
 }
 
-PUBLIC void spawnBullet3(Bullet a, int xOrigin, int yOrigin, double angle, int damage)
-{
-	a->active = 1;
-	a->xPos = a->xOrigin = xOrigin;
-	a->yPos = a->yOrigin = yOrigin;
-	a->xSpeed = a->speed * cos(angle);
-	a->ySpeed = a->speed * sin(angle);
-	a->hit = 0;
-	a->shotTimer = 5;
-	a->shot = true;
-}
+// PUBLIC void spawnBullet3(Bullet a, int xOrigin, int yOrigin, double angle, int damage)
+// {
+// 	a->active = 1;
+// 	a->xPos = a->xOrigin = xOrigin;
+// 	a->yPos = a->yOrigin = yOrigin;
+// 	a->xSpeed = a->speed * cos(angle);
+// 	a->ySpeed = a->speed * sin(angle);
+// 	a->hit = 0;
+// 	a->shotTimer = 5;
+// 	a->shot = true;
+// }
 
 PUBLIC void spawnBullet3(Bullet a, int xOrigin, int yOrigin, double angle, int damage)
 {

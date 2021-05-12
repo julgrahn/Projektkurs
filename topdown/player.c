@@ -330,15 +330,9 @@ PUBLIC int getPlayerGunbarrelY(Player a)
     return a->pDimensions.y + 32 + (34*cos((-a->direction + 72)*M_PI/180));
 }
 
-PUBLIC int getPlayerWeapondamage(Player a)
-{
-    return getWeapondamage(a->gun);
-}
+PUBLIC int getPlayerWeapondamage(Player a) { return getWeapondamage(a->gun); }
 
-PUBLIC int getPlayerweaponMag(Player a)
-{
-    return getMag(a->gun);
-}
+PUBLIC int getPlayerweaponMag(Player a) { return getMag(a->gun); }
 
 PUBLIC void setPlayerhealth(Player a, int health)
 {
@@ -350,15 +344,9 @@ PUBLIC void setPlayerLives(Player a, int lives)
     a->lives = lives;
 }
 
-PUBLIC int getPlayerlives(Player a)
-{
-    return a->lives;
-}
+PUBLIC int getPlayerlives(Player a) { return a->lives; }
 
-PUBLIC int getPlayerReloadprogress(Player a)
-{
-    return getReloadprogress(a->gun);
-}
+PUBLIC int getPlayerReloadprogress(Player a) { return getReloadprogress(a->gun); }
 
 PUBLIC void resetPlayer(Player a)
 {
