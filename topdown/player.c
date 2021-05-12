@@ -62,6 +62,7 @@ PUBLIC Player createPlayer(int x, int y, int id)
     a->isShooting = false;
     a->gun = createWeapon();
     a->wasDamaged = false;
+    a->lives = 0;
     return a;
 }
 
