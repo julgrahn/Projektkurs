@@ -92,8 +92,8 @@ PUBLIC void fire(Bullet bullets[], Player p, int playerID, int xTarget, int yTar
         {
             if (!isBulletActive(bullets[i]))
             {
-                // spawnBullet3(bullets[i], getPlayerGunbarrelX(p), getPlayerGunbarrelY(p), getPlayerDirection(p)*M_PI/180, getPlayerWeapondamage(p));
-                spawnBullet(bullets[i], getPlayerGunbarrelX(p), getPlayerGunbarrelY(p), xTarget, yTarget, playerID, getPlayerWeapondamage(p));
+                spawnBullet3(bullets[i], getPlayerGunbarrelX(p)-2, getPlayerGunbarrelY(p)-2, getPlayershotangle(p), getPlayerWeapondamage(p));
+                // spawnBullet(bullets[i], getPlayerGunbarrelX(p), getPlayerGunbarrelY(p), xTarget, yTarget, playerID, getPlayerWeapondamage(p));
                 break;
             }
         }

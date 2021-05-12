@@ -34,6 +34,7 @@ struct Player_type {
     bool wasDamaged;
     int gunBarrelX, gunBarrelY;
     int lives;
+    double shotAngle;
 };
 
 PUBLIC Player createPlayer(int x, int y, int id)
@@ -122,6 +123,7 @@ PUBLIC void movePlayer(Player p, int up, int down, int right, int left, int mous
     // Rotate player
     p->direction = (atan2(mouseY - p->pDimensions.y - 34, mouseX - p->pDimensions.x - 18) * 180 / M_PI) - 6;
 
+    p->shotAngle = atan2(mouseY - getPlayerGunbarrelY(p), mouseX - getPlayerGunbarrelX(p));
     // Collision detection with window
     if (p->pDimensions.y <= 0) p->pDimensions.y = p->posY = 0;
     if (p->pDimensions.y >= WINDOWHEIGHT - p->pDimensions.h) p->pDimensions.y = p->posY = WINDOWHEIGHT - p->pDimensions.h;
@@ -322,12 +324,12 @@ PUBLIC void playerTick(Player a)
 
 PUBLIC int getPlayerGunbarrelX(Player a)
 {
-    return a->pDimensions.x + 20 + (34*sin((-a->direction + 72)*M_PI/180));   
+    return round(a->pDimensions.x + 20 + (34*sin((-a->direction + 72)*M_PI/180)));   
 }
 
 PUBLIC int getPlayerGunbarrelY(Player a)
 {
-    return a->pDimensions.y + 32 + (34*cos((-a->direction + 72)*M_PI/180));
+    return round(a->pDimensions.y + 32 + (34*cos((-a->direction + 72)*M_PI/180)));
 }
 
 PUBLIC int getPlayerWeapondamage(Player a)
@@ -363,4 +365,9 @@ PUBLIC int getPlayerReloadprogress(Player a)
 PUBLIC void resetPlayer(Player a)
 {
     resetWeapon(a->gun);
+}
+
+PUBLIC double getPlayershotangle(Player a)
+{
+    return a->shotAngle;
 }
