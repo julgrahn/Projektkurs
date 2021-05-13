@@ -58,7 +58,6 @@ PUBLIC void renderGame(SDL_Renderer* renderer, SDL_Texture* mTiles, SDL_Rect gTi
         {
             if (bulletHit(bullets[i][j]))
             {
-                printf("%.2f\n", getBulletDirection(bullets[i][j])*180/M_PI);
                 gunFireRect.x = getBulletX(bullets[i][j]) - 14; // gunfireRect bör bytas till en annan då denna avser muzzle från vapnet. 
                 gunFireRect.y = getBulletY(bullets[i][j]) - 16;
                 if (getWallCollisionBullet(getBulletX(bullets[i][j]), getBulletY(bullets[i][j]), 4, 4))

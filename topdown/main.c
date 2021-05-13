@@ -134,7 +134,7 @@ int main(int argc, char* args[])
             startNewGame(&tcpsock);
             newGame = false;
         }
-        setPlayerShooting(&players[playerID], shooting, mouseX, mouseY);
+        setPlayerShooting(players[playerID], shooting, mouseX, mouseY);
         if (isPlayerAlive(players[playerID]))
         {
             movePlayer(players[playerID], up, down, right, left, mouseX, mouseY, reload);
@@ -149,9 +149,9 @@ int main(int argc, char* args[])
         }
         simulateBullets(bullets);
         SDL_LockMutex(mutex);
-        setNetworkgamestateplayer(&networkgamestate, playerID, players[playerID]);
-        setNetworkbullets(networkgamestate, playerID, bullets[playerID]);
-        sendUDP(getNetworkgamestateplayer(&networkgamestate, playerID), &sd, &srvadd, &p, &p2);
+        setNetPlayer(networkgamestate, playerID, players[playerID]);
+        setNetBullets(networkgamestate, playerID, bullets[playerID]);
+        sendUDP(getNetPlayer(networkgamestate, playerID), &sd, &srvadd, &p, &p2);
         handleClientTCP(&tcpsock, &set, networkgamestate, players, playerID);
         SDL_UnlockMutex(mutex);
 

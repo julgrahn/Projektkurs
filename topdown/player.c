@@ -31,7 +31,6 @@ struct Player_type {
     int xTarget, yTarget;
     bool isShooting;
     Weapon gun;
-    bool wasDamaged;
     int gunBarrelX, gunBarrelY;
     int lives;
     double shotAngle;
@@ -62,7 +61,7 @@ PUBLIC Player createPlayer(int x, int y, int id)
     a->newDirection = 0;
     a->isShooting = false;
     a->gun = createWeapon();
-    a->wasDamaged = false;
+    a->lives = 0;
     return a;
 }
 
@@ -167,23 +166,13 @@ PUBLIC int getPlayerID(Player p)
     return p->id;
 }
 
-PUBLIC void updatePlayerPosition(Player *p, int x, int y, int direction, bool alive) //bool isShooting, int xTarget, int yTarget)
+PUBLIC void updatePlayerPosition(Player p, int x, int y, int direction, bool alive) //bool isShooting, int xTarget, int yTarget)
 {
-    (*p)->alive = alive;
-    (*p)->newX = x;
-    (*p)->newY = y;
-    (*p)->newDirection = direction;
-    (*p)->direction = direction;
-}
-
-PUBLIC void updateServerPlayer(Player* p, int x, int y, int direction, bool alive, bool isShooting, int xTarget, int yTarget)
-{
-    (*p)->pDimensions.x = x;
-    (*p)->pDimensions.y = y;
-    (*p)->newDirection = direction;
-    (*p)->direction = direction;
-    (*p)->isShooting = isShooting;
-    (*p)->xTarget = xTarget, (*p)->yTarget = yTarget;
+    p->alive = alive;
+    p->newX = x;
+    p->newY = y;
+    p->newDirection = direction;
+    p->direction = direction;
 }
 
 PUBLIC void moveOtherPlayers(Player p)
@@ -262,21 +251,6 @@ PUBLIC void damagePlayer(Player p, int damage)
     if (p->health <= 0) p->alive = false;
 }
 
-PUBLIC void clientDamagePlayer(Player p)
-{
-    p->wasDamaged = true;
-}
-
-PUBLIC bool checkIfPlayerdamaged(Player p)
-{
-    return p->wasDamaged;
-}
-
-PUBLIC void resetDamagedPlayer(Player p)
-{
-    p->wasDamaged = false;
-}
-
 PUBLIC bool isPlayerAlive(Player p)
 {
     return p->alive;
@@ -306,10 +280,10 @@ PUBLIC bool isPlayershooting(Player a)
     //     return false;
 }
 
-PUBLIC void setPlayerShooting(Player* a, bool isShooting, int xTarget, int yTarget)
+PUBLIC void setPlayerShooting(Player a, bool isShooting, int xTarget, int yTarget)
 {
-    (*a)->isShooting = isShooting;
-    (*a)->xTarget = xTarget, (*a)->yTarget = yTarget;
+    a->isShooting = isShooting;
+    a->xTarget = xTarget, a->yTarget = yTarget;
 }
 
 PUBLIC bool canShoot(Player a)

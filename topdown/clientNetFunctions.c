@@ -41,7 +41,7 @@ PUBLIC void connectToServer(char* ip, IPaddress* srvadd, TCPsocket* tcpsock, Net
         //setPlayerAlive(players[*playerID], true);
         for (int i = 0; i < MAX_PLAYERS; i++)
         {
-            snapPlayer(players[i], getNetworkgamestateplayerX(&networkgamestate, i), getNetworkgamestateplayerY(&networkgamestate, i));
+            snapPlayer(players[i], getNetPlayerX(networkgamestate, i), getNetPlayerY(networkgamestate, i));
         }
 
         sprintf(msg, "%d\n", SDLNet_UDP_GetPeerAddress(*sd, -1)->port);
@@ -55,9 +55,9 @@ PUBLIC void connectToServer(char* ip, IPaddress* srvadd, TCPsocket* tcpsock, Net
 
 PUBLIC void sendUDP(void* player, UDPsocket* sd, IPaddress* srvadd, UDPpacket** p, UDPpacket** p2)
 {
-    memcpy((*p)->data, player, getNetworkplayersize());
+    memcpy((*p)->data, player, getNetPlayerSize());
     (*p)->address = *srvadd;
-    (*p)->len = getNetworkplayersize();
+    (*p)->len = getNetPlayerSize();
     SDLNet_UDP_Send(*sd, -1, *p);
 }
 
@@ -112,7 +112,7 @@ PUBLIC void handleClientTCP(TCPsocket* tcpsock, SDLNet_SocketSet* set, Networkga
             setPlayerAlive(players[playerID], true);
             for (int i = 0; i < MAX_PLAYERS; i++)
             {
-                snapPlayer(players[i], getNetworkgamestateplayerX(&networkgamestate, i), getNetworkgamestateplayerY(&networkgamestate, i));
+                snapPlayer(players[i], getNetPlayerX(networkgamestate, i), getNetPlayerY(networkgamestate, i));
             }
             break;
         default:

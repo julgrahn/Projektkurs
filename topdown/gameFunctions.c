@@ -9,17 +9,17 @@ PUBLIC void updateplayers(Networkgamestate networkgamestate, Player players[], i
     {
         if (i != playerID)
         {
-            updatePlayerPosition(&players[i], getNetworkgamestateplayerX(&networkgamestate, i), getNetworkgamestateplayerY(&networkgamestate, i), getNetworkgamestateplayerDirection(&networkgamestate, i), isNetworkplayerAlive(&networkgamestate, i));
+            updatePlayerPosition(players[i], getNetPlayerX(networkgamestate, i), getNetPlayerY(networkgamestate, i), getNetPlayerDirection(networkgamestate, i), isNetPlayerAlive(networkgamestate, i));
         }
         else
         {
             setPlayerLives(players[playerID], getNetplayerLives(networkgamestate, playerID));
-            setPlayerAlive(players[playerID], isNetworkplayerAlive(&networkgamestate, playerID));
+            setPlayerAlive(players[playerID], isNetPlayerAlive(networkgamestate, playerID));
             setPlayerhealth(players[playerID], getNetplayerHealth(networkgamestate, playerID));
             if (!isPlayerAlive(players[playerID]))
             {
                 resetPlayer(players[playerID]);
-                snapPlayer(players[playerID], getNetworkgamestateplayerX(&networkgamestate, playerID), getNetworkgamestateplayerY(&networkgamestate, playerID));
+                snapPlayer(players[playerID], getNetPlayerX(networkgamestate, playerID), getNetPlayerY(networkgamestate, playerID));
             }
         }
     }
@@ -49,7 +49,7 @@ PUBLIC void updateplayerbullets(Networkgamestate networkgamestate, int playerID,
                 }
                 else if(isNetbulletActive(networkgamestate, i, j) && !isBulletActive(*((bullets+i*MAX_BULLETS) + j)))
                 {
-                    spawnBullet(*((bullets+i*MAX_BULLETS) + j), getNetbulletX(networkgamestate, i, j), getNetbulletY(networkgamestate, i, j), getNetbulletAngle(networkgamestate, i, j), 0);
+                    spawnBullet(*((bullets+i*MAX_BULLETS) + j), getNetBulletX(networkgamestate, i, j), getNetBulletY(networkgamestate, i, j), getNetbulletAngle(networkgamestate, i, j), 0);
                 }
             }
         }

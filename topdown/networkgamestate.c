@@ -12,7 +12,7 @@ typedef struct NetworkPlayer_type{
     short direction;
     short posX, posY;
     Uint8 status;   // bitpattern: 2 - alive, 1 - active, 0 - invulnerable
-    Uint8 lives, health;
+    Sint8 lives, health;  
     Networkbullet aBullet[MAX_BULLETS];
 }Networkplayer;
 
@@ -44,97 +44,81 @@ PUBLIC Uint32 getGamestatesize()
     return sizeof(struct Networkgamestate_type);
 }
 
-PUBLIC int getNetworkgamestateplayerX(Networkgamestate *a, int n)
+PUBLIC int getNetPlayerX(Networkgamestate a, int n)
 {
-    return (*a)->aPlayer[n].posX;
+    return a->aPlayer[n].posX;
 }
 
-PUBLIC int getNetworkgamestateplayerY(Networkgamestate *a, int n)
+PUBLIC int getNetPlayerY(Networkgamestate a, int n)
 {
-    return (*a)->aPlayer[n].posY;
+    return a->aPlayer[n].posY;
 }
 
-PUBLIC void setGamastateplayerpos(Networkgamestate *a, int n, int x, int y)
+PUBLIC void setNetPlayer(Networkgamestate a, int n, Player b)
 {
-    (*a)->aPlayer[n].posX = x, (*a)->aPlayer[n].posY = y;
+    a->aPlayer[n].posX = getPlayerX(b);
+    a->aPlayer[n].posY = getPlayerY(b);
+    a->aPlayer[n].direction = (short)getPlayerDirection(b);
+    a->aPlayer[n].status |= 0b010;
 }
 
-PUBLIC void setNetworkgamestateplayer(Networkgamestate *a, int n, Player b)
+PUBLIC void* getNetPlayer(Networkgamestate a, int playerID)
 {
-    (*a)->aPlayer[n].posX = getPlayerX(b);
-    (*a)->aPlayer[n].posY = getPlayerY(b);
-    (*a)->aPlayer[n].direction = (short)getPlayerDirection(b);
-    (*a)->aPlayer[n].status |= 0b010;
+    return &a->aPlayer[playerID];
 }
 
-PUBLIC void* getNetworkgamestateplayer(Networkgamestate *a, int playerID)
+PUBLIC void killNetPlayer(Networkgamestate a, int n)
 {
-    return &(*a)->aPlayer[playerID];
+    a->aPlayer[n].status &= 0b011;
 }
 
-PUBLIC void killNetworkplayer(Networkgamestate *a, int n)
+PUBLIC void reviveNetPlayer(Networkgamestate a, int n)
 {
-    (*a)->aPlayer[n].status &= 0b011;
+    a->aPlayer[n].health = 100;
+    a->aPlayer[n].status |= 0b100;
 }
 
-PUBLIC void reviveNetworkgamestateplayer(Networkgamestate *a, int n)
+PUBLIC bool isNetPlayerActive(Networkgamestate a, int n)
 {
-    (*a)->aPlayer[n].health = 100;
-    (*a)->aPlayer[n].status |= 0b100;
+    return (a->aPlayer[n].status & 0b010) >> 1; 
 }
 
-PUBLIC bool isNetworkplayeractive(Networkgamestate *a, int n)
+PUBLIC void freeNetPlayer(Networkgamestate a, int n)
 {
-    return ((*a)->aPlayer[n].status & 0b010) >> 1; 
+    a->aPlayer[n].status &= 0b101;
 }
 
-PUBLIC void freeNetworkgamestateplayer(Networkgamestate *a, int n)
+PUBLIC void activateNetPlayer(Networkgamestate a, int n)
 {
-    (*a)->aPlayer[n].status &= 0b101;
+    a->aPlayer[n].status |= 0b010;
 }
 
-PUBLIC void activateNetworkgamestateplayer(Networkgamestate *a, int n)
-{
-    (*a)->aPlayer[n].status |= 0b010;
-}
-
-PUBLIC void setGamestateplayer(Networkgamestate *a, void *player, int n)
-{
-    (*a)->aPlayer[n] = *(Networkplayer*)(player);
-}
-
-PUBLIC Uint32 getNetworkplayersize()
+PUBLIC Uint32 getNetPlayerSize()
 {
     return sizeof(struct NetworkPlayer_type);
 }
 
-PUBLIC int getNetworkgamestateplayerDirection(Networkgamestate *a, int n)
+PUBLIC int getNetPlayerDirection(Networkgamestate a, int n)
 {
-    return (*a)->aPlayer[n].direction;
+    return a->aPlayer[n].direction;
 }
 
-PUBLIC bool isNetworkplayerAlive(Networkgamestate *a, int n)
+PUBLIC bool isNetPlayerAlive(Networkgamestate a, int n)
 {
-    return ((*a)->aPlayer[n].status & 0b100) >> 2;
+    return (a->aPlayer[n].status & 0b100) >> 2;
 }
 
-PUBLIC void setNetworkplayeralive(Networkgamestate *a, int n, bool alive)
+PUBLIC void setNetPlayerAlive(Networkgamestate a, int n, bool alive)
 {
-    if(alive)
-        (*a)->aPlayer[n].status |= 0b100;
-    else
-        (*a)->aPlayer[n].status &= 0b011;
+    a->aPlayer[n].status = (a->aPlayer[n].status |= 0b100) * alive + (a->aPlayer[n].status &= 0b011) * !alive;
 }
 
-PUBLIC void setNetworkbullets(Networkgamestate a, int playerID, Bullet bullets[])
+PUBLIC void setNetBullets(Networkgamestate a, int playerID, Bullet bullets[])
 {
     int i;
     for (i = 0; i < MAX_BULLETS; i++)
     {
-        if(isBulletActive(bullets[i]))
-            a->aPlayer[playerID].aBullet[i].control_active |= 0b01;
-        else
-            a->aPlayer[playerID].aBullet[i].control_active &= 0b10;
+        a->aPlayer[playerID].aBullet[i].control_active = (a->aPlayer[playerID].aBullet[i].control_active |= 0b01) * isBulletActive(bullets[i]) + (a->aPlayer[playerID].aBullet[i].control_active &= 0b10) * !isBulletActive(bullets[i]);
         a->aPlayer[playerID].aBullet[i].angle = getBulletDirection(bullets[i])*10000;
         a->aPlayer[playerID].aBullet[i].xPos = getBulletX(bullets[i]);
         a->aPlayer[playerID].aBullet[i].yPos = getBulletY(bullets[i]);
@@ -142,12 +126,12 @@ PUBLIC void setNetworkbullets(Networkgamestate a, int playerID, Bullet bullets[]
     }
 }
 
-PUBLIC int getNetbulletX(Networkgamestate a, int playerID, int bulletNo)
+PUBLIC int getNetBulletX(Networkgamestate a, int playerID, int bulletNo)
 {
     return a->aPlayer[playerID].aBullet[bulletNo].xPos;
 }
 
-PUBLIC int getNetbulletY(Networkgamestate a, int playerID, int bulletNo)
+PUBLIC int getNetBulletY(Networkgamestate a, int playerID, int bulletNo)
 {
     return a->aPlayer[playerID].aBullet[bulletNo].yPos;
 }
@@ -162,8 +146,8 @@ PUBLIC void damageNetplayer(Networkgamestate a, int playerID, int damage)
     a->aPlayer[playerID].health -= damage;
     if(a->aPlayer[playerID].health <= 0)
     {
-        a->aPlayer[playerID].lives -= 1;
-        killNetworkplayer(&a, playerID);
+        if(--a->aPlayer[playerID].lives < 0) a->aPlayer[playerID].lives = 0;
+        killNetPlayer(a, playerID);
     }
 }
 
@@ -179,10 +163,7 @@ PUBLIC bool isNetplayerInvulnerable(Networkgamestate a, int playerID)
 
 PUBLIC void setNetplayerInvulnerable(Networkgamestate a, int playerID, bool value)
 {
-    if(value)
-        a->aPlayer[playerID].status |= 0b001;
-    else
-        a->aPlayer[playerID].status &= 0b110;
+    a->aPlayer[playerID].status = (a->aPlayer[playerID].status |= 0b001) * value + (a->aPlayer[playerID].status &= 0b110) * !value;
 }
 
 PUBLIC int getNetplayerLives(Networkgamestate a, int playerID)
