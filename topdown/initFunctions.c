@@ -48,7 +48,7 @@ PUBLIC void initGameObjects(Player players[], Bullet bullets[][MAX_BULLETS])
     }
     for (int i = 0; i < MAX_PLAYERS; i++)
     {
-        players[i] = createPlayer(100, 100, i);
+        players[i] = createPlayer(100, 100);
     }
 }
 

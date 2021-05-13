@@ -64,7 +64,7 @@ PUBLIC bool rectCollisionTest(SDL_Rect* a, SDL_Rect* b)
     return false;
 }
 
-PUBLIC void fire(Bullet bullets[], Player p, int playerID)
+PUBLIC void fire(Bullet bullets[], Player p)
 {
     if(canShoot(p))
     {

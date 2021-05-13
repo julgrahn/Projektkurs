@@ -6,7 +6,7 @@
 typedef struct Player_type* Player;
 
 
-Player createPlayer(int x, int y, int id);
+Player createPlayer(int x, int y);
 void movePlayer(Player p, int up, int down, int right, int left, int mouseX, int mouseY, bool reload);
 SDL_Rect* getPlayerRect(Player p);
 int getPlayerFrame(Player p);
@@ -22,10 +22,6 @@ void snapPlayer(Player p, int x, int y);
 void damagePlayer(Player p, int damage);
 bool isPlayerAlive(Player p);
 void setPlayerAlive(Player p, bool value);
-int getPlayerxtarget(Player b);
-int getPlayerytarget(Player b);
-bool isPlayershooting(Player a);
-void setPlayerShooting(Player p, bool isShooting, int xTarget, int yTarget);
 void clientDamagePlayer(Player p);
 bool checkIfPlayerdamaged(Player p);
 void resetDamagedPlayer(Player p);
