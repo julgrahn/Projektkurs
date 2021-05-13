@@ -7,7 +7,8 @@
 #define PUBLIC 
 
 
-enum material { bricks = 222, wall = 186, truck = 102, wall2 = 246, wall3 = 216 };
+enum material { bricks = 120, wall = 186, truck = 102, wall2 = 246, wall3 = 216 };
+// enum material { bricks = 222, wall = 186, truck = 102, wall2 = 246, wall3 = 216 };
 
 int tileGrid[22][22] = {
     {bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks},

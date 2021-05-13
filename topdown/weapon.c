@@ -19,7 +19,7 @@ PUBLIC Weapon createWeapon()
     a->isEmpty = false;
     a->magazineSize = a->magazine = 20;
     a->damage = 20;
-    a->isReady = true;
+    a->isReady = 0;
     a->reload = 0;
     return a;
 }
@@ -57,4 +57,26 @@ PUBLIC bool fireWeapon(Weapon a)
 PUBLIC int getWeapondamage(Weapon a)
 {
     return a->damage;
+}
+
+PUBLIC int getMag(Weapon a)
+{
+    return a->magazine;
+}
+
+PUBLIC int getReloadprogress(Weapon a)
+{
+    return a->reload;
+}
+
+PUBLIC void resetWeapon(Weapon a)
+{
+    a->magazine = 20;
+    a->reload = 0;
+    a->isReady = 0;
+}
+
+PUBLIC void reloadWeapon(Weapon a)
+{
+    if(!a->reload && a->magazine != a->magazineSize) { a->magazine = 0; a->reload = 90; }
 }

@@ -26,6 +26,7 @@ PUBLIC bool initSDL(SDL_Renderer** renderer, Mix_Chunk** sound)
         SDL_Quit();
         return false;
     }
+    SDL_SetRenderDrawBlendMode(*renderer, SDL_BLENDMODE_BLEND);
     if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0)
     {
         printf("SDL_mixer could not initialize! SDL_mixer Error: %s\n", Mix_GetError());
@@ -111,6 +112,7 @@ PUBLIC void loadMedia(SDL_Renderer* renderer, SDL_Rect gTiles[], SDL_Texture** t
     SDL_Surface* bulletSurface = IMG_Load("resources/expl_04_0014.png");
     *bulletTexture = SDL_CreateTextureFromSurface(renderer, bulletSurface);
     SDL_FreeSurface(bulletSurface);
+     
 
     SDL_Surface* gunFireSurface = IMG_Load("resources/muzzle2_0007.png");
     *gunFireTexture = SDL_CreateTextureFromSurface(renderer, gunFireSurface);
@@ -150,12 +152,52 @@ PUBLIC void loadMedia(SDL_Renderer* renderer, SDL_Rect gTiles[], SDL_Texture** t
     *sound = Mix_LoadWAV("resources/gunsound2.wav");
     if (sound == NULL)
     {
-        printf("Failed to load beat music! SDL_mixer Error: %s\n", Mix_GetError());
+        printf( "Failed to load beat music! SDL_mixer Error: %s\n", Mix_GetError() );
     }
     // Volume
     Mix_Volume(-1, 20);
-
 }
+
+// PUBLIC void initGameHUD(SDL_Renderer *renderer, SDL_Rect textRect[], SDL_Texture **textTexture, SDL_Rect *healthBar, SDL_Rect *reloadTimer)
+// {
+//     TTF_Init();
+//     TTF_Font *font;
+//     font=TTF_OpenFont("unispace_bd.ttf", 20);
+//     if(!font) {
+//         printf("TTF_OpenFont: %s\n", TTF_GetError());
+//     }
+//     else
+//     {
+//         SDL_Color color = {255,255,255};
+//         SDL_Surface *textSurface;
+//         textSurface = TTF_RenderText_Solid(font,"0123456789|HP: ",color);
+//         *textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
+//         SDL_FreeSurface(textSurface);
+//         healthBar->h = 10, healthBar->w = 150, healthBar->x = 100, healthBar->y = 7;
+//         reloadTimer->x = 35, reloadTimer->y = 2, reloadTimer->w = 24; 
+//         int width, height;
+//         TTF_SizeText(font, "0123456789|HP: ", &width, &height);
+//         for(int i = 0; i < 11; i++)
+//         {
+//             textRect[i].x = i * width/15;
+//             textRect[i].y = 0;
+//             textRect[i].w = width/15;
+//             textRect[i].h = height;
+//         }
+//         for(int i = 12; i < 15; i++)
+//         {
+//             textRect[i].x = i * width/15 + (width/15*4);
+//             textRect[i].y = 0;
+//             textRect[i].w = width/15;
+//             textRect[i].h = height;
+//         }
+//         textRect[11].x = 11 * width/15;
+//         textRect[11].y = 0;
+//         textRect[11].w = width/15*4;
+//         textRect[11].h = height;
+//         TTF_CloseFont(font);
+//     }
+// }
 
 PUBLIC void loadMenu(SDL_Renderer* renderer, SDL_Texture* connectTextures[], SDL_Texture* hostTextures[], SDL_Texture* quitTextures[])
 {

@@ -7,7 +7,7 @@
 #define PUBLIC
 #define SPEED 2
 #define ANIMATIONSPEED 8               //lower = faster
-#define HEALTH 1000
+#define HEALTH 100
 #define ROTATION_UPDATE_SPEED 5
 #define SNAP_DISTANCE 10
 
@@ -31,8 +31,9 @@ struct Player_type {
     int xTarget, yTarget;
     bool isShooting;
     Weapon gun;
-    bool wasDamaged;
     int gunBarrelX, gunBarrelY;
+    int lives;
+    double shotAngle;
 };
 
 PUBLIC Player createPlayer(int x, int y, int id)
@@ -60,7 +61,7 @@ PUBLIC Player createPlayer(int x, int y, int id)
     a->newDirection = 0;
     a->isShooting = false;
     a->gun = createWeapon();
-    a->wasDamaged = false;
+    a->lives = 0;
     return a;
 }
 
@@ -69,8 +70,9 @@ PUBLIC int getPlayerFrame(Player p)
     return p->frame;
 }
 
-PUBLIC void movePlayer(Player p, int up, int down, int right, int left, int mouseX, int mouseY)
+PUBLIC void movePlayer(Player p, int up, int down, int right, int left, int mouseX, int mouseY, bool reload)
 {
+    if(reload) reloadWeapon(p->gun);
     int newX = 0, newY = 0, diagonal, oldX = p->posX, oldY = p->posY;
     p->isMoving = 0;
     p->xTarget = mouseX;
@@ -120,6 +122,7 @@ PUBLIC void movePlayer(Player p, int up, int down, int right, int left, int mous
     // Rotate player
     p->direction = (atan2(mouseY - p->pDimensions.y - 34, mouseX - p->pDimensions.x - 18) * 180 / M_PI) - 6;
 
+    p->shotAngle = atan2(mouseY - getPlayerGunbarrelY(p), mouseX - getPlayerGunbarrelX(p));
     // Collision detection with window
     if (p->pDimensions.y <= 0) p->pDimensions.y = p->posY = 0;
     if (p->pDimensions.y >= WINDOWHEIGHT - p->pDimensions.h) p->pDimensions.y = p->posY = WINDOWHEIGHT - p->pDimensions.h;
@@ -163,23 +166,13 @@ PUBLIC int getPlayerID(Player p)
     return p->id;
 }
 
-PUBLIC void updatePlayerPosition(Player *p, int x, int y, int direction, bool alive) //bool isShooting, int xTarget, int yTarget)
+PUBLIC void updatePlayerPosition(Player p, int x, int y, int direction, bool alive) //bool isShooting, int xTarget, int yTarget)
 {
-    (*p)->alive = alive;
-    (*p)->newX = x;
-    (*p)->newY = y;
-    (*p)->newDirection = direction;
-    (*p)->direction = direction;
-}
-
-PUBLIC void updateServerPlayer(Player* p, int x, int y, int direction, bool alive, bool isShooting, int xTarget, int yTarget)
-{
-    (*p)->pDimensions.x = x;
-    (*p)->pDimensions.y = y;
-    (*p)->newDirection = direction;
-    (*p)->direction = direction;
-    (*p)->isShooting = isShooting;
-    (*p)->xTarget = xTarget, (*p)->yTarget = yTarget;
+    p->alive = alive;
+    p->newX = x;
+    p->newY = y;
+    p->newDirection = direction;
+    p->direction = direction;
 }
 
 PUBLIC void moveOtherPlayers(Player p)
@@ -258,21 +251,6 @@ PUBLIC void damagePlayer(Player p, int damage)
     if (p->health <= 0) p->alive = false;
 }
 
-PUBLIC void clientDamagePlayer(Player p)
-{
-    p->wasDamaged = true;
-}
-
-PUBLIC bool checkIfPlayerdamaged(Player p)
-{
-    return p->wasDamaged;
-}
-
-PUBLIC void resetDamagedPlayer(Player p)
-{
-    p->wasDamaged = false;
-}
-
 PUBLIC bool isPlayerAlive(Player p)
 {
     return p->alive;
@@ -302,10 +280,10 @@ PUBLIC bool isPlayershooting(Player a)
     //     return false;
 }
 
-PUBLIC void setPlayerShooting(Player* a, bool isShooting, int xTarget, int yTarget)
+PUBLIC void setPlayerShooting(Player a, bool isShooting, int xTarget, int yTarget)
 {
-    (*a)->isShooting = isShooting;
-    (*a)->xTarget = xTarget, (*a)->yTarget = yTarget;
+    a->isShooting = isShooting;
+    a->xTarget = xTarget, a->yTarget = yTarget;
 }
 
 PUBLIC bool canShoot(Player a)
@@ -320,15 +298,50 @@ PUBLIC void playerTick(Player a)
 
 PUBLIC int getPlayerGunbarrelX(Player a)
 {
-    return a->pDimensions.x + 20 + (34*sin((-a->direction + 72)*M_PI/180));   
+    return round(a->pDimensions.x + 20 + (34*sin((-a->direction + 72)*M_PI/180)));   
 }
 
 PUBLIC int getPlayerGunbarrelY(Player a)
 {
-    return a->pDimensions.y + 32 + (34*cos((-a->direction + 72)*M_PI/180));
+    return round(a->pDimensions.y + 32 + (34*cos((-a->direction + 72)*M_PI/180)));
 }
 
 PUBLIC int getPlayerWeapondamage(Player a)
 {
     return getWeapondamage(a->gun);
+}
+
+PUBLIC int getPlayerweaponMag(Player a)
+{
+    return getMag(a->gun);
+}
+
+PUBLIC void setPlayerhealth(Player a, int health)
+{
+    a->health = health;
+}
+
+PUBLIC void setPlayerLives(Player a, int lives)
+{
+    a->lives = lives;
+}
+
+PUBLIC int getPlayerlives(Player a)
+{
+    return a->lives;
+}
+
+PUBLIC int getPlayerReloadprogress(Player a)
+{
+    return getReloadprogress(a->gun);
+}
+
+PUBLIC void resetPlayer(Player a)
+{
+    resetWeapon(a->gun);
+}
+
+PUBLIC double getPlayerShotAngle(Player a)
+{
+    return a->shotAngle;
 }
