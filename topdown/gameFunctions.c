@@ -70,10 +70,10 @@ PUBLIC void fire(Bullet bullets[], Player p, int playerID)
     {
         for (int i = 0; i < MAX_BULLETS; i++)
         {
-            if (!isBulletActive(bullets[i]))
+            if (!isBulletActive(bullets[i]) && !getBulletHitValue(bullets[i]))
             {
-                spawnBullet(bullets[i], getPlayerGunbarrelX(p)-2, getPlayerGunbarrelY(p)-2, getPlayerShotAngle(p), getPlayerWeapondamage(p));            
-                break;
+                spawnBullet(bullets[i], getPlayerGunbarrelX(p)-0, getPlayerGunbarrelY(p)-0, getPlayerShotAngle(p), getPlayerWeapondamage(p));            
+                return;
             }
         }
     }

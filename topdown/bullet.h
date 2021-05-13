@@ -17,7 +17,7 @@ int getBulletX(Bullet a);
 int getBulletY(Bullet a);
 
 int getBulletDamage(Bullet b);
-void setBulletXY(Bullet b, int x, int y);
+// void setBulletXY(Bullet b, int x, int y);
 void bulletActivate(Bullet b);
 void simulateBullets(Bullet aBullets[][MAX_BULLETS]);
 void setBulletSpeed(Bullet b, double x, double y);

@@ -10,6 +10,8 @@
 #define HEALTH 100
 #define ROTATION_UPDATE_SPEED 5
 #define SNAP_DISTANCE 10
+#define PLAYER_CENTER_OFFSET_X 20
+#define PLAYER_CENTER_OFFSET_Y 32
 
 struct Player_type {
     int health;
@@ -73,7 +75,7 @@ PUBLIC int getPlayerFrame(Player p)
 PUBLIC void movePlayer(Player p, int up, int down, int right, int left, int mouseX, int mouseY, bool reload)
 {
     if(reload) reloadWeapon(p->gun);
-    int newX = 0, newY = 0, diagonal, oldX = p->posX, oldY = p->posY;
+    int newX = 0, newY = 0, diagonal;
     p->isMoving = 0;
     p->xTarget = mouseX;
     p->yTarget = mouseY;
@@ -87,7 +89,8 @@ PUBLIC void movePlayer(Player p, int up, int down, int right, int left, int mous
     p->posY += p->diaSpeed * diagonal * newY + p->speed * !diagonal * newY;
 
     // Set new pixel pos of player
-    p->pDimensions.x = round(p->posX);
+    p->pDimensions.x = round(p->posX)-PLAYER_CENTER_OFFSET_X;
+    p->pDimensions.y = round(p->posY)-PLAYER_CENTER_OFFSET_Y;
     if (getWallCollisionPlayer(p->pDimensions.x, p->pDimensions.y))   // Collision x-led
     {
         if (right)
@@ -101,7 +104,6 @@ PUBLIC void movePlayer(Player p, int up, int down, int right, int left, int mous
             p->pDimensions.x += 2;
         }
     }
-    p->pDimensions.y = round(p->posY);
     if (getWallCollisionPlayer(p->pDimensions.x, p->pDimensions.y))   // Collision y-led
     {
         if (up)
@@ -115,7 +117,6 @@ PUBLIC void movePlayer(Player p, int up, int down, int right, int left, int mous
             p->pDimensions.y -= 2;
         }
     }
-
     // Update player sprite frame
     p->frameCounter = (p->frameCounter + p->isMoving) % (ANIMATIONSPEED + 1);
     p->frame = (p->frame + ((p->frameCounter / ANIMATIONSPEED) * p->isMoving)) % 4;
@@ -124,10 +125,10 @@ PUBLIC void movePlayer(Player p, int up, int down, int right, int left, int mous
 
     p->shotAngle = atan2(mouseY - getPlayerGunbarrelY(p), mouseX - getPlayerGunbarrelX(p));
     // Collision detection with window
-    if (p->pDimensions.y <= 0) p->pDimensions.y = p->posY = 0;
-    if (p->pDimensions.y >= WINDOWHEIGHT - p->pDimensions.h) p->pDimensions.y = p->posY = WINDOWHEIGHT - p->pDimensions.h;
-    if (p->pDimensions.x <= 0) p->pDimensions.x = p->posX = 0;
-    if (p->pDimensions.x >= WINDOWWIDTH - p->pDimensions.w) p->pDimensions.x = p->posX = WINDOWWIDTH - p->pDimensions.w;
+    if (p->pDimensions.y <= 0) {p->pDimensions.y = 0; p->posY = PLAYER_CENTER_OFFSET_Y;}
+    if (p->pDimensions.y >= WINDOWHEIGHT - p->pDimensions.h) { p->pDimensions.y = WINDOWHEIGHT - p->pDimensions.h; p->posY = p->pDimensions.y + PLAYER_CENTER_OFFSET_Y;}
+    if (p->pDimensions.x <= 0) {p->pDimensions.x = 0; p->posX = PLAYER_CENTER_OFFSET_X;}
+    if (p->pDimensions.x >= WINDOWWIDTH - p->pDimensions.w) { p->pDimensions.x = WINDOWWIDTH - p->pDimensions.w; p->posX = p->pDimensions.x + PLAYER_CENTER_OFFSET_X;}
 
 }
 
@@ -148,12 +149,12 @@ PUBLIC SDL_Rect* getPlayerRect(Player p)
 
 PUBLIC int getPlayerX(Player p)
 {
-    return p->pDimensions.x;
+    return p->posX;
 }
 
 PUBLIC int getPlayerY(Player p)
 {
-    return p->pDimensions.y;
+    return p->posY;
 }
 
 PUBLIC void activatePlayer(Player p)
@@ -177,8 +178,8 @@ PUBLIC void updatePlayerPosition(Player p, int x, int y, int direction, bool ali
 
 PUBLIC void moveOtherPlayers(Player p)
 {
-    int xDelta = p->newX - p->pDimensions.x;
-    int yDelta = p->newY - p->pDimensions.y;
+    int xDelta = p->newX - p->posX;
+    int yDelta = p->newY - p->posY;
     double distance = sqrt(xDelta * xDelta + yDelta * yDelta);
     double scaling = p->speed / (distance * (distance >= 1) + (distance < 1));
     if (distance >= SNAP_DISTANCE)
@@ -186,9 +187,6 @@ PUBLIC void moveOtherPlayers(Player p)
         snapPlayer(p, p->newX, p->newY);
         return;
     }
-    int old = p->direction + 180 + 5;
-    int new = p->newDirection + 180 + 5;
-
     if (xDelta > 1 || xDelta < -1 || yDelta > 1 || yDelta < -1)
     {
         p->xSpeed = scaling * xDelta;
@@ -197,48 +195,77 @@ PUBLIC void moveOtherPlayers(Player p)
         p->posX += p->xSpeed;
         p->posY += p->ySpeed;
 
-        p->pDimensions.x = round(p->posX);
-        p->pDimensions.y = round(p->posY);
+        p->pDimensions.x = round(p->posX)-PLAYER_CENTER_OFFSET_X;
+        p->pDimensions.y = round(p->posY)-PLAYER_CENTER_OFFSET_Y;
         p->frameCounter = (p->frameCounter + 1) % (ANIMATIONSPEED + 1);
         p->frame = (p->frame + ((p->frameCounter / ANIMATIONSPEED))) % 4;
     }
-    // if(p->direction != p->newDirection)
-    // {
-    //     if(new - old < 180 && new - old > 0)
-    //     {
-    //         old += ROTATION_UPDATE_SPEED;
-    //     }
-    //     else if(new - old > -180 && new - old < 0)
-    //     {
-    //         old -= ROTATION_UPDATE_SPEED;
-    //     }
-    //     else if(new - old < -180)
-    //     {
-    //             old += ROTATION_UPDATE_SPEED;
-    //         if(old > 360)
-    //         {
-    //             old -= 360;
-    //         }
-    //     }
-    //     else if(new - old > 180)
-    //     {
-    //         old -= ROTATION_UPDATE_SPEED;
-    //         if(old < 0)
-    //         {
-    //             old += 360;
-    //         }
-    //         // if(new - old < ROTATION_UPDATE_SPEED) old = new;
-    //     }
-    //     old -= (180+5);
-    //     p->direction = old;
-    // }
-
 }
+
+// PUBLIC void moveOtherPlayers(Player p)
+// {
+//     int xDelta = p->newX - p->pDimensions.x;
+//     int yDelta = p->newY - p->pDimensions.y;
+//     double distance = sqrt(xDelta * xDelta + yDelta * yDelta);
+//     double scaling = p->speed / (distance * (distance >= 1) + (distance < 1));
+//     if (distance >= SNAP_DISTANCE)
+//     {
+//         snapPlayer(p, p->newX, p->newY);
+//         return;
+//     }
+//     int old = p->direction + 180 + 5;
+//     int new = p->newDirection + 180 + 5;
+
+//     if (xDelta > 1 || xDelta < -1 || yDelta > 1 || yDelta < -1)
+//     {
+//         p->xSpeed = scaling * xDelta;
+//         p->ySpeed = scaling * yDelta;
+
+//         p->posX += p->xSpeed;
+//         p->posY += p->ySpeed;
+
+//         p->pDimensions.x = round(p->posX);
+//         p->pDimensions.y = round(p->posY);
+//         p->frameCounter = (p->frameCounter + 1) % (ANIMATIONSPEED + 1);
+//         p->frame = (p->frame + ((p->frameCounter / ANIMATIONSPEED))) % 4;
+//     }
+//     // if(p->direction != p->newDirection)
+//     // {
+//     //     if(new - old < 180 && new - old > 0)
+//     //     {
+//     //         old += ROTATION_UPDATE_SPEED;
+//     //     }
+//     //     else if(new - old > -180 && new - old < 0)
+//     //     {
+//     //         old -= ROTATION_UPDATE_SPEED;
+//     //     }
+//     //     else if(new - old < -180)
+//     //     {
+//     //             old += ROTATION_UPDATE_SPEED;
+//     //         if(old > 360)
+//     //         {
+//     //             old -= 360;
+//     //         }
+//     //     }
+//     //     else if(new - old > 180)
+//     //     {
+//     //         old -= ROTATION_UPDATE_SPEED;
+//     //         if(old < 0)
+//     //         {
+//     //             old += 360;
+//     //         }
+//     //         // if(new - old < ROTATION_UPDATE_SPEED) old = new;
+//     //     }
+//     //     old -= (180+5);
+//     //     p->direction = old;
+//     // }
+
+// }
 
 PUBLIC void snapPlayer(Player p, int x, int y)
 {
-    p->pDimensions.x = x;
-    p->pDimensions.y = y;
+    p->pDimensions.x = x-PLAYER_CENTER_OFFSET_X;
+    p->pDimensions.y = y-PLAYER_CENTER_OFFSET_Y;
     p->newX = x;
     p->newY = y;
     p->posX = x;
@@ -298,12 +325,14 @@ PUBLIC void playerTick(Player a)
 
 PUBLIC int getPlayerGunbarrelX(Player a)
 {
-    return round(a->pDimensions.x + 20 + (34*sin((-a->direction + 72)*M_PI/180)));   
+    // return round(a->pDimensions.x + 20 + (34*sin((-a->direction + 72)*M_PI/180)));   
+    return round(a->posX + (34*sin((-a->direction + 72)*M_PI/180)));   
 }
 
 PUBLIC int getPlayerGunbarrelY(Player a)
 {
-    return round(a->pDimensions.y + 32 + (34*cos((-a->direction + 72)*M_PI/180)));
+    // return round(a->pDimensions.y + 32 + (34*cos((-a->direction + 72)*M_PI/180)));
+    return round(a->posY + (34*cos((-a->direction + 72)*M_PI/180)));
 }
 
 PUBLIC int getPlayerWeapondamage(Player a)

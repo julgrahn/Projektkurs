@@ -58,9 +58,9 @@ PUBLIC void renderGame(SDL_Renderer* renderer, SDL_Texture* mTiles, SDL_Rect gTi
         {
             if (bulletHit(bullets[i][j]))
             {
-                gunFireRect.x = getBulletX(bullets[i][j]) - 14; // gunfireRect bör bytas till en annan då denna avser muzzle från vapnet. 
-                gunFireRect.y = getBulletY(bullets[i][j]) - 16;
-                if (getWallCollisionBullet(getBulletX(bullets[i][j]), getBulletY(bullets[i][j]), 4, 4))
+                gunFireRect.x = getBulletX(bullets[i][j]) - 14 - 2; // gunfireRect bör bytas till en annan då denna avser muzzle från vapnet. 
+                gunFireRect.y = getBulletY(bullets[i][j]) - 16 - 2;
+                if (getWallCollisionBullet(getBulletX(bullets[i][j])-2, getBulletY(bullets[i][j])-2, 4, 4))
                 {
                     if (getBulletHitValue(bullets[i][j]) > 12)
                     {
@@ -102,8 +102,8 @@ PUBLIC void renderGame(SDL_Renderer* renderer, SDL_Texture* mTiles, SDL_Rect gTi
             }
             if (bulletShot(bullets[i][j]))
             {
-                gunFireRect.x = getBulletOriginX(bullets[i][j]) + 2 - 14;
-                gunFireRect.y = getBulletOriginY(bullets[i][j]) + 2 - 16;
+                gunFireRect.x = getBulletOriginX(bullets[i][j]) + 0 - 14;
+                gunFireRect.y = getBulletOriginY(bullets[i][j]) + 0 - 16;
                 SDL_RenderCopyEx(renderer, gunFireTexture, NULL, &gunFireRect, getPlayerDirection(players[i]), muzzleRotationPoint, SDL_FLIP_NONE);
 
                 // if(checkShot(bullets[i][j]))

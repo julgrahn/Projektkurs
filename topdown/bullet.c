@@ -6,6 +6,8 @@
 #include <math.h>
 #define PUBLIC
 #define PRIVATE static
+#define BULLET_WIDTH 4
+#define BULLET_HEIGHT 4
 
 PRIVATE void moveBullet(Bullet bullet);
 
@@ -30,8 +32,8 @@ PUBLIC Bullet createBullet()
 {
 	Bullet b = malloc(sizeof(struct Bullet_type));
 	b->active = false;
-	b->dimensions.w = 4;
-	b->dimensions.h = 4;
+	b->dimensions.w = BULLET_WIDTH;
+	b->dimensions.h = BULLET_HEIGHT;
 	b->speed = BULLET_SPEED;
 	b->damage = BULLET_DAMAGE;
 	b->hit = 0;
@@ -42,8 +44,8 @@ PUBLIC Bullet createBullet()
 PUBLIC void spawnBullet(Bullet a, int xOrigin, int yOrigin, double angle, int damage)
 {
 	a->active = 1;
-	a->xPos = a->xOrigin = xOrigin ;
-	a->yPos = a->yOrigin = yOrigin ;
+	a->xPos = a->xOrigin = xOrigin;
+	a->yPos = a->yOrigin = yOrigin;
 	a->direction = angle;
 	a->xSpeed = a->speed * cos(angle);
 	a->ySpeed = a->speed * sin(angle);
@@ -64,14 +66,16 @@ PRIVATE void moveBullet(Bullet bullet)
 	{
 		bullet->xPos += bullet->xSpeed;
 		bullet->yPos += bullet->ySpeed;
+		bullet->dimensions.x = round(bullet->xPos)-BULLET_WIDTH/2;
+		bullet->dimensions.y = round(bullet->yPos)-BULLET_HEIGHT/2;
 
-		if (getWallCollisionBullet(bullet->xPos, bullet->yPos, bullet->dimensions.h, bullet->dimensions.w))
+		if (getWallCollisionBullet(bullet->dimensions.x, bullet->dimensions.y, bullet->dimensions.h, bullet->dimensions.w))
 		{
 			freeBullet(bullet);
 		}
 
-		bullet->dimensions.x = round(bullet->xPos);
-		bullet->dimensions.y = round(bullet->yPos);
+		// bullet->dimensions.x = round(bullet->xPos)-BULLET_WIDTH/2;
+		// bullet->dimensions.y = round(bullet->yPos)-BULLET_HEIGHT/2;
 
 		if (bullet->dimensions.x < 0 || bullet->dimensions.x > WINDOWWIDTH || bullet->dimensions.y < 0 || bullet->dimensions.y > WINDOWHEIGHT)
 			bullet->active = false;
@@ -101,22 +105,22 @@ PUBLIC int getBulletOwner(Bullet b)
 
 PUBLIC int getBulletX(Bullet a)
 {
-	return a->dimensions.x;	//a->xPos;
+	return a->xPos; //a->dimensions.x;
 }
 
 PUBLIC int getBulletY(Bullet a)
 {
-	return a->dimensions.y;	//a->yPos;
+	return a->yPos; //a->dimensions.y;
 }
 PUBLIC int getBulletDamage(Bullet b)
 {
 	return b->damage;
 }
 
-PUBLIC void setBulletXY(Bullet b, int x, int y)
-{
-	b->xPos = b->dimensions.x = x, b->yPos = b->dimensions.y = y; 
-}
+// PUBLIC void setBulletXY(Bullet b, int x, int y)
+// {
+// 	b->xPos = b->dimensions.x = x, b->yPos = b->dimensions.y = y; 
+// }
 
 PUBLIC void bulletActivate(Bullet b)
 {
