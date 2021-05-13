@@ -39,41 +39,14 @@ PUBLIC Bullet createBullet()
 	b->shot = false;
 	return b;
 }
-
-PUBLIC void spawnBullet2(Bullet a, int xOrigin, int yOrigin, double angle)
-{
-	a->active = 1;
-	a->xPos = a->xOrigin = xOrigin;
-	a->yPos = a->yOrigin = yOrigin;
-	a->xSpeed = a->speed * cos(angle);
-	a->ySpeed = a->speed * sin(angle);
-	a->hit = 0;
-	a->shotTimer = 5;
-	a->shot = true;
-}
-
-PUBLIC void spawnBullet3(Bullet a, int xOrigin, int yOrigin, double angle, int damage)
+PUBLIC void spawnBullet(Bullet a, int xOrigin, int yOrigin, double angle, int damage)
 {
 	a->active = 1;
 	a->xPos = a->xOrigin = xOrigin ;
 	a->yPos = a->yOrigin = yOrigin ;
+	a->direction = angle;
 	a->xSpeed = a->speed * cos(angle);
 	a->ySpeed = a->speed * sin(angle);
-	a->hit = 0;
-	a->shotTimer = 5;
-	a->shot = true;
-	a->damage = damage;
-}
-
-PUBLIC void spawnBullet(Bullet a, int xOrigin, int yOrigin, int xTarget, int yTarget, int owner, int damage)
-{
-	a->active = 1;
-	a->xPos = a->xOrigin = xOrigin ;
-	a->yPos = a->yOrigin = yOrigin ;
-	a->direction = atan2(yTarget - (a->yPos + (a->dimensions.h / 2)), xTarget - (a->xPos + (a->dimensions.w / 2)));
-	a->xSpeed = a->speed * cos(a->direction);
-	a->ySpeed = a->speed * sin(a->direction);
-	a->owner = owner;
 	a->hit = 0;
 	a->shotTimer = 5;
 	a->shot = true;
@@ -121,19 +94,19 @@ PUBLIC double getBulletDirection(Bullet a)
 	return a->direction;
 }
 
-int getBulletOwner(Bullet b)
+PUBLIC int getBulletOwner(Bullet b)
 {
 	return b->owner;
 }
 
 PUBLIC int getBulletX(Bullet a)
 {
-	return a->xPos;
+	return a->dimensions.x;	//a->xPos;
 }
 
 PUBLIC int getBulletY(Bullet a)
 {
-	return a->yPos;
+	return a->dimensions.y;	//a->yPos;
 }
 PUBLIC int getBulletDamage(Bullet b)
 {
