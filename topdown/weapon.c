@@ -1,0 +1,60 @@
+#include "weapon.h"
+
+#define PUBLIC
+#define PRIVATE static
+
+struct Weapon_type {
+    int firerate;
+    int damage;
+    int magazineSize, magazine;
+    bool isEmpty;
+    int isReady;
+    int reload;  
+};
+
+PUBLIC Weapon createWeapon()
+{
+    Weapon a = malloc(sizeof(struct Weapon_type));
+    a->firerate = 10;
+    a->isEmpty = false;
+    a->magazineSize = a->magazine = 20;
+    a->damage = 20;
+    a->isReady = true;
+    a->reload = 0;
+    return a;
+}
+
+PUBLIC void weaponTick(Weapon a)
+{
+    if(a->isReady)
+    {
+        a->isReady--;
+    }
+    if(a->reload)
+    {
+        a->reload--;
+        if(!a->reload)
+        {
+            a->magazine = a->magazineSize;
+        }
+    }
+}
+
+PUBLIC bool fireWeapon(Weapon a)
+{
+    if(!a->isReady && a->magazine)
+    {
+        a->isReady = a->firerate;
+        a->magazine--;
+        return true;
+    }
+    else{
+        if(!a->magazine && !a->reload) a->reload = 90;
+        return false;
+    }
+}
+
+PUBLIC int getWeapondamage(Weapon a)
+{
+    return a->damage;
+}
