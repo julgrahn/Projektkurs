@@ -108,7 +108,7 @@ PUBLIC void loadMedia(SDL_Renderer* renderer, SDL_Rect gTiles[], SDL_Texture** t
     SDL_FreeSurface(cursorSurface);
     SDL_SetCursor(*cursor);
 
-    SDL_Surface* bulletSurface = IMG_Load("resources/explosions.png");
+    SDL_Surface* bulletSurface = IMG_Load("resources/expl_04_0014.png");
     *bulletTexture = SDL_CreateTextureFromSurface(renderer, bulletSurface);
     SDL_FreeSurface(bulletSurface);
 
@@ -155,6 +155,47 @@ PUBLIC void loadMedia(SDL_Renderer* renderer, SDL_Rect gTiles[], SDL_Texture** t
     // Volume
     Mix_Volume(-1, 20);
 
+}
 
+PUBLIC void loadMenu(SDL_Renderer* renderer, SDL_Texture* connectTextures[], SDL_Texture* hostTextures[], SDL_Texture* quitTextures[])
+{
+    SDL_Surface* connectButton = IMG_Load("resources/ConnectGrey.png");
+    SDL_Surface* connectButtonHover = IMG_Load("resources/ConnectWhite.png");
+    SDL_Surface* connectButtonClick = IMG_Load("resources/ConnectGreen.png");
+
+    SDL_Surface* hostButton = IMG_Load("resources/HostGrey.png");
+    SDL_Surface* hostButtonHover = IMG_Load("resources/HostWhite.png");
+    SDL_Surface* hostButtonClick = IMG_Load("resources/HostGreen.png");
+
+    SDL_Surface* quitButton = IMG_Load("resources/QuitGrey.png");
+    SDL_Surface* quitButtonHover = IMG_Load("resources/QuitWhite.png");
+    SDL_Surface* quitButtonClick = IMG_Load("resources/QuitRed.png");
+
+    connectTextures[0] = SDL_CreateTextureFromSurface(renderer, connectButton);
+    connectTextures[1] = SDL_CreateTextureFromSurface(renderer, connectButtonHover);
+    connectTextures[2] = SDL_CreateTextureFromSurface(renderer, connectButtonClick);
+
+    hostTextures[0] = SDL_CreateTextureFromSurface(renderer, hostButton);
+    hostTextures[1] = SDL_CreateTextureFromSurface(renderer, hostButtonHover);
+    hostTextures[2] = SDL_CreateTextureFromSurface(renderer, hostButtonClick);
+
+    quitTextures[0] = SDL_CreateTextureFromSurface(renderer, quitButton);
+    quitTextures[1] = SDL_CreateTextureFromSurface(renderer, quitButtonHover);
+    quitTextures[2] = SDL_CreateTextureFromSurface(renderer, quitButtonClick);
+
+    SDL_FreeSurface(connectButton);
+    SDL_FreeSurface(connectButtonHover);
+    SDL_FreeSurface(connectButtonClick);
+
+    SDL_FreeSurface(hostButton);
+    SDL_FreeSurface(hostButtonHover);
+    SDL_FreeSurface(hostButtonClick);
+
+    SDL_FreeSurface(quitButton);
+    SDL_FreeSurface(quitButtonHover);
+    SDL_FreeSurface(quitButtonClick);
+
+    /*if (connectTexture == NULL) printf("Finns ingen bild\n");
+    else printf("texturen har laddats\n");*/
 
 }

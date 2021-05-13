@@ -20,5 +20,6 @@ void loadMedia(SDL_Renderer* renderer, SDL_Rect gTiles[], SDL_Texture** tiles,
                 SDL_Texture** bulletTexture, SDL_Texture** gunFireTexture, 
                 SDL_Texture** explosionTexture, SDL_Texture** bloodTexture, Mix_Chunk** sound,
                 SDL_Rect explosionTiles[], SDL_Rect bloodTiles[]);
+void loadMenu(SDL_Renderer* renderer, SDL_Texture* connectTextures[], SDL_Texture* hostTexture[], SDL_Texture* quitTexture[]);
 
 #endif  // INITFUNCTIONS_H

@@ -104,7 +104,7 @@ PUBLIC bool getWallCollisionBullet(int x, int y, int h, int w) {
 
                 if (x + w >= wallCordStartX && x <= wallCordEndX && y + h >= wallCordStartY && y <= wallCordEndY)
                 {
-                    countWallHits(i, j);  
+                    countWallHits(i, j);  // Ta bort kommentaren om du vill förstöra väggar
                     return true;
                 }
             }
@@ -124,7 +124,7 @@ void countWallHits(int i, int j)
     {
         tileGrid[i][j] = wall3;
     }
-    //else if (tileGridHits[i][j] == 200) // ta bort kommentar for att fortstora väggar
+    //else if (tileGridHits[i][j] == 200)
     //{
     //   tileGrid[i][j] = bricks;
     //}

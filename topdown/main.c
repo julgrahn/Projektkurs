@@ -64,27 +64,68 @@ int main(int argc, char* args[])
     SDL_Point playerRotationPoint = { 20, 32 };
     SDL_Point muzzleRotationPoint = { 14, 16 };
     Networkgamestate networkgamestate = createNetworkgamestate();
+    Button buttons[3];
+    SDL_Texture* connectTextures[3];
+    SDL_Texture* hostTextures[3];
+    SDL_Texture* quitTextures[3];
 
     // Init functions
     set = SDLNet_AllocSocketSet(1);
     mutex = SDL_CreateMutex();
     if (!initSDL(&renderer, &sound)) return 1;
     initGameObjects(players, bullets);
-    startPrompt(&playerID, &server, &host);
-    if (host)
+    loadMenu(renderer, connectTextures, hostTextures, quitTextures);
+    //startPrompt(&playerID, &server, &host);
+    /*if (host)
     {
         server = createServer();
         startServer(server);
-    }
+    }*/
     initClient(&sd, &p, &p2);
     loadMedia(renderer, gridTiles, &tiles, playerRect, &playerText, &cursor, &bulletTexture, 
             &gunFireTexture, &explosionTexture, &bloodTexture, 
             &sound, explosionTiles, bloodTiles);
-    connectToServer(LOCAL_IP, &srvadd, &tcpsock, networkgamestate, &playerID, players, &sd, &connected);
-    startUDPreceiveThread(&sd, &p2, bullets, players, &networkgamestate, playerID, &mutex);
 
-    SDLNet_TCP_AddSocket(set, tcpsock);
+    // Menu loop
+    buttons[0] = createButton((WINDOWWIDTH / 2) - BUTTON_HEIGHT, CONNECT_Y_POS);
+    buttons[1] = createButton((WINDOWWIDTH / 2) - BUTTON_HEIGHT, HOST_Y_POS);
+    buttons[2] = createButton((WINDOWWIDTH / 2) - BUTTON_HEIGHT, QUIT_Y_POS);
+    while (isPlaying && !connected)
+    {
+        handleEvents(&event, &up, &down, &right, &left, &isPlaying, &mouseX, &mouseY, &shooting, &newGame);
+        renderMenu(renderer, connectTextures, hostTextures, quitTextures, buttons, mouseX, mouseY, shooting);
 
+        if (mouseX >= (WINDOWWIDTH / 2) - BUTTON_HEIGHT && mouseX <= (WINDOWWIDTH / 2) + BUTTON_HEIGHT)
+        {
+            // Connect button
+            if (mouseY > CONNECT_Y_POS && mouseY < CONNECT_Y_POS + BUTTON_HEIGHT && shooting)
+            {
+                setButtonPressed(buttons[0], true);
+                connectToServer(LOCAL_IP, &srvadd, &tcpsock, networkgamestate, &playerID, players, &sd, &connected);
+                startUDPreceiveThread(&sd, &p2, bullets, players, &networkgamestate, playerID, &mutex);
+                SDLNet_TCP_AddSocket(set, tcpsock);
+            }
+
+            // Host button
+            if (mouseY > HOST_Y_POS && mouseY < HOST_Y_POS + BUTTON_HEIGHT && shooting)
+            {
+                server = createServer();
+                startServer(server);
+                host = true;
+                setButtonPressed(buttons[1], true);
+                connectToServer(LOCAL_IP, &srvadd, &tcpsock, networkgamestate, &playerID, players, &sd, &connected);
+                startUDPreceiveThread(&sd, &p2, bullets, players, &networkgamestate, playerID, &mutex);
+                SDLNet_TCP_AddSocket(set, tcpsock);
+            }
+
+            // Quit button
+            if (mouseY > QUIT_Y_POS && mouseY < QUIT_Y_POS + BUTTON_HEIGHT && shooting)
+            {
+                setButtonPressed(buttons[2], true);
+                isPlaying = false;
+            }
+        }
+    }
     // Main loop
     while (isPlaying)
     {
@@ -120,7 +161,7 @@ int main(int argc, char* args[])
         renderGame(renderer, tiles, gridTiles, bullets, bulletTexture, players, playerText, 
                     playerRect, &playerRotationPoint, gunFireTexture, gunFireRect, 
                     explosionTexture, explosionRect,  &muzzleRotationPoint, bloodTexture, 
-                    bloodRect, sound, explosionTiles, bloodTiles, cursor);
+                    bloodRect, sound, explosionTiles, bloodTiles);
     }
 
     SDL_DestroyRenderer(renderer);
