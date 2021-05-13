@@ -49,7 +49,6 @@ PUBLIC void renderGame(SDL_Renderer* renderer, SDL_Texture* mTiles, SDL_Rect gTi
         if (isPlayerAlive(players[i]))
         {
             SDL_RenderCopyEx(renderer, playerText, &playerRect[getPlayerFrame(players[i])], getPlayerRect(players[i]), getPlayerDirection(players[i]), playerRotationPoint, SDL_FLIP_NONE);
-            printf("%d\n", getPlayerDirection(players[i])); 
         }
     }
     // Render Gunfire
