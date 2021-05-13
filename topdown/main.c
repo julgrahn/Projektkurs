@@ -120,7 +120,7 @@ int main(int argc, char* args[])
         renderGame(renderer, tiles, gridTiles, bullets, bulletTexture, players, playerText, 
                     playerRect, &playerRotationPoint, gunFireTexture, gunFireRect, 
                     explosionTexture, explosionRect,  &muzzleRotationPoint, bloodTexture, 
-                    bloodRect, sound, explosionTiles, bloodTiles);
+                    bloodRect, sound, explosionTiles, bloodTiles, cursor);
     }
 
     SDL_DestroyRenderer(renderer);

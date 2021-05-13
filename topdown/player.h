@@ -38,4 +38,6 @@ int getPlayerGunbarrelX(Player a);
 int getPlayerGunbarrelY(Player a);
 int getPlayerWeapondamage(Player a);
 
+int deadTimer(Player a);
+
 #endif

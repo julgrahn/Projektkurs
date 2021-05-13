@@ -33,6 +33,7 @@ struct Player_type {
     Weapon gun;
     bool wasDamaged;
     int gunBarrelX, gunBarrelY;
+    int deadTimer;
 };
 
 PUBLIC Player createPlayer(int x, int y, int id)
@@ -61,6 +62,7 @@ PUBLIC Player createPlayer(int x, int y, int id)
     a->isShooting = false;
     a->gun = createWeapon();
     a->wasDamaged = false;
+    a->deadTimer = 30; 
     return a;
 }
 
@@ -331,4 +333,12 @@ PUBLIC int getPlayerGunbarrelY(Player a)
 PUBLIC int getPlayerWeapondamage(Player a)
 {
     return getWeapondamage(a->gun);
+}
+
+PUBLIC int deadTimer(Player a)
+{
+    a->deadTimer--;
+    printf("%d", a->deadTimer--);
+
+    return a->deadTimer;
 }
