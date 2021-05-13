@@ -6,10 +6,6 @@
 
 #define HEALTHBARLENGTH 130
 
-// PUBLIC void renderGame(SDL_Renderer* renderer, SDL_Texture* mTiles, SDL_Rect gTiles[], Bullet bullets[][MAX_BULLETS],
-//     SDL_Texture* bulletTexture, Player players[], SDL_Texture* playerText, SDL_Rect playerRect[], SDL_Point* playerRotationPoint,
-//     SDL_Texture* gunFireTexture, SDL_Rect gunFireRect, SDL_Texture* explosionTexture, SDL_Rect explosionRect, 
-//     SDL_Point* muzzleRotationPoint, SDL_Texture* gunFireTexture2, SDL_Rect gunFireRect2, SDL_Point* bulletRotationPoint, Mix_Chunk* sound)
 PUBLIC void renderGame(SDL_Renderer* renderer, SDL_Texture* mTiles, SDL_Rect gTiles[], Bullet bullets[][MAX_BULLETS],
     SDL_Texture* bulletTexture, Player players[], SDL_Texture* playerText, SDL_Rect playerRect[], SDL_Point* playerRotationPoint,
     SDL_Texture* gunFireTexture, SDL_Rect gunFireRect, SDL_Texture* explosionTexture, SDL_Rect explosionRect, 
@@ -58,28 +54,11 @@ PUBLIC void renderGame(SDL_Renderer* renderer, SDL_Texture* mTiles, SDL_Rect gTi
     // Render Gunfire
     for (int i = 0; i < MAX_PLAYERS; i++)
     {
-        // for(int j = 0; j < MAX_BULLETS; j++)
-        // {
-        //     if(bulletHit(bullets[i][j]))
-        //     {
-        //         gunFireRect.x = getBulletX(bullets[i][j]) - 14;
-        //         gunFireRect.y = getBulletY(bullets[i][j]) - 16;
-        //         SDL_RenderCopy(renderer, gunFireTexture, NULL, &gunFireRect);
-        //     }
-        //     if(bulletShot(bullets[i][j]))
-        //     {
-        //         gunFireRect.x = getBulletOriginX(bullets[i][j]) - 14;
-        //         gunFireRect.y = getBulletOriginY(bullets[i][j]) - 16;
-        //         SDL_RenderCopyEx(renderer, gunFireTexture, NULL, &gunFireRect, getPlayerDirection(players[i]), muzzleRotationPoint, SDL_FLIP_NONE);
-                
-        //         // if(checkShot(bullets[i][j]))
-        //         //     Mix_PlayChannel(-1, sound, 0);
-        //     }
-        // }   
         for (int j = 0; j < MAX_BULLETS; j++)
         {
             if (bulletHit(bullets[i][j]))
             {
+                printf("%.2f\n", getBulletDirection(bullets[i][j])*180/M_PI);
                 gunFireRect.x = getBulletX(bullets[i][j]) - 14; // gunfireRect bör bytas till en annan då denna avser muzzle från vapnet. 
                 gunFireRect.y = getBulletY(bullets[i][j]) - 16;
                 if (getWallCollisionBullet(getBulletX(bullets[i][j]), getBulletY(bullets[i][j]), 4, 4))
@@ -106,29 +85,26 @@ PUBLIC void renderGame(SDL_Renderer* renderer, SDL_Texture* mTiles, SDL_Rect gTi
                 {
                     if (getBulletHitValue(bullets[i][j]) > 12)
                     {
-                        SDL_RenderCopyEx(renderer, bloodTexture, &bloodTiles[9], &gunFireRect, 0, NULL, SDL_FLIP_NONE);
+                        SDL_RenderCopyEx(renderer, bloodTexture, &bloodTiles[9], &gunFireRect, (getBulletDirection(bullets[i][j])*180/M_PI), muzzleRotationPoint, SDL_FLIP_HORIZONTAL && SDL_FLIP_VERTICAL);
                     }
                     else if (getBulletHitValue(bullets[i][j]) > 9)
                     {
-                        SDL_RenderCopyEx(renderer, bloodTexture, &bloodTiles[10], &gunFireRect, 0, NULL, SDL_FLIP_NONE);
+                        SDL_RenderCopyEx(renderer, bloodTexture, &bloodTiles[10], &gunFireRect, (getBulletDirection(bullets[i][j])*180/M_PI), muzzleRotationPoint, SDL_FLIP_HORIZONTAL && SDL_FLIP_VERTICAL);
                     }
                     else if (getBulletHitValue(bullets[i][j]) > 6)
                     {
-                        SDL_RenderCopyEx(renderer, bloodTexture, &bloodTiles[11], &gunFireRect, 0, NULL, SDL_FLIP_NONE);
+                        SDL_RenderCopyEx(renderer, bloodTexture, &bloodTiles[11], &gunFireRect, (getBulletDirection(bullets[i][j])*180/M_PI), muzzleRotationPoint, SDL_FLIP_HORIZONTAL && SDL_FLIP_VERTICAL);
                     }
                     else if (getBulletHitValue(bullets[i][j]) > 3)
                     {
-                        SDL_RenderCopyEx(renderer, bloodTexture, &bloodTiles[12], &gunFireRect, 0, NULL, SDL_FLIP_NONE);
+                        SDL_RenderCopyEx(renderer, bloodTexture, &bloodTiles[12], &gunFireRect, (getBulletDirection(bullets[i][j])*180/M_PI), muzzleRotationPoint, SDL_FLIP_HORIZONTAL && SDL_FLIP_VERTICAL);
                     }
-
                 }
-                // SDL_RenderCopyEx(renderer, gunFireTexture, NULL, &gunFireRect, NULL, NULL, SDL_FLIP_NONE);
             }
             if (bulletShot(bullets[i][j]))
             {
-                gunFireRect.x = getBulletOriginX(bullets[i][j]) - 14;
-                gunFireRect.y = getBulletOriginY(bullets[i][j]) - 16;
-                // SDL_RenderCopy(renderer, gunFireTexture, NULL, &gunFireRect);
+                gunFireRect.x = getBulletOriginX(bullets[i][j]) + 2 - 14;
+                gunFireRect.y = getBulletOriginY(bullets[i][j]) + 2 - 16;
                 SDL_RenderCopyEx(renderer, gunFireTexture, NULL, &gunFireRect, getPlayerDirection(players[i]), muzzleRotationPoint, SDL_FLIP_NONE);
 
                 // if(checkShot(bullets[i][j]))
@@ -163,6 +139,7 @@ PUBLIC void renderHUD(SDL_Renderer* renderer, Player player, SDL_Rect textrect[]
 
     SDL_SetRenderDrawColor(renderer,255,0,0,175);
     SDL_RenderFillRect(renderer, healthbar);
+    SDL_SetRenderDrawColor(renderer,0,0,0,255);
 }
 
 PUBLIC void renderMenu(SDL_Renderer* renderer, SDL_Texture* connectTextures[], SDL_Texture* hostTextures[], SDL_Texture* quitTextures[], Button buttons[], int mouseX, int mouseY, bool shooting)

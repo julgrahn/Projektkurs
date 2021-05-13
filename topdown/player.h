@@ -43,5 +43,6 @@ void setPlayerLives(Player a, int lives);
 int getPlayerlives(Player a);
 int getPlayerReloadprogress(Player a);
 void resetPlayer(Player a);
+double getPlayerShotAngle(Player a);
 
 #endif

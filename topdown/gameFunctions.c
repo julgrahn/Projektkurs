@@ -49,70 +49,13 @@ PUBLIC void updateplayerbullets(Networkgamestate networkgamestate, int playerID,
                 }
                 else if(isNetbulletActive(networkgamestate, i, j) && !isBulletActive(*((bullets+i*MAX_BULLETS) + j)))
                 {
-                    spawnBullet2(*((bullets+i*MAX_BULLETS) + j), getNetbulletX(networkgamestate, i, j), getNetbulletY(networkgamestate, i, j), getNetbulletAngle(networkgamestate, i, j));
-                    // bulletActivate(*((bullets+i*MAX_BULLETS) + j));
-                    // setBulletXY(*((bullets+i*MAX_BULLETS) + j), getNetbulletX(networkgamestate, i, j), getNetbulletY(networkgamestate, i, j));
-                    // setBulletSpeed(*((bullets+i*MAX_BULLETS) + j), getNetbulletspeedX(networkgamestate, i, j), getNetbulletspeedY(networkgamestate, i, j));
-                    // clientDamagePlayer(players[j]);
-                    // freeBullet(bullets[i]);
+                    spawnBullet(*((bullets+i*MAX_BULLETS) + j), getNetbulletX(networkgamestate, i, j), getNetbulletY(networkgamestate, i, j), getNetbulletAngle(networkgamestate, i, j), 0);
                 }
             }
         }
     }
     
 }
-
-// PUBLIC void updateplayerbullets(Networkgamestate networkgamestate, int playerID, Bullet bullets[][MAX_BULLETS])
-// {
-//     for (int i = 0; i < MAX_BULLETS; i++)
-//     {
-//         if(isBulletActive(bullets[i]) && netbulletStatus(networkgamestate, playerID, i))
-//         {
-//             if(!isNetbulletActive(networkgamestate, playerID, i))
-//             {
-//                 // printf("freebullet\n");
-//                 freeBullet(bullets[i]);
-//                 // bulletTimer(bullets[i]);
-//             }
-//         }
-//     }
-// }
-
-// PUBLIC void updateplayerbullets(Networkgamestate networkgamestate, int playerID, Bullet bullets[])
-// {
-//     for (int i = 0; i < MAX_BULLETS; i++)
-//     {
-//         if(isBulletActive(bullets[i]) && netbulletStatus(networkgamestate, playerID, i))
-//         {
-//             if(!isNetbulletActive(networkgamestate, playerID, i))
-//             {
-//                 // printf("freebullet\n");
-//                 freeBullet(bullets[i]);
-//                 // bulletTimer(bullets[i]);
-//             }
-//         }
-//     }
-// }
-
-// PUBLIC void playerBulletCollisionCheck(Bullet bullets[], Player players[])
-// {
-//     for (int i = 0; i < MAX_BULLETS; i++)
-//     {
-//         if (isBulletActive(bullets[i]))
-//         {
-//             moveBullet(bullets[i]);
-//             // for (int j = 0; j < MAX_PLAYERS; j++)
-//             // {
-//             //     if (rectCollisionTest(getBulletRect(bullets[i]), getPlayerRect(players[j]))
-//             //         && (getBulletOwner(bullets[i]) != j) && isPlayerAlive(players[j]))
-//             //     {
-//             //         freeBullet(bullets[i]);
-//             //     }
-//             // }
-//         }
-//     }
-// }
-
 
 PUBLIC bool rectCollisionTest(SDL_Rect* a, SDL_Rect* b)
 {
@@ -121,7 +64,7 @@ PUBLIC bool rectCollisionTest(SDL_Rect* a, SDL_Rect* b)
     return false;
 }
 
-PUBLIC void fire2(Bullet bullets[], Player p, int playerID)
+PUBLIC void fire(Bullet bullets[], Player p, int playerID)
 {
     if(canShoot(p))
     {
@@ -129,38 +72,7 @@ PUBLIC void fire2(Bullet bullets[], Player p, int playerID)
         {
             if (!isBulletActive(bullets[i]))
             {
-                spawnBullet2(bullets[i], getPlayerGunbarrelX(p), getPlayerGunbarrelY(p), getPlayerDirection(p));
-                break;
-            }
-        }
-    }
-}
-
-// PUBLIC void fire(Bullet bullets[], Player p, int playerID, int xTarget, int yTarget)
-// {
-//     if(canShoot(p))
-//     {
-//         for (int i = 0; i < MAX_BULLETS; i++)
-//         {
-//             if (!isBulletActive(bullets[i]))
-//             {
-//                 spawnBullet2(bullets[i], getPlayerGunbarrelX(p), getPlayerGunbarrelY(p), getPlayerDirection(p));
-//                 break;
-//             }
-//         }
-//     }
-// }
-
-PUBLIC void fire(Bullet bullets[], Player p, int playerID, int xTarget, int yTarget)
-{
-    if(canShoot(p))
-    {
-        for (int i = 0; i < MAX_BULLETS; i++)
-        {
-            if (!isBulletActive(bullets[i]))
-            {
-                // spawnBullet3(bullets[i], getPlayerGunbarrelX(p), getPlayerGunbarrelY(p), getPlayerDirection(p)*M_PI/180, getPlayerWeapondamage(p));
-                spawnBullet(bullets[i], getPlayerGunbarrelX(p), getPlayerGunbarrelY(p), xTarget, yTarget, playerID, getPlayerWeapondamage(p));
+                spawnBullet(bullets[i], getPlayerGunbarrelX(p)-2, getPlayerGunbarrelY(p)-2, getPlayerShotAngle(p), getPlayerWeapondamage(p));            
                 break;
             }
         }

@@ -54,11 +54,20 @@ PUBLIC bool fireWeapon(Weapon a)
     }
 }
 
-PUBLIC int getWeapondamage(Weapon a) { return a->damage; }
+PUBLIC int getWeapondamage(Weapon a)
+{
+    return a->damage;
+}
 
-PUBLIC int getMag(Weapon a) { return a->magazine; }
+PUBLIC int getMag(Weapon a)
+{
+    return a->magazine;
+}
 
-PUBLIC int getReloadprogress(Weapon a) { return a->reload; }
+PUBLIC int getReloadprogress(Weapon a)
+{
+    return a->reload;
+}
 
 PUBLIC void resetWeapon(Weapon a)
 {

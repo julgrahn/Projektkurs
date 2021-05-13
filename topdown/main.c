@@ -78,25 +78,7 @@ int main(int argc, char* args[])
     if (!initSDL(&renderer, &sound)) return 1;
     initGameObjects(players, bullets);
     initGameHUD(renderer, textRect, &textTexture, &healthBar, &reloadTimer);
-    // startPrompt(&playerID, &server, &host);
-    // if (host)
-    // {
-    //     server = createServer();
-    //     startServer(server);
-    // }
-    // initClient(&sd, &p, &p2);
-    // loadMedia(renderer, gridTiles, &tiles, playerRect, &playerText, &cursor, &bulletTexture, 
-    //         &gunFireTexture, gunFireRect, &explosionTexture, explosionRect, &gunFireTexture2, gunFireRect2, &sound);
-    // connectToServer(LOCAL_IP, &srvadd, &tcpsock, networkgamestate, &playerID, players, &sd, &connected);
-    // startUDPreceiveThread(&sd, &p2, bullets, players, &networkgamestate, playerID, &mutex);
-    // SDLNet_TCP_AddSocket(set, tcpsock);
     loadMenu(renderer, connectTextures, hostTextures, quitTextures);
-    //startPrompt(&playerID, &server, &host);
-    /*if (host)
-    {
-        server = createServer();
-        startServer(server);
-    }*/
     initClient(&sd, &p, &p2);
     loadMedia(renderer, gridTiles, &tiles, playerRect, &playerText, &cursor, &bulletTexture, 
             &gunFireTexture, &explosionTexture, &bloodTexture, 
@@ -156,7 +138,7 @@ int main(int argc, char* args[])
         if (isPlayerAlive(players[playerID]))
         {
             movePlayer(players[playerID], up, down, right, left, mouseX, mouseY, reload);
-            if (isPlayershooting(players[playerID])) fire(bullets[playerID], players[playerID], playerID, mouseX, mouseY);
+            if (isPlayershooting(players[playerID])) fire(bullets[playerID], players[playerID], playerID);
         }
         //Flytta på alla andra spelare
         for (int i = 0; i < MAX_PLAYERS; i++)
@@ -166,7 +148,6 @@ int main(int argc, char* args[])
             }
         }
         simulateBullets(bullets);
-        // playerBulletCollisionCheck(bullets, players);
         SDL_LockMutex(mutex);
         setNetworkgamestateplayer(&networkgamestate, playerID, players[playerID]);
         setNetworkbullets(networkgamestate, playerID, bullets[playerID]);

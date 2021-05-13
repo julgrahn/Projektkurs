@@ -11,13 +11,13 @@
 #define SERVER_REFRESH_RATE 30  // 30 = 10/s    10 = 30//
 
 PRIVATE void runServer(void* args);
-PRIVATE void handleGameLogic(Server server, int respawnDelay[], SDL_Rect *a, SDL_Rect *b, int invulnerabilityDelay[]);
+PRIVATE void handleGameLogic(Server server, int respawnDelay[], SDL_Point *a, SDL_Point *b, int invulnerabilityDelay[]);
 PRIVATE void handleTCP(Server server);
 PRIVATE void handleUDPreceive(Server server);
 PRIVATE void handleUDPsend(Server server);
 PRIVATE void startNewGame(Server server);
-
-
+PRIVATE bool circleHitDetect(SDL_Point *a, int rad0, SDL_Point *b, int rad1);
+ 
 
 struct Server_type {
     UDPsocket sd;       /* Socket descriptor */
@@ -124,9 +124,10 @@ PRIVATE void runServer(void* args)
     int invulnerabilityDelay[MAX_PLAYERS] = {0};
     int respawnDelay[MAX_PLAYERS] = {0}; 
 
-    SDL_Rect a, b;
-    a.w = a.h = 64;
-    b.w = b.h = 4;
+    SDL_Point a, b;
+    // SDL_Rect a, b;
+    // a.w = a.h = 64;
+    // b.w = b.h = 4;
     // Main-loop
     while (true)
     {   
@@ -315,7 +316,7 @@ PRIVATE void startNewGame(Server server)
     }
 }
 
-PRIVATE void handleGameLogic(Server server, int respawnDelay[], SDL_Rect *a, SDL_Rect *b, int invulnerabilityDelay[])
+PRIVATE void handleGameLogic(Server server, int respawnDelay[], SDL_Point *a, SDL_Point *b, int invulnerabilityDelay[])
 {
     // Loop för kollisionshanteringen för kulor, om spelare dör och om spelet är över
     for (int i = 0; i < MAX_PLAYERS; i++)
@@ -334,11 +335,11 @@ PRIVATE void handleGameLogic(Server server, int respawnDelay[], SDL_Rect *a, SDL
                             {
                                 setNetplayerInvulnerable(server->state, i, false);
                             }
-                            a->x = getNetworkgamestateplayerX(&server->state, k);
-                            a->y = getNetworkgamestateplayerY(&server->state, k);
-                            b->x = getNetbulletX(server->state, i, j);
-                            b->y = getNetbulletY(server->state, i, j);
-                            if(rectCollisionTest(b,a))
+                            a->x = getNetworkgamestateplayerX(&server->state, k)+20;
+                            a->y = getNetworkgamestateplayerY(&server->state, k)+32;
+                            b->x = getNetbulletX(server->state, i, j)+2;
+                            b->y = getNetbulletY(server->state, i, j)+2;
+                            if(circleHitDetect(a, 20, b, 1))
                             {
                                 server->bulletTimers[i][j] = 1;
                                 freeNetbullet(server->state, i, j);
@@ -405,4 +406,9 @@ PRIVATE void handleGameLogic(Server server, int respawnDelay[], SDL_Rect *a, SDL
             }
         }
     }
+}
+
+PRIVATE bool circleHitDetect(SDL_Point *a, int rad0, SDL_Point *b, int rad1)
+{
+    return sqrt((a->x - b->x) * (a->x - b->x) + (a->y - b->y) * (a->y - b->y)) < (rad0 + rad1);
 }
