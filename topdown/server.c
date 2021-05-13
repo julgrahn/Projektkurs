@@ -335,10 +335,10 @@ PRIVATE void handleGameLogic(Server server, int respawnDelay[], SDL_Point *a, SD
                             {
                                 setNetplayerInvulnerable(server->state, i, false);
                             }
-                            a->x = getNetPlayerX(server->state, k)+20;
-                            a->y = getNetPlayerY(server->state, k)+32;
-                            b->x = getNetBulletX(server->state, i, j)+2;
-                            b->y = getNetBulletY(server->state, i, j)+2;
+                            a->x = getNetPlayerX(server->state, k);
+                            a->y = getNetPlayerY(server->state, k);
+                            b->x = getNetBulletX(server->state, i, j);
+                            b->y = getNetBulletY(server->state, i, j);
                             if(circleHitDetect(a, 20, b, 1))
                             {
                                 server->bulletTimers[i][j] = 1;
