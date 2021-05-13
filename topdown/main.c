@@ -77,7 +77,7 @@ int main(int argc, char* args[])
     mutex = SDL_CreateMutex();
     if (!initSDL(&renderer, &sound)) return 1;
     initGameObjects(players, bullets);
-    initGameHUD(renderer, textRect, &textTexture, &healthBar, &reloadTimer);
+    // initGameHUD(renderer, textRect, &textTexture, &healthBar, &reloadTimer);
     loadMenu(renderer, connectTextures, hostTextures, quitTextures);
     initClient(&sd, &p, &p2);
     loadMedia(renderer, gridTiles, &tiles, playerRect, &playerText, &cursor, &bulletTexture, 
@@ -159,7 +159,7 @@ int main(int argc, char* args[])
                     playerRect, &playerRotationPoint, gunFireTexture, gunFireRect, 
                     explosionTexture, explosionRect,  &muzzleRotationPoint, bloodTexture, 
                     bloodRect, sound, explosionTiles, bloodTiles);
-        renderHUD(renderer, players[playerID], textRect, textTexture, &healthBar, &reloadTimer);
+        // renderHUD(renderer, players[playerID], textRect, textTexture, &healthBar, &reloadTimer);
 
         SDL_RenderPresent(renderer);
     }
