@@ -102,8 +102,8 @@ PUBLIC void renderGame(SDL_Renderer* renderer, SDL_Texture* mTiles, SDL_Rect gTi
             }
             if (bulletShot(bullets[i][j]))
             {
-                gunFireRect.x = getBulletOriginX(bullets[i][j]) + 0 - 14;
-                gunFireRect.y = getBulletOriginY(bullets[i][j]) + 0 - 16;
+                gunFireRect.x = getBulletOriginX(bullets[i][j]) - 14;
+                gunFireRect.y = getBulletOriginY(bullets[i][j]) - 16;
                 SDL_RenderCopyEx(renderer, gunFireTexture, NULL, &gunFireRect, getPlayerDirection(players[i]), muzzleRotationPoint, SDL_FLIP_NONE);
 
                 // if(checkShot(bullets[i][j]))

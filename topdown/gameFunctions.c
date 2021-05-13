@@ -72,7 +72,7 @@ PUBLIC void fire(Bullet bullets[], Player p)
         {
             if (!isBulletActive(bullets[i]) && !getBulletHitValue(bullets[i]))
             {
-                spawnBullet(bullets[i], getPlayerGunbarrelX(p)-0, getPlayerGunbarrelY(p)-0, getPlayerShotAngle(p), getPlayerWeapondamage(p));            
+                spawnBullet(bullets[i], getPlayerGunbarrelX(p), getPlayerGunbarrelY(p), getPlayerShotAngle(p), getPlayerWeapondamage(p));            
                 return;
             }
         }
