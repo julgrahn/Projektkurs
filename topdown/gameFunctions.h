@@ -13,7 +13,7 @@
 
 void updateplayers(Networkgamestate networkgamestate, Player players[], int playerID);
 bool rectCollisionTest(SDL_Rect* a, SDL_Rect* b);
-void fire(Bullet bullets[], Player p, int playerID);
+void fire(Bullet bullets[], Player p);
 void updateplayerbullets(Networkgamestate networkgamestate, int playerID, Bullet *bullets);
 
 #endif  // GAMEFUNCTIONS_H

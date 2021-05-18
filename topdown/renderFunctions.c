@@ -10,7 +10,7 @@ PUBLIC void renderGame(SDL_Renderer* renderer, SDL_Texture* mTiles, SDL_Rect gTi
     SDL_Texture* bulletTexture, Player players[], SDL_Texture* playerText, SDL_Rect playerRect[], SDL_Point* playerRotationPoint,
     SDL_Texture* gunFireTexture, SDL_Rect gunFireRect, SDL_Texture* explosionTexture, SDL_Rect explosionRect, 
     SDL_Point* muzzleRotationPoint, SDL_Texture* bloodTexture, SDL_Rect bloodRect, Mix_Chunk* sound,
-    SDL_Rect explosionTiles[], SDL_Rect bloodTiles[])
+    SDL_Rect explosionTiles[], SDL_Rect bloodTiles[], Mix_Chunk* soundWall, Mix_Chunk* soundDeath)
 {
     SDL_RenderClear(renderer);
     // Render Background
@@ -50,6 +50,12 @@ PUBLIC void renderGame(SDL_Renderer* renderer, SDL_Texture* mTiles, SDL_Rect gTi
         {
             SDL_RenderCopyEx(renderer, playerText, &playerRect[getPlayerFrame(players[i])], getPlayerRect(players[i]), getPlayerDirection(players[i]), playerRotationPoint, SDL_FLIP_NONE);
         }
+        if (checkKilled(players[i])) // dödsljud fungerar ej optimalt än
+        {
+            Mix_PlayChannel(-1, soundDeath, 0);
+            printf("killed1\n");
+        }
+        
     }
     // Render Gunfire
     for (int i = 0; i < MAX_PLAYERS; i++)
@@ -58,13 +64,14 @@ PUBLIC void renderGame(SDL_Renderer* renderer, SDL_Texture* mTiles, SDL_Rect gTi
         {
             if (bulletHit(bullets[i][j]))
             {
-                gunFireRect.x = getBulletX(bullets[i][j]) - 14; // gunfireRect bör bytas till en annan då denna avser muzzle från vapnet. 
-                gunFireRect.y = getBulletY(bullets[i][j]) - 16;
-                if (getWallCollisionBullet(getBulletX(bullets[i][j]), getBulletY(bullets[i][j]), 4, 4))
+                gunFireRect.x = getBulletX(bullets[i][j]) - 14 - 2; // gunfireRect bör bytas till en annan då denna avser muzzle från vapnet. 
+                gunFireRect.y = getBulletY(bullets[i][j]) - 16 - 2;
+                if (getWallCollisionBullet(getBulletX(bullets[i][j])-2, getBulletY(bullets[i][j])-2, 4, 4))
                 {
                     if (getBulletHitValue(bullets[i][j]) > 12)
                     {
                         SDL_RenderCopyEx(renderer, explosionTexture, &explosionTiles[45], &gunFireRect, 0, NULL, SDL_FLIP_NONE);
+                        Mix_PlayChannel(-1, soundWall, 0); // wall sound
                     }
                     else if (getBulletHitValue(bullets[i][j]) > 9)
                     {
@@ -85,6 +92,8 @@ PUBLIC void renderGame(SDL_Renderer* renderer, SDL_Texture* mTiles, SDL_Rect gTi
                     if (getBulletHitValue(bullets[i][j]) > 12)
                     {
                         SDL_RenderCopyEx(renderer, bloodTexture, &bloodTiles[9], &gunFireRect, (getBulletDirection(bullets[i][j])*180/M_PI), muzzleRotationPoint, SDL_FLIP_HORIZONTAL && SDL_FLIP_VERTICAL);
+                        // ljud vid träff på spelare
+                        //Mix_PlayChannel(-1, soundDeath, 0); // 
                     }
                     else if (getBulletHitValue(bullets[i][j]) > 9)
                     {
@@ -102,12 +111,12 @@ PUBLIC void renderGame(SDL_Renderer* renderer, SDL_Texture* mTiles, SDL_Rect gTi
             }
             if (bulletShot(bullets[i][j]))
             {
-                gunFireRect.x = getBulletOriginX(bullets[i][j]) + 2 - 14;
-                gunFireRect.y = getBulletOriginY(bullets[i][j]) + 2 - 16;
+                gunFireRect.x = getBulletOriginX(bullets[i][j]) - 14;
+                gunFireRect.y = getBulletOriginY(bullets[i][j]) - 16;
                 SDL_RenderCopyEx(renderer, gunFireTexture, NULL, &gunFireRect, getPlayerDirection(players[i]), muzzleRotationPoint, SDL_FLIP_NONE);
 
-                // if(checkShot(bullets[i][j]))
-                //     Mix_PlayChannel(-1, sound, 0);
+                if(checkShot(bullets[i][j]))
+                    Mix_PlayChannel(-1, sound, 0);
             }
         }
     }

@@ -3,7 +3,7 @@
 #define PUBLIC /* empty */
 #define PRIVATE static
 
-PUBLIC bool initSDL(SDL_Renderer** renderer, Mix_Chunk** sound)
+PUBLIC bool initSDL(SDL_Renderer** renderer, Mix_Chunk** sound, Mix_Chunk** soundWall, Mix_Chunk** soundDeath)
 {
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_AUDIO) != 0)
     {
@@ -48,7 +48,7 @@ PUBLIC void initGameObjects(Player players[], Bullet bullets[][MAX_BULLETS])
     }
     for (int i = 0; i < MAX_PLAYERS; i++)
     {
-        players[i] = createPlayer(100, 100, i);
+        players[i] = createPlayer(100, 100);
     }
 }
 
@@ -77,7 +77,7 @@ PUBLIC void loadMedia(SDL_Renderer* renderer, SDL_Rect gTiles[], SDL_Texture** t
                         SDL_Texture** pTexture, SDL_Cursor** cursor, SDL_Texture** bulletTexture, 
                         SDL_Texture** gunFireTexture, SDL_Texture** explosionTexture, 
                         SDL_Texture** bloodTexture, Mix_Chunk** sound,
-                        SDL_Rect explosionTiles[], SDL_Rect bloodTiles[])
+                        SDL_Rect explosionTiles[], SDL_Rect bloodTiles[], Mix_Chunk** soundWall, Mix_Chunk** soundDeath)
 {
     SDL_Surface* gTilesSurface = IMG_Load("resources/tilemap.png");
     *tiles = SDL_CreateTextureFromSurface(renderer, gTilesSurface);
@@ -154,47 +154,64 @@ PUBLIC void loadMedia(SDL_Renderer* renderer, SDL_Rect gTiles[], SDL_Texture** t
     {
         printf( "Failed to load beat music! SDL_mixer Error: %s\n", Mix_GetError() );
     }
+    
+
+    //Wall hit soundeffect
+    *soundWall = Mix_LoadWAV("resources/thwack-10.wav");
+    if (soundWall == NULL)
+    {
+        printf("Failed to load beat music! SDL_mixer Error: %s\n", Mix_GetError());
+    }
     // Volume
+    
+
+    *soundDeath = Mix_LoadWAV("resources/death.wav");
+    if (soundDeath == NULL)
+    {
+        printf("Failed to load beat music! SDL_mixer Error: %s\n", Mix_GetError());
+    }
     Mix_Volume(-1, 20);
+    
+    
 }
 
 PUBLIC void initGameHUD(SDL_Renderer *renderer, SDL_Rect textRect[], SDL_Texture **textTexture, SDL_Rect *healthBar, SDL_Rect *reloadTimer)
- {
-     TTF_Init();
-     TTF_Font *font;
-     font=TTF_OpenFont("unispace_bd.ttf", 20);
-     if(!font) {
-         printf("TTF_OpenFont: %s\n", TTF_GetError());
-     }
-     else
-     {
-         SDL_Color color = {255,255,255};
-         SDL_Surface *textSurface;
-         textSurface = TTF_RenderText_Solid(font,"0123456789|HP: ",color);
-         *textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
-         SDL_FreeSurface(textSurface);
-         healthBar->h = 10, healthBar->w = 150, healthBar->x = 100, healthBar->y = 7;
-         reloadTimer->x = 35, reloadTimer->y = 2, reloadTimer->w = 24; 
-         int width, height;
-         TTF_SizeText(font, "0123456789|HP: ", &width, &height);
-         for(int i = 0; i < 11; i++)
-         {
-             textRect[i].x = i * width/15;
-             textRect[i].y = 0;
-             textRect[i].w = width/15;
-             textRect[i].h = height;
-         }
-         for(int i = 12; i < 15; i++)
-         {
-             textRect[i].x = i * width/15 + (width/15*4);
-             textRect[i].y = 0;
-             textRect[i].w = width/15;
-             textRect[i].h = height;
-         }
-         textRect[11].x = 11 * width/15;
-         textRect[11].y = 0;
-         textRect[11].w = width/15*4;
-         textRect[11].h = height;
+{
+    TTF_Init();
+    TTF_Font *font;
+    font=TTF_OpenFont("unispace_bd.ttf", 20);
+    if(!font) {
+        printf("TTF_OpenFont: %s\n", TTF_GetError());
+    }
+    else
+    {
+        SDL_Color color = {255,255,255};
+        SDL_Surface *textSurface;
+        textSurface = TTF_RenderText_Solid(font,"0123456789|HP: ",color);
+        *textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
+        SDL_FreeSurface(textSurface);
+        healthBar->h = 10, healthBar->w = 150, healthBar->x = 100, healthBar->y = 7;
+        reloadTimer->x = 35, reloadTimer->y = 2, reloadTimer->w = 24; 
+        int width, height;
+        TTF_SizeText(font, "0123456789|HP: ", &width, &height);
+        for(int i = 0; i < 11; i++)
+        {
+            textRect[i].x = i * width/15;
+            textRect[i].y = 0;
+            textRect[i].w = width/15;
+            textRect[i].h = height;
+        }
+        for(int i = 12; i < 15; i++)
+        {
+            textRect[i].x = i * width/15 + (width/15*4);
+            textRect[i].y = 0;
+            textRect[i].w = width/15;
+            textRect[i].h = height;
+        }
+        textRect[11].x = 11 * width/15;
+        textRect[11].y = 0;
+        textRect[11].w = width/15*4;
+        textRect[11].h = height;
         TTF_CloseFont(font);
     }
 }

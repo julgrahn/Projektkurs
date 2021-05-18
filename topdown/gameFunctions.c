@@ -64,16 +64,16 @@ PUBLIC bool rectCollisionTest(SDL_Rect* a, SDL_Rect* b)
     return false;
 }
 
-PUBLIC void fire(Bullet bullets[], Player p, int playerID)
+PUBLIC void fire(Bullet bullets[], Player p)
 {
     if(canShoot(p))
     {
         for (int i = 0; i < MAX_BULLETS; i++)
         {
-            if (!isBulletActive(bullets[i]))
+            if (!isBulletActive(bullets[i]) && !getBulletHitValue(bullets[i]))
             {
-                spawnBullet(bullets[i], getPlayerGunbarrelX(p)-2, getPlayerGunbarrelY(p)-2, getPlayerShotAngle(p), getPlayerWeapondamage(p));            
-                break;
+                spawnBullet(bullets[i], getPlayerGunbarrelX(p), getPlayerGunbarrelY(p), getPlayerShotAngle(p), getPlayerWeapondamage(p));            
+                return;
             }
         }
     }
