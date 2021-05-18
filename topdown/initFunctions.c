@@ -26,9 +26,10 @@ PUBLIC bool initSDL(SDL_Renderer** renderer, Mix_Chunk** sound)
         SDL_Quit();
         return false;
     }
-    if( Mix_OpenAudio( 44100, MIX_DEFAULT_FORMAT, 2, 2048 ) < 0 )
+    SDL_SetRenderDrawBlendMode(*renderer, SDL_BLENDMODE_BLEND);
+    if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0)
     {
-        printf( "SDL_mixer could not initialize! SDL_mixer Error: %s\n", Mix_GetError() );
+        printf("SDL_mixer could not initialize! SDL_mixer Error: %s\n", Mix_GetError());
         SDL_Quit();
         return false;
     }
@@ -47,7 +48,7 @@ PUBLIC void initGameObjects(Player players[], Bullet bullets[][MAX_BULLETS])
     }
     for (int i = 0; i < MAX_PLAYERS; i++)
     {
-        players[i] = createPlayer(100, 100, i);
+        players[i] = createPlayer(100, 100);
     }
 }
 
@@ -131,15 +132,18 @@ PUBLIC void loadMedia(SDL_Renderer* renderer, SDL_Rect gTiles[], SDL_Texture** t
     }
 
     // Blod
-    SDL_Surface* bloodSurface = IMG_Load("resources/blood.png");
+    SDL_Surface* bloodSurface = IMG_Load("resources/blood - right 1.png");
     *bloodTexture = SDL_CreateTextureFromSurface(renderer, bloodSurface);
     SDL_FreeSurface(bloodSurface);
-    for (int i = 0; i < 48; i++)
+    for (int i = 0; i < 4; i++)
     {
-        bloodTiles[i].x = 0 + (i * 64);
-        bloodTiles[i].y = 64;
-        bloodTiles[i].w = 64;
-        bloodTiles[i].h = 64;
+        for (int j = 0; j < 4; j++)
+        {
+            bloodTiles[i * 4 + j].x = j * 512;
+            bloodTiles[i * 4 + j].y = i * 512;
+            bloodTiles[i * 4 + j].w = 512;
+            bloodTiles[i * 4 + j].h = 512;
+        }
     }
 
 
@@ -151,7 +155,88 @@ PUBLIC void loadMedia(SDL_Renderer* renderer, SDL_Rect gTiles[], SDL_Texture** t
     }
     // Volume
     Mix_Volume(-1, 20);
+}
 
+PUBLIC void initGameHUD(SDL_Renderer *renderer, SDL_Rect textRect[], SDL_Texture **textTexture, SDL_Rect *healthBar, SDL_Rect *reloadTimer)
+{
+    TTF_Init();
+    TTF_Font *font;
+    font=TTF_OpenFont("unispace_bd.ttf", 20);
+    if(!font) {
+        printf("TTF_OpenFont: %s\n", TTF_GetError());
+    }
+    else
+    {
+        SDL_Color color = {255,255,255};
+        SDL_Surface *textSurface;
+        textSurface = TTF_RenderText_Solid(font,"0123456789|HP: ",color);
+        *textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
+        SDL_FreeSurface(textSurface);
+        healthBar->h = 10, healthBar->w = 150, healthBar->x = 100, healthBar->y = 7;
+        reloadTimer->x = 35, reloadTimer->y = 2, reloadTimer->w = 24; 
+        int width, height;
+        TTF_SizeText(font, "0123456789|HP: ", &width, &height);
+        for(int i = 0; i < 11; i++)
+        {
+            textRect[i].x = i * width/15;
+            textRect[i].y = 0;
+            textRect[i].w = width/15;
+            textRect[i].h = height;
+        }
+        for(int i = 12; i < 15; i++)
+        {
+            textRect[i].x = i * width/15 + (width/15*4);
+            textRect[i].y = 0;
+            textRect[i].w = width/15;
+            textRect[i].h = height;
+        }
+        textRect[11].x = 11 * width/15;
+        textRect[11].y = 0;
+        textRect[11].w = width/15*4;
+        textRect[11].h = height;
+        TTF_CloseFont(font);
+    }
+}
 
-    
+PUBLIC void loadMenu(SDL_Renderer* renderer, SDL_Texture* connectTextures[], SDL_Texture* hostTextures[], SDL_Texture* quitTextures[])
+{
+    SDL_Surface* connectButton = IMG_Load("resources/ConnectGrey.png");
+    SDL_Surface* connectButtonHover = IMG_Load("resources/ConnectWhite.png");
+    SDL_Surface* connectButtonClick = IMG_Load("resources/ConnectGreen.png");
+
+    SDL_Surface* hostButton = IMG_Load("resources/HostGrey.png");
+    SDL_Surface* hostButtonHover = IMG_Load("resources/HostWhite.png");
+    SDL_Surface* hostButtonClick = IMG_Load("resources/HostGreen.png");
+
+    SDL_Surface* quitButton = IMG_Load("resources/QuitGrey.png");
+    SDL_Surface* quitButtonHover = IMG_Load("resources/QuitWhite.png");
+    SDL_Surface* quitButtonClick = IMG_Load("resources/QuitRed.png");
+
+    connectTextures[0] = SDL_CreateTextureFromSurface(renderer, connectButton);
+    connectTextures[1] = SDL_CreateTextureFromSurface(renderer, connectButtonHover);
+    connectTextures[2] = SDL_CreateTextureFromSurface(renderer, connectButtonClick);
+
+    hostTextures[0] = SDL_CreateTextureFromSurface(renderer, hostButton);
+    hostTextures[1] = SDL_CreateTextureFromSurface(renderer, hostButtonHover);
+    hostTextures[2] = SDL_CreateTextureFromSurface(renderer, hostButtonClick);
+
+    quitTextures[0] = SDL_CreateTextureFromSurface(renderer, quitButton);
+    quitTextures[1] = SDL_CreateTextureFromSurface(renderer, quitButtonHover);
+    quitTextures[2] = SDL_CreateTextureFromSurface(renderer, quitButtonClick);
+
+    SDL_FreeSurface(connectButton);
+    SDL_FreeSurface(connectButtonHover);
+    SDL_FreeSurface(connectButtonClick);
+
+    SDL_FreeSurface(hostButton);
+    SDL_FreeSurface(hostButtonHover);
+    SDL_FreeSurface(hostButtonClick);
+
+    SDL_FreeSurface(quitButton);
+    SDL_FreeSurface(quitButtonHover);
+    SDL_FreeSurface(quitButtonClick);
+
+    /*if (connectTexture == NULL) printf("Finns ingen bild\n");
+    else printf("texturen har laddats\n");*/
+
 }
