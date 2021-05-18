@@ -34,14 +34,14 @@ PUBLIC void connectToServer(char* ip, IPaddress* srvadd, TCPsocket* tcpsock, Net
         exit(EXIT_FAILURE);
     }
     char msg[1024];
-    
+
     if (SDLNet_TCP_Recv(*tcpsock, networkgamestate, getGamestatesize()))
     {
         SDLNet_TCP_Recv(*tcpsock, playerID, sizeof(*playerID));
         //setPlayerAlive(players[*playerID], true);
         for (int i = 0; i < MAX_PLAYERS; i++)
         {
-            snapPlayer(players[i], getNetworkgamestateplayerX(&networkgamestate, i), getNetworkgamestateplayerY(&networkgamestate, i));
+            snapPlayer(players[i], getNetPlayerX(networkgamestate, i), getNetPlayerY(networkgamestate, i));
         }
 
         sprintf(msg, "%d\n", SDLNet_UDP_GetPeerAddress(*sd, -1)->port);
@@ -54,11 +54,11 @@ PUBLIC void connectToServer(char* ip, IPaddress* srvadd, TCPsocket* tcpsock, Net
 }
 
 PUBLIC void sendUDP(void* player, UDPsocket* sd, IPaddress* srvadd, UDPpacket** p, UDPpacket** p2)
-{ 
-    memcpy((*p)->data, player, getNetworkplayersize());
+{
+    memcpy((*p)->data, player, getNetPlayerSize());
     (*p)->address = *srvadd;
-    (*p)->len = getNetworkplayersize();
-    SDLNet_UDP_Send(*sd, -1, *p);    
+    (*p)->len = getNetPlayerSize();
+    SDLNet_UDP_Send(*sd, -1, *p);
 }
 
 PUBLIC void startUDPreceiveThread(UDPsocket *sd, UDPpacket** p2, Bullet bullets[][MAX_BULLETS], Player players[], Networkgamestate *networkgamestate, int playerID, SDL_mutex** mutex)
@@ -112,7 +112,7 @@ PUBLIC void handleClientTCP(TCPsocket* tcpsock, SDLNet_SocketSet* set, Networkga
             setPlayerAlive(players[playerID], true);
             for (int i = 0; i < MAX_PLAYERS; i++)
             {
-                snapPlayer(players[i], getNetworkgamestateplayerX(&networkgamestate, i), getNetworkgamestateplayerY(&networkgamestate, i));
+                snapPlayer(players[i], getNetPlayerX(networkgamestate, i), getNetPlayerY(networkgamestate, i));
             }
             break;
         default:
@@ -121,8 +121,9 @@ PUBLIC void handleClientTCP(TCPsocket* tcpsock, SDLNet_SocketSet* set, Networkga
     }
 }
 
-void startNewGame(TCPsocket* tcpsock)
+
+
+void sendTCPtoServer(TCPsocket* tcpsock, int message)
 {
-    int message = 1;
     SDLNet_TCP_Send(*tcpsock, &message, sizeof(message));
 }

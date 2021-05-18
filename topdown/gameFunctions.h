@@ -9,11 +9,11 @@
 #include "player.h"
 #include "sdlinclude.h"
 #include "networkgamestate.h"
+#include "weapon.h"
 
 void updateplayers(Networkgamestate networkgamestate, Player players[], int playerID);
-void playerBulletCollisionCheck(Bullet bullets[], Player players[]);
 bool rectCollisionTest(SDL_Rect* a, SDL_Rect* b);
-void fire(Bullet bullets[], Player* p, int playerID, int xTarget, int yTarget);
+void fire(Bullet bullets[], Player p);
 void updateplayerbullets(Networkgamestate networkgamestate, int playerID, Bullet *bullets);
 
 #endif  // GAMEFUNCTIONS_H

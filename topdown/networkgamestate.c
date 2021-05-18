@@ -1,27 +1,24 @@
 #include "networkgamestate.h"
 
 #define PUBLIC
-#define NETBULLETDMG 10
+
 typedef struct NetworkBullet_type{
 	short xPos, yPos, angle;
-    // Uint8 control;
-    bool control;
-    bool active;
+    Uint8 damage;
+    Uint8 control_active;
 }Networkbullet;
 
 typedef struct NetworkPlayer_type{
-    short direction, health;
-    short posX, posY;// xTarget, yTarget;
-    bool isAlive, isActive, invulnerable; //isShooting;
-    int lives;
-    // Uint8 damage;
-    // Uint8 playerstatus, damage, health;
-    // short bullets[15][4];
+    short direction;
+    short posX, posY;
+    Uint8 status;   // bitpattern: 2 - alive, 1 - active, 0 - invulnerable
+    Sint8 lives, health, kills;  
     Networkbullet aBullet[MAX_BULLETS];
 }Networkplayer;
 
 struct Networkgamestate_type {
     Networkplayer aPlayer[5];
+    Uint8 roundState;
 };
 
 PUBLIC Networkgamestate createNetworkgamestate()
@@ -31,158 +28,152 @@ PUBLIC Networkgamestate createNetworkgamestate()
     {
         a->aPlayer[i].direction = 0;
         a->aPlayer[i].posX = 0, a->aPlayer[i].posY = 0;
-        a->aPlayer[i].isAlive = false;
-        a->aPlayer[i].isActive = false;
         a->aPlayer[i].health = 100;
         a->aPlayer[i].lives = 0;
-        a->aPlayer[i].invulnerable = false;
+        a->aPlayer[i].status = 0;
+        a->aPlayer[i].kills = 0;
         for (int j = 0; j < MAX_BULLETS; j++)
         {
-            a->aPlayer[i].aBullet[j].active = false;
-            a->aPlayer[i].aBullet[j].control = false;
+            a->aPlayer[i].aBullet[j].control_active = 0;
         }
+
+        a->roundState = 0;
     }
     return a;
 }
-
 
 PUBLIC Uint32 getGamestatesize()
 {
     return sizeof(struct Networkgamestate_type);
 }
 
-PUBLIC int getNetworkgamestateplayerX(Networkgamestate *a, int n)
+PUBLIC void setRoundState(Networkgamestate a, int newValue)
 {
-    return (*a)->aPlayer[n].posX;
+    a->roundState = newValue;
 }
 
-PUBLIC int getNetworkgamestateplayerY(Networkgamestate *a, int n)
+PUBLIC Uint8 getRoundState(Networkgamestate a)
 {
-    return (*a)->aPlayer[n].posY;
+    return a->roundState;
 }
 
-PUBLIC void setGamastateplayerpos(Networkgamestate *a, int n, int x, int y)
+PUBLIC int getNetPlayerX(Networkgamestate a, int n)
 {
-    (*a)->aPlayer[n].posX = x, (*a)->aPlayer[n].posY = y;
+    return a->aPlayer[n].posX;
 }
 
-PUBLIC void setNetworkgamestateplayer(Networkgamestate *a, int n, Player b)
+PUBLIC int getNetPlayerY(Networkgamestate a, int n)
 {
-    (*a)->aPlayer[n].posX = getPlayerX(b);
-    (*a)->aPlayer[n].posY = getPlayerY(b);
-    (*a)->aPlayer[n].direction = (short)getPlayerDirection(b);
-    (*a)->aPlayer[n].isActive = true;
+    return a->aPlayer[n].posY;
 }
 
-// PUBLIC Networkplayer* getGamestateplayer(Networkgamestate *a, int n)
-// {
-//     return &(*a)->player[n];
-// }
-
-// PUBLIC Networkgamestate createNetworkgamestate()
-// {
-//     Networkgamestate a;
-//     for (int i = 0; i < MAX_PLAYERS; i++) a.players[i] = createNetworkplayer(-1);
-//     // sizeof(*a);
-//     return a;
-// }
-
-PUBLIC void* getNetworkgamestateplayer(Networkgamestate *a, int playerID)
+PUBLIC void setNetPlayerKills(Networkgamestate a, int n, int newValue)
 {
-    return &(*a)->aPlayer[playerID];
+    a->aPlayer[n].kills = newValue;
 }
 
-PUBLIC void killNetworkplayer(Networkgamestate *a, int n)
+PUBLIC void setNetPlayer(Networkgamestate a, int n, Player b)
 {
-    (*a)->aPlayer[n].isAlive = false;
+    a->aPlayer[n].posX = getPlayerX(b);
+    a->aPlayer[n].posY = getPlayerY(b);
+    a->aPlayer[n].direction = (short)getPlayerDirection(b);
+    a->aPlayer[n].status |= 0b010;
 }
 
-PUBLIC void reviveNetworkgamestateplayer(Networkgamestate *a, int n)
+PUBLIC void* getNetPlayer(Networkgamestate a, int playerID)
 {
-    (*a)->aPlayer[n].isAlive = true;
-    (*a)->aPlayer[n].health = 100;
+    return &a->aPlayer[playerID];
 }
 
-PUBLIC bool isNetworkplayeractive(Networkgamestate *a, int n)
+PUBLIC void killNetPlayer(Networkgamestate a, int n)
 {
-    return (*a)->aPlayer[n].isActive;
+    a->aPlayer[n].status &= 0b011;
 }
 
-PUBLIC void freeNetworkgamestateplayer(Networkgamestate *a, int n)
+PUBLIC void reviveNetPlayer(Networkgamestate a, int n)
 {
-    (*a)->aPlayer[n].isActive = false;
+    a->aPlayer[n].health = 100;
+    a->aPlayer[n].status |= 0b100;
 }
 
-PUBLIC void activateNetworkgamestateplayer(Networkgamestate *a, int n)
+PUBLIC int getNetPlayerKills(Networkgamestate a, int n)
 {
-    (*a)->aPlayer[n].isActive = true;
+    return a->aPlayer[n].kills;
 }
 
-PUBLIC void setGamestateplayer(Networkgamestate *a, void *player, int n)
+PUBLIC bool isNetPlayerActive(Networkgamestate a, int n)
 {
-    (*a)->aPlayer[n] = *(Networkplayer*)(player);
+    return (a->aPlayer[n].status & 0b010) >> 1; 
 }
 
-PUBLIC Uint32 getNetworkplayersize()
+PUBLIC void freeNetPlayer(Networkgamestate a, int n)
+{
+    a->aPlayer[n].status &= 0b101;
+    a->aPlayer[n].kills = 0;
+}
+
+PUBLIC void activateNetPlayer(Networkgamestate a, int n)
+{
+    a->aPlayer[n].status |= 0b010;
+}
+
+PUBLIC Uint32 getNetPlayerSize()
 {
     return sizeof(struct NetworkPlayer_type);
 }
 
-PUBLIC int getNetworkgamestateplayerDirection(Networkgamestate *a, int n)
+PUBLIC int getNetPlayerDirection(Networkgamestate a, int n)
 {
-    return (*a)->aPlayer[n].direction;
+    return a->aPlayer[n].direction;
 }
 
-PUBLIC bool isNetworkplayerAlive(Networkgamestate *a, int n)
+PUBLIC bool isNetPlayerAlive(Networkgamestate a, int n)
 {
-    return (*a)->aPlayer[n].isAlive;
+    return (a->aPlayer[n].status & 0b100) >> 2;
 }
 
-// PUBLIC bool isNetworkgamestateplayerShooting(Networkgamestate *a, int n)
-// {
-//     return (*a)->aPlayer[n].isShooting;
-// }
-
-
-PUBLIC void setNetworkplayeralive(Networkgamestate *a, int n, bool alive)
+PUBLIC void setNetPlayerAlive(Networkgamestate a, int n, bool alive)
 {
-    (*a)->aPlayer[n].isAlive = alive;
+    a->aPlayer[n].status = (a->aPlayer[n].status |= 0b100) * alive + (a->aPlayer[n].status &= 0b011) * !alive;
 }
 
-PUBLIC void setNetworkbullets(Networkgamestate a, int playerID, Bullet bullets[])
+
+PUBLIC void setNetBullets(Networkgamestate a, int playerID, Bullet bullets[])
 {
     int i;
     for (i = 0; i < MAX_BULLETS; i++)
     {
-        a->aPlayer[playerID].aBullet[i].active = isBulletActive(bullets[i]);
+        a->aPlayer[playerID].aBullet[i].control_active = (a->aPlayer[playerID].aBullet[i].control_active |= 0b01) * isBulletActive(bullets[i]) + (a->aPlayer[playerID].aBullet[i].control_active &= 0b10) * !isBulletActive(bullets[i]);
         a->aPlayer[playerID].aBullet[i].angle = getBulletDirection(bullets[i])*10000;
         a->aPlayer[playerID].aBullet[i].xPos = getBulletX(bullets[i]);
         a->aPlayer[playerID].aBullet[i].yPos = getBulletY(bullets[i]);
+        a->aPlayer[playerID].aBullet[i].damage = getBulletDamage(bullets[i]);
     }
 }
 
-PUBLIC int getNetbulletX(Networkgamestate a, int playerID, int bulletNo)
+PUBLIC int getNetBulletX(Networkgamestate a, int playerID, int bulletNo)
 {
     return a->aPlayer[playerID].aBullet[bulletNo].xPos;
 }
 
-PUBLIC int getNetbulletY(Networkgamestate a, int playerID, int bulletNo)
+PUBLIC int getNetBulletY(Networkgamestate a, int playerID, int bulletNo)
 {
     return a->aPlayer[playerID].aBullet[bulletNo].yPos;
 }
 
 PUBLIC bool isNetbulletActive(Networkgamestate a, int playerID, int bulletNo)
 {
-    return a->aPlayer[playerID].aBullet[bulletNo].active;
+    return a->aPlayer[playerID].aBullet[bulletNo].control_active & 0b01;
 }
 
-PUBLIC void damageNetplayer(Networkgamestate a, int playerID)
+PUBLIC void damageNetplayer(Networkgamestate a, int playerID, int damage, int shooterID)
 {
-    a->aPlayer[playerID].health -= NETBULLETDMG;
+    a->aPlayer[playerID].health -= damage;
     if(a->aPlayer[playerID].health <= 0)
     {
-        a->aPlayer[playerID].lives -= 1;
-        killNetworkplayer(&a, playerID);
+        if(--a->aPlayer[playerID].lives < 0) a->aPlayer[playerID].lives = 0;
+        killNetPlayer(a, playerID);
+        a->aPlayer[shooterID].kills++;
     }
 }
 
@@ -193,12 +184,12 @@ PUBLIC int getNetplayerHealth(Networkgamestate a, int playerID)
 
 PUBLIC bool isNetplayerInvulnerable(Networkgamestate a, int playerID)
 {
-    return a->aPlayer[playerID].invulnerable;
+    return (a->aPlayer[playerID].status & 0b001);
 }
 
 PUBLIC void setNetplayerInvulnerable(Networkgamestate a, int playerID, bool value)
 {
-    a->aPlayer[playerID].invulnerable = value;
+    a->aPlayer[playerID].status = (a->aPlayer[playerID].status |= 0b001) * value + (a->aPlayer[playerID].status &= 0b110) * !value;
 }
 
 PUBLIC int getNetplayerLives(Networkgamestate a, int playerID)
@@ -218,8 +209,7 @@ PUBLIC void setNetplayerLives(Networkgamestate a, int playerID, int lives)
 
 PUBLIC void freeNetbullet(Networkgamestate a, int playerID, int bulletNo)
 {
-    a->aPlayer[playerID].aBullet[bulletNo].active = false;
-    a->aPlayer[playerID].aBullet[bulletNo].control = true;
+    a->aPlayer[playerID].aBullet[bulletNo].control_active = 0b10;
 }
 
 PUBLIC void setNetplayerPos(Networkgamestate a, int playerID, int x, int y)
@@ -229,12 +219,12 @@ PUBLIC void setNetplayerPos(Networkgamestate a, int playerID, int x, int y)
 
 PUBLIC bool netbulletStatus(Networkgamestate a, int playerID, int bulletID)
 {
-    return a->aPlayer[playerID].aBullet[bulletID].control;
+    return (a->aPlayer[playerID].aBullet[bulletID].control_active & 0b10)>>1;
 }
 
 PUBLIC void netBulletclearcontrol(Networkgamestate a, int playerID, int bulletID)
 {
-    a->aPlayer[playerID].aBullet[bulletID].control = 0;
+    a->aPlayer[playerID].aBullet[bulletID].control_active &= 0b01;
 }
 
 PUBLIC double getNetbulletspeedX(Networkgamestate a, int playerID, int bulletID)
@@ -245,4 +235,14 @@ PUBLIC double getNetbulletspeedX(Networkgamestate a, int playerID, int bulletID)
 PUBLIC double getNetbulletspeedY(Networkgamestate a, int playerID, int bulletID)
 {
     return BULLET_SPEED * sin((double)a->aPlayer[playerID].aBullet[bulletID].angle/10000);
+}
+
+PUBLIC double getNetbulletAngle(Networkgamestate a, int playerID, int bulletID)
+{
+    return (double)a->aPlayer[playerID].aBullet[bulletID].angle/10000;
+}
+
+PUBLIC int getNetbulletdamage(Networkgamestate a, int playerID, int bulletID)
+{
+    return a->aPlayer[playerID].aBullet[bulletID].damage;
 }
