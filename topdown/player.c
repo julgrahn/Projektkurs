@@ -33,7 +33,8 @@ struct Player_type {
     int gunBarrelX, gunBarrelY;
     int lives;
     double shotAngle;
-    bool killed;
+    bool killed;// tillfälligt för dödsljud
+    int kills;
 };
 
 PUBLIC Player createPlayer(int x, int y)
@@ -60,7 +61,8 @@ PUBLIC Player createPlayer(int x, int y)
     a->newDirection = 0;
     a->gun = createWeapon();
     a->lives = 0;
-    a->killed = false;
+    a->killed = false;//tillfälligt för dödsljud
+    a->kills = 0;
     return a;
 }
 
@@ -155,6 +157,26 @@ PUBLIC int getPlayerY(Player p)
 PUBLIC void activatePlayer(Player p)
 {
     p->active = true;
+}
+
+PUBLIC void setActivePlayer(Player p, bool newValue)
+{
+    p->active = newValue;
+}
+
+PUBLIC bool isPlayerActive(Player p)
+{
+    return p->active;
+}
+
+PUBLIC int getPlayerKills(Player p)
+{
+    return p->kills;
+}
+
+PUBLIC void setPlayerKills(Player p, int newValue)
+{
+    p->kills = newValue;
 }
 
 PUBLIC void updatePlayerPosition(Player p, int x, int y, int direction, bool alive)

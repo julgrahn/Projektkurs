@@ -1,6 +1,16 @@
 #ifndef SDLINCLUDE_H
 #define SDLINCLUDE_H
 
+/****************
+* Vad siffrorna i TCP-paketen betyder
+* 
+* Host till server
+* 1: Starta en ny spelomg�ng
+* 2: Starta warmup
+* 
+*********************/
+
+
 // #include <SDL.h>
 // #include <SDL_image.h>
 // #include <SDL_timer.h>
@@ -28,5 +38,6 @@
 #define LOCAL_IP "127.0.0.1"
 #define MAX_PLAYERS 5
 #define START_LIVES 3
+#define STANDARDSPAWNTIME 180
 
 #endif
