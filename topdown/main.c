@@ -50,6 +50,8 @@ int main(int argc, char* args[])
     SDL_Texture* gunFireTexture = NULL;
     SDL_Rect gunFireRect;
     Mix_Chunk* sound;
+    Mix_Chunk* soundWall;
+    Mix_Chunk* soundDeath;
     gunFireRect.w = 40;
     gunFireRect.h = 40;
     SDL_Texture* bloodTexture = NULL;
@@ -79,14 +81,14 @@ int main(int argc, char* args[])
     // Init functions
     set = SDLNet_AllocSocketSet(1);
     mutex = SDL_CreateMutex();
-    if (!initSDL(&renderer, &sound)) return 1;
+    if (!initSDL(&renderer, &sound, &soundWall, &soundDeath)) return 1;
     initGameObjects(players, bullets);
     initGameHUD(renderer, textRect, &textTexture, &healthBar, &reloadTimer);
     loadMenu(renderer, connectTextures, hostTextures, quitTextures);
     initClient(&sd, &p, &p2);
     loadMedia(renderer, gridTiles, &tiles, playerRect, &playerText, &cursor, &bulletTexture, 
             &gunFireTexture, &explosionTexture, &bloodTexture, 
-            &sound, explosionTiles, bloodTiles);
+            &sound, explosionTiles, bloodTiles, &soundWall, &soundDeath);
 
 
     // Synligare bullets för testing 
@@ -110,7 +112,7 @@ int main(int argc, char* args[])
             if (mouse.y > CONNECT_Y_POS && mouse.y < CONNECT_Y_POS + BUTTON_HEIGHT && shooting)
             {
                 setButtonPressed(buttons[0], true);
-                connectToServer(ANDREAS_IP, &srvadd, &tcpsock, networkgamestate, &playerID, players, &sd, &connected);
+                connectToServer(LOCAL_IP, &srvadd, &tcpsock, networkgamestate, &playerID, players, &sd, &connected);
                 startUDPreceiveThread(&sd, &p2, bullets, players, &networkgamestate, playerID, &mutex);
                 SDLNet_TCP_AddSocket(set, tcpsock);
             }
@@ -167,7 +169,7 @@ int main(int argc, char* args[])
         renderGame(renderer, tiles, gridTiles, bullets, bulletTexture, players, playerText, 
                     playerRect, &playerRotationPoint, gunFireTexture, gunFireRect, 
                     explosionTexture, explosionRect,  &muzzleRotationPoint, bloodTexture, 
-                    bloodRect, sound, explosionTiles, bloodTiles);
+                    bloodRect, sound, explosionTiles, bloodTiles, soundWall, soundDeath);
         
         renderTestBullets(renderer, bullets, bulletTEST); // Synligare bullets för testing    
 

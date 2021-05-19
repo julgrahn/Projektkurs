@@ -12,7 +12,8 @@ typedef struct NetworkPlayer_type{
     short direction;
     short posX, posY;
     Uint8 status;   // bitpattern: 2 - alive, 1 - active, 0 - invulnerable
-    Sint8 lives, health;  
+    Sint8 lives, health;
+    bool killed;
     Networkbullet aBullet[MAX_BULLETS];
 }Networkplayer;
 
@@ -30,6 +31,7 @@ PUBLIC Networkgamestate createNetworkgamestate()
         a->aPlayer[i].health = 100;
         a->aPlayer[i].lives = 0;
         a->aPlayer[i].status = 0;
+        a->aPlayer[i].killed = false;
         for (int j = 0; j < MAX_BULLETS; j++)
         {
             a->aPlayer[i].aBullet[j].control_active = 0;
@@ -146,6 +148,7 @@ PUBLIC void damageNetplayer(Networkgamestate a, int playerID, int damage)
     a->aPlayer[playerID].health -= damage;
     if(a->aPlayer[playerID].health <= 0)
     {
+        a->aPlayer[playerID].killed = true;
         if(--a->aPlayer[playerID].lives < 0) a->aPlayer[playerID].lives = 0;
         killNetPlayer(a, playerID);
     }
@@ -219,4 +222,17 @@ PUBLIC double getNetbulletAngle(Networkgamestate a, int playerID, int bulletID)
 PUBLIC int getNetbulletdamage(Networkgamestate a, int playerID, int bulletID)
 {
     return a->aPlayer[playerID].aBullet[bulletID].damage;
+}
+
+PUBLIC bool getNetPlayerKilled(Networkgamestate a, int playerID)
+{
+    return a->aPlayer[playerID].killed;
+}
+
+PUBLIC void resetPlayerKilled(Networkgamestate a, int playerID)
+{
+    if(a->aPlayer[playerID].killed){
+        printf("skicka paket\n");
+    }
+    a->aPlayer[playerID].killed = false;
 }

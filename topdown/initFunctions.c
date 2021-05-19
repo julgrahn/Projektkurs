@@ -3,7 +3,7 @@
 #define PUBLIC /* empty */
 #define PRIVATE static
 
-PUBLIC bool initSDL(SDL_Renderer** renderer, Mix_Chunk** sound)
+PUBLIC bool initSDL(SDL_Renderer** renderer, Mix_Chunk** sound, Mix_Chunk** soundWall, Mix_Chunk** soundDeath)
 {
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_AUDIO) != 0)
     {
@@ -77,7 +77,7 @@ PUBLIC void loadMedia(SDL_Renderer* renderer, SDL_Rect gTiles[], SDL_Texture** t
                         SDL_Texture** pTexture, SDL_Cursor** cursor, SDL_Texture** bulletTexture, 
                         SDL_Texture** gunFireTexture, SDL_Texture** explosionTexture, 
                         SDL_Texture** bloodTexture, Mix_Chunk** sound,
-                        SDL_Rect explosionTiles[], SDL_Rect bloodTiles[])
+                        SDL_Rect explosionTiles[], SDL_Rect bloodTiles[], Mix_Chunk** soundWall, Mix_Chunk** soundDeath)
 {
     SDL_Surface* gTilesSurface = IMG_Load("resources/tilemap.png");
     *tiles = SDL_CreateTextureFromSurface(renderer, gTilesSurface);
@@ -112,6 +112,7 @@ PUBLIC void loadMedia(SDL_Renderer* renderer, SDL_Rect gTiles[], SDL_Texture** t
     SDL_Surface* bulletSurface = IMG_Load("resources/expl_04_0014.png");
     *bulletTexture = SDL_CreateTextureFromSurface(renderer, bulletSurface);
     SDL_FreeSurface(bulletSurface);
+     
 
     SDL_Surface* gunFireSurface = IMG_Load("resources/muzzle2_0007.png");
     *gunFireTexture = SDL_CreateTextureFromSurface(renderer, gunFireSurface);
@@ -153,8 +154,25 @@ PUBLIC void loadMedia(SDL_Renderer* renderer, SDL_Rect gTiles[], SDL_Texture** t
     {
         printf( "Failed to load beat music! SDL_mixer Error: %s\n", Mix_GetError() );
     }
+    
+
+    //Wall hit soundeffect
+    *soundWall = Mix_LoadWAV("resources/thwack-10.wav");
+    if (soundWall == NULL)
+    {
+        printf("Failed to load beat music! SDL_mixer Error: %s\n", Mix_GetError());
+    }
     // Volume
-    Mix_Volume(-1, 20);
+    
+
+    *soundDeath = Mix_LoadWAV("resources/death.wav");
+    if (soundDeath == NULL)
+    {
+        printf("Failed to load beat music! SDL_mixer Error: %s\n", Mix_GetError());
+    }
+    Mix_Volume(-1, 5);
+    
+    
 }
 
 PUBLIC void initGameHUD(SDL_Renderer *renderer, SDL_Rect textRect[], SDL_Texture **textTexture, SDL_Rect *healthBar, SDL_Rect *reloadTimer)

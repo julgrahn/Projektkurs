@@ -33,6 +33,7 @@ struct Player_type {
     int gunBarrelX, gunBarrelY;
     int lives;
     double shotAngle;
+    bool killed;
 };
 
 PUBLIC Player createPlayer(int x, int y)
@@ -59,6 +60,7 @@ PUBLIC Player createPlayer(int x, int y)
     a->newDirection = 0;
     a->gun = createWeapon();
     a->lives = 0;
+    a->killed = false;
     return a;
 }
 
@@ -337,4 +339,19 @@ PUBLIC void resetPlayer(Player a)
 PUBLIC double getPlayerShotAngle(Player a)
 {
     return a->shotAngle;
+}
+
+PUBLIC bool checkKilled(Player a) // experiment f�r att testa d�dsljud
+{
+    if (a->killed)
+    {
+        a->killed = false;
+        return true;
+    }
+    else return false;
+}
+
+PUBLIC void setKilled(Player p, bool n)
+{
+    p->killed = n;
 }

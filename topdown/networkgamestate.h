@@ -42,5 +42,7 @@ double getNetbulletspeedX(Networkgamestate a, int playerID, int bulletID);
 double getNetbulletspeedY(Networkgamestate a, int playerID, int bulletID);
 double getNetbulletAngle(Networkgamestate a, int playerID, int bulletID);
 int getNetbulletdamage(Networkgamestate a, int playerID, int bulletID);
+bool getNetPlayerKilled(Networkgamestate a, int playerID);
+void resetPlayerKilled(Networkgamestate a, int playerID);
 
 #endif

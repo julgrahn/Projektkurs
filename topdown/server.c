@@ -130,13 +130,13 @@ PRIVATE void runServer(void* args)
     // b.w = b.h = 4;
     // Main-loop
     while (true)
-    {   
+    {
         SDL_Delay(1); 
         TCPdelay = (TCPdelay + 1) % 200;
         UDPreceiveDelay = (UDPreceiveDelay + 1) % 1;
         UDPsendDelay = (UDPsendDelay + 1) % 10;
         Gamelogicdelay = (Gamelogicdelay + 1) % 8;
-        
+
         // TCP
         if (!TCPdelay)
         {
@@ -171,6 +171,7 @@ PRIVATE void handleUDPsend(Server server)
             memcpy(server->pSent->data, server->state, getGamestatesize());
             server->pSent->len = getGamestatesize();
             SDLNet_UDP_Send(server->sd, -1, server->pSent);
+            resetPlayerKilled(server->state, i);
         }
     }
 }
