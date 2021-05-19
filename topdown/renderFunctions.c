@@ -20,9 +20,9 @@ PUBLIC void renderGame(SDL_Renderer* renderer, SDL_Texture* mTiles, SDL_Rect gTi
     position.h = getTileHeight();
     position.w = getTileWidth();
 
-    for (int i = 0; i < getTileColumns(); i++)
+    for (int i = 0; i < getTileRows(); i++)
     {
-        for (int j = 0; j < getTileRows(); j++)
+        for (int j = 0; j < getTileColumns(); j++)
         {
             position.y = i * getTileHeight();
             position.x = j * getTileWidth();

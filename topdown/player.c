@@ -1,7 +1,5 @@
 #include <stdlib.h>
 #include "player.h"
-#include "world.h"
-#include "weapon.h"
 #include <math.h>
 
 #define PUBLIC
@@ -126,7 +124,6 @@ PUBLIC void movePlayer(Player p, int up, int down, int right, int left, int mous
     if (p->pDimensions.y >= WINDOWHEIGHT - p->pDimensions.h) { p->pDimensions.y = WINDOWHEIGHT - p->pDimensions.h; p->posY = p->pDimensions.y + PLAYER_CENTER_OFFSET_Y;}
     if (p->pDimensions.x <= 0) {p->pDimensions.x = 0; p->posX = PLAYER_CENTER_OFFSET_X;}
     if (p->pDimensions.x >= WINDOWWIDTH - p->pDimensions.w) { p->pDimensions.x = WINDOWWIDTH - p->pDimensions.w; p->posX = p->pDimensions.x + PLAYER_CENTER_OFFSET_X;}
-
 }
 
 PUBLIC double getPlayerDirection(Player p)

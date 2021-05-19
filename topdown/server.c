@@ -150,7 +150,6 @@ PRIVATE void runServer(void* args)
         if (!UDPreceiveDelay)
         {
             handleUDPreceive(server);
-            
         }
         // Game logic
         if(!Gamelogicdelay)

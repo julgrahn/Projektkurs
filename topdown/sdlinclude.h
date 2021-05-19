@@ -25,8 +25,8 @@
 #include <SDL2/SDL_ttf.h>
 
 
-#define WINDOWWIDTH 704
-#define WINDOWHEIGHT 704
+#define WINDOWWIDTH 1152
+#define WINDOWHEIGHT 768
 #define MAX_BULLETS 10
 #define BUTTON_HEIGHT 64
 #define CONNECT_Y_POS 100

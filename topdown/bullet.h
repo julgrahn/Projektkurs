@@ -1,6 +1,7 @@
 #ifndef BULLET_H
 #define BULLET_H
 #include "sdlinclude.h"
+#include "world.h"
 #include <stdbool.h>
 
 #define BULLET_SPEED 10

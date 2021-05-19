@@ -1,6 +1,8 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 #include "sdlinclude.h"
+#include "world.h"
+#include "weapon.h"
 #include <stdbool.h>
 
 typedef struct Player_type* Player;

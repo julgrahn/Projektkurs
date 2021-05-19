@@ -172,7 +172,7 @@ PUBLIC void damageNetplayer(Networkgamestate a, int playerID, int damage, int sh
     a->aPlayer[playerID].health -= damage;
     if(a->aPlayer[playerID].health <= 0)
     {
-        a->aPlayer[playerID].killed = true;//tillfälligt för dödsljud
+        // a->aPlayer[playerID].killed = true;//tillfälligt för dödsljud
         if(--a->aPlayer[playerID].lives < 0) a->aPlayer[playerID].lives = 0;
         killNetPlayer(a, playerID);
         a->aPlayer[shooterID].kills++;
@@ -249,6 +249,8 @@ PUBLIC int getNetbulletdamage(Networkgamestate a, int playerID, int bulletID)
     return a->aPlayer[playerID].aBullet[bulletID].damage;
 }
 
+
+// för dödsljud
 PUBLIC bool getNetPlayerKilled(Networkgamestate a, int playerID)
 {
     return a->aPlayer[playerID].killed;

@@ -20,7 +20,6 @@ void handleEvents(SDL_Event* event, int* up, int* down, int* right, int* left, b
 void startPrompt(int* playerID, Server* server, bool* host);
 void handleClientTCP(TCPsocket* tcpsock, SDLNet_SocketSet* set, Networkgamestate networkgamestate, Player players[], int playerID);
 
-
 int main(int argc, char* args[])
 {
     // Variables

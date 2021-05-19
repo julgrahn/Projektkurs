@@ -1,7 +1,5 @@
 #include <stdlib.h>
-#include "sdlinclude.h"
 #include "bullet.h"
-#include "world.h"
 #include <stdbool.h>
 #include <math.h>
 #define PUBLIC
