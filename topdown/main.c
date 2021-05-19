@@ -16,7 +16,7 @@ SDL_mutex* mutex;
 
 void renderTestBullets(SDL_Renderer *renderer, Bullet bullets[][MAX_BULLETS], SDL_Texture *testText); // Synligare bullets för testing 
 
-void handleEvents(SDL_Event* event, int* up, int* down, int* right, int* left, bool* isPlaying, SDL_Point *mouse, bool* shooting, bool* newGame, bool *reload);
+void handleEvents(SDL_Event* event, int* up, int* down, int* right, int* left, bool* isPlaying, SDL_Point *mouse, bool* shooting, bool* newGame, bool *reload, bool *mute);
 void startPrompt(int* playerID, Server* server, bool* host);
 void startNewGame(TCPsocket* tcpsock);
 void handleClientTCP(TCPsocket* tcpsock, SDLNet_SocketSet* set, Networkgamestate networkgamestate, Player players[], int playerID);
@@ -45,7 +45,7 @@ int main(int argc, char* args[])
     Bullet bullets[MAX_PLAYERS][MAX_BULLETS];
     SDL_Texture* tiles = NULL;
     SDL_Rect gridTiles[900];   // Kommer innehålla alla 900 rutor från bakgrundsbilden, kan optmiseras.
-    bool isPlaying = true, shooting = false, host = false, connected = false, newGame = false, reload = false;
+    bool isPlaying = true, shooting = false, host = false, connected = false, newGame = false, reload = false, mute = false;
     SDL_Texture* bulletTexture = NULL;
     SDL_Texture* gunFireTexture = NULL;
     SDL_Rect gunFireRect;
@@ -103,7 +103,7 @@ int main(int argc, char* args[])
     buttons[2] = createButton((WINDOWWIDTH / 2) - BUTTON_HEIGHT, QUIT_Y_POS);
     while (isPlaying && !connected)
     {
-        handleEvents(&event, &up, &down, &right, &left, &isPlaying, &mouse, &shooting, &newGame, &reload);
+        handleEvents(&event, &up, &down, &right, &left, &isPlaying, &mouse, &shooting, &newGame, &reload, &mute);
         renderMenu(renderer, connectTextures, hostTextures, quitTextures, buttons, mouse.x, mouse.y, shooting);
 
         if (mouse.x >= (WINDOWWIDTH / 2) - BUTTON_HEIGHT && mouse.x <= (WINDOWWIDTH / 2) + BUTTON_HEIGHT)
@@ -141,11 +141,19 @@ int main(int argc, char* args[])
     while (isPlaying)
     {
         playerTick(players[playerID]);
-        handleEvents(&event, &up, &down, &right, &left, &isPlaying, &mouse, &shooting, &newGame, &reload);
+        handleEvents(&event, &up, &down, &right, &left, &isPlaying, &mouse, &shooting, &newGame, &reload, &mute);
         if (newGame && host)
         {
             startNewGame(&tcpsock);
             newGame = false;
+        }
+        if (mute)
+        {
+            Mix_Volume(-1, 0);
+        }
+        else
+        {
+            Mix_Volume(-1, 5);
         }
         if (isPlayerAlive(players[playerID]))
         {
@@ -185,7 +193,7 @@ int main(int argc, char* args[])
     return 0;
 }
 
-void handleEvents(SDL_Event* event, int* up, int* down, int* right, int* left, bool* isPlaying, SDL_Point *mouse, bool* shooting, bool* newGame, bool *reload)
+void handleEvents(SDL_Event* event, int* up, int* down, int* right, int* left, bool* isPlaying, SDL_Point *mouse, bool* shooting, bool* newGame, bool *reload, bool *mute)
 {
     SDL_GetMouseState(&mouse->x, &mouse->y);
     while (SDL_PollEvent(event))
@@ -220,6 +228,15 @@ void handleEvents(SDL_Event* event, int* up, int* down, int* right, int* left, b
             case SDL_SCANCODE_R:
                 *reload = true;
                 break;
+            case SDL_SCANCODE_M:
+                if(*mute)
+                {
+                    *mute = false;
+                }
+                else
+                {
+                    *mute = true;
+                }
             default:
                 break;
             }
