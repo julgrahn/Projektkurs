@@ -12,6 +12,7 @@
 #define SNAP_DISTANCE 10
 #define PLAYER_CENTER_OFFSET_X 20
 #define PLAYER_CENTER_OFFSET_Y 32
+#define PLAYER_RADIUS 20
 
 struct Player_type {
     int health;
@@ -81,48 +82,25 @@ PUBLIC void movePlayer(Player p, int up, int down, int right, int left, int mous
     p->posX += p->diaSpeed * diagonal * newX + p->speed * !diagonal * newX;
     p->posY += p->diaSpeed * diagonal * newY + p->speed * !diagonal * newY;
 
-    // Set new pixel pos of player
+    wallPlayerCollisionHandling(&(p->posX), &(p->posY), PLAYER_RADIUS);
+    
+    // Collision detection with window
+    if (p->posY-PLAYER_RADIUS <= 0) p->posY = PLAYER_RADIUS;
+    if (p->posY+PLAYER_RADIUS >= WINDOWHEIGHT) p->posY = WINDOWHEIGHT - PLAYER_RADIUS;
+    if (p->posX-PLAYER_RADIUS <= 0) p->posX = PLAYER_RADIUS;
+    if (p->posX+PLAYER_RADIUS >= WINDOWWIDTH) p->posX = WINDOWWIDTH - PLAYER_RADIUS;
+
+    // Update player rectangle
     p->pDimensions.x = round(p->posX)-PLAYER_CENTER_OFFSET_X;
     p->pDimensions.y = round(p->posY)-PLAYER_CENTER_OFFSET_Y;
-    if (getWallCollisionPlayer(p->pDimensions.x, p->pDimensions.y))   // Collision x-led
-    {
-        if (right)
-        {
-            p->posX -= 2;
-            p->pDimensions.x -= 2;
-        }
-        if (left)
-        {
-            p->posX += 2;
-            p->pDimensions.x += 2;
-        }
-    }
-    if (getWallCollisionPlayer(p->pDimensions.x, p->pDimensions.y))   // Collision y-led
-    {
-        if (up)
-        {
-            p->posY += 2;
-            p->pDimensions.y += 2;
-        }
-        if (down)
-        {
-            p->posY -= 2;
-            p->pDimensions.y -= 2;
-        }
-    }
+
     // Update player sprite frame
     p->frameCounter = (p->frameCounter + p->isMoving) % (ANIMATIONSPEED + 1);
     p->frame = (p->frame + ((p->frameCounter / ANIMATIONSPEED) * p->isMoving)) % 4;
     // Rotate player
     p->direction = (atan2(mouseY - p->pDimensions.y - 34, mouseX - p->pDimensions.x - 18) * 180 / M_PI) - 6;
-
+    // Update shooting angle
     p->shotAngle = atan2(mouseY - getPlayerGunbarrelY(p), mouseX - getPlayerGunbarrelX(p));
-    // Collision detection with window
-    if (p->pDimensions.y <= 0) {p->pDimensions.y = 0; p->posY = PLAYER_CENTER_OFFSET_Y;}
-    if (p->pDimensions.y >= WINDOWHEIGHT - p->pDimensions.h) { p->pDimensions.y = WINDOWHEIGHT - p->pDimensions.h; p->posY = p->pDimensions.y + PLAYER_CENTER_OFFSET_Y;}
-    if (p->pDimensions.x <= 0) {p->pDimensions.x = 0; p->posX = PLAYER_CENTER_OFFSET_X;}
-    if (p->pDimensions.x >= WINDOWWIDTH - p->pDimensions.w) { p->pDimensions.x = WINDOWWIDTH - p->pDimensions.w; p->posX = p->pDimensions.x + PLAYER_CENTER_OFFSET_X;}
-
 }
 
 PUBLIC double getPlayerDirection(Player p)
@@ -337,4 +315,9 @@ PUBLIC void resetPlayer(Player a)
 PUBLIC double getPlayerShotAngle(Player a)
 {
     return a->shotAngle;
+}
+
+PUBLIC int getPlayerRadius()
+{
+    return PLAYER_RADIUS;
 }

@@ -72,8 +72,11 @@ PRIVATE void moveBullet(Bullet bullet)
 		{
 			freeBullet(bullet);
 		}
-		if (bullet->dimensions.x < 0 || bullet->dimensions.x > WINDOWWIDTH || bullet->dimensions.y < 0 || bullet->dimensions.y > WINDOWHEIGHT)
+		if (bullet->xPos < -20 || bullet->xPos > WINDOWWIDTH + 20 || bullet->yPos < -20 || bullet->yPos > WINDOWHEIGHT + 20)
 			bullet->active = false;
+
+		// if (bullet->dimensions.x < 0 || bullet->dimensions.x > WINDOWWIDTH || bullet->dimensions.y < 0 || bullet->dimensions.y > WINDOWHEIGHT)
+		// 	bullet->active = false;
 	}
 }
 

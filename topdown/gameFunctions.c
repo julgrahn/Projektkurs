@@ -54,7 +54,6 @@ PUBLIC void updateplayerbullets(Networkgamestate networkgamestate, int playerID,
             }
         }
     }
-    
 }
 
 PUBLIC bool rectCollisionTest(SDL_Rect* a, SDL_Rect* b)
