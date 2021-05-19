@@ -122,7 +122,7 @@ int main(int argc, char* args[])
                 startServer(server);
                 host = true;
                 setButtonPressed(buttons[1], true);
-                connectToServer(ANDREAS_IP, &srvadd, &tcpsock, networkgamestate, &playerID, players, &sd, &connected);
+                connectToServer(LOCAL_IP, &srvadd, &tcpsock, networkgamestate, &playerID, players, &sd, &connected);
                 startUDPreceiveThread(&sd, &p2, bullets, players, &networkgamestate, playerID, &mutex);
                 SDLNet_TCP_AddSocket(set, tcpsock);
             }
