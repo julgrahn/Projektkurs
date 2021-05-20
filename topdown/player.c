@@ -1,7 +1,5 @@
 #include <stdlib.h>
 #include "player.h"
-#include "world.h"
-#include "weapon.h"
 #include <math.h>
 
 #define PUBLIC
@@ -33,8 +31,8 @@ struct Player_type {
     int gunBarrelX, gunBarrelY;
     int lives;
     double shotAngle;
-    bool killed;
-    int killTimer;
+    bool killed;// tillfÃ¤lligt fÃ¶r dÃ¶dsljud
+    int kills;
 };
 
 PUBLIC Player createPlayer(int x, int y)
@@ -61,8 +59,8 @@ PUBLIC Player createPlayer(int x, int y)
     a->newDirection = 0;
     a->gun = createWeapon();
     a->lives = 0;
-    a->killed = false;
-    a->killTimer = 5;
+    a->killed = false;//tillfÃ¤lligt fÃ¶r dÃ¶dsljud
+    a->kills = 0;
     return a;
 }
 
@@ -126,7 +124,6 @@ PUBLIC void movePlayer(Player p, int up, int down, int right, int left, int mous
     if (p->pDimensions.y >= WINDOWHEIGHT - p->pDimensions.h) { p->pDimensions.y = WINDOWHEIGHT - p->pDimensions.h; p->posY = p->pDimensions.y + PLAYER_CENTER_OFFSET_Y;}
     if (p->pDimensions.x <= 0) {p->pDimensions.x = 0; p->posX = PLAYER_CENTER_OFFSET_X;}
     if (p->pDimensions.x >= WINDOWWIDTH - p->pDimensions.w) { p->pDimensions.x = WINDOWWIDTH - p->pDimensions.w; p->posX = p->pDimensions.x + PLAYER_CENTER_OFFSET_X;}
-
 }
 
 PUBLIC double getPlayerDirection(Player p)
@@ -157,6 +154,26 @@ PUBLIC int getPlayerY(Player p)
 PUBLIC void activatePlayer(Player p)
 {
     p->active = true;
+}
+
+PUBLIC void setActivePlayer(Player p, bool newValue)
+{
+    p->active = newValue;
+}
+
+PUBLIC bool isPlayerActive(Player p)
+{
+    return p->active;
+}
+
+PUBLIC int getPlayerKills(Player p)
+{
+    return p->kills;
+}
+
+PUBLIC void setPlayerKills(Player p, int newValue)
+{
+    p->kills = newValue;
 }
 
 PUBLIC void updatePlayerPosition(Player p, int x, int y, int direction, bool alive)
@@ -267,12 +284,7 @@ PUBLIC void snapPlayer(Player p, int x, int y)
 PUBLIC void damagePlayer(Player p, int damage)
 {
     p->health -= damage;
-    if (p->health <= 0)
-    {
-        p->alive = false;
-        p->killed = true; 
-    }
-
+    if (p->health <= 0) p->alive = false;
 }
 
 PUBLIC bool isPlayerAlive(Player p)
@@ -348,7 +360,7 @@ PUBLIC double getPlayerShotAngle(Player a)
     return a->shotAngle;
 }
 
-PUBLIC bool checkKilled(Player a) // experiment för att testa dödsljud
+PUBLIC bool checkKilled(Player a) // experiment fï¿½r att testa dï¿½dsljud
 {
     if (a->killed)
     {
@@ -358,14 +370,7 @@ PUBLIC bool checkKilled(Player a) // experiment för att testa dödsljud
     else return false;
 }
 
-PUBLIC bool killedTimer(Player a)
+PUBLIC void setKilled(Player p, bool n)
 {
-    a->killTimer-1; 
-    if (a->killTimer == 0)
-    {
-        a->killTimer = 5;
-        return false; 
-    }
-    return true; 
-}   
-
+    p->killed = n;
+}
