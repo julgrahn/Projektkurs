@@ -309,3 +309,9 @@ PUBLIC void renderMenu(SDL_Renderer* renderer, SDL_Texture* connectTextures[], S
 
     SDL_RenderPresent(renderer);
 }
+
+PUBLIC void newRound(Mix_Chunk* roundStartSound)
+{
+    resetTileGridMap();
+    Mix_PlayChannel(-1, roundStartSound, 0);
+}

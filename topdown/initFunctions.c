@@ -77,7 +77,8 @@ PUBLIC void loadMedia(SDL_Renderer* renderer, SDL_Rect gTiles[], SDL_Texture** t
                         SDL_Texture** pTexture, SDL_Cursor** cursor, SDL_Texture** bulletTexture, 
                         SDL_Texture** gunFireTexture, SDL_Texture** explosionTexture, 
                         SDL_Texture** bloodTexture, Mix_Chunk** sound,
-                        SDL_Rect explosionTiles[], SDL_Rect bloodTiles[], Mix_Chunk** soundWall, Mix_Chunk** soundDeath)
+                        SDL_Rect explosionTiles[], SDL_Rect bloodTiles[], Mix_Chunk** soundWall,
+                        Mix_Chunk** soundDeath, Mix_Chunk** prepareToFight)
 {
     SDL_Surface* gTilesSurface = IMG_Load("resources/tilemap.png");
     *tiles = SDL_CreateTextureFromSurface(renderer, gTilesSurface);
@@ -155,21 +156,28 @@ PUBLIC void loadMedia(SDL_Renderer* renderer, SDL_Rect gTiles[], SDL_Texture** t
         printf( "Failed to load beat music! SDL_mixer Error: %s\n", Mix_GetError() );
     }
     
-
     //Wall hit soundeffect
     *soundWall = Mix_LoadWAV("resources/thwack-10.wav");
     if (soundWall == NULL)
     {
         printf("Failed to load beat music! SDL_mixer Error: %s\n", Mix_GetError());
     }
-    // Volume
     
-
+    //Killed player sound
     *soundDeath = Mix_LoadWAV("resources/death.wav");
     if (soundDeath == NULL)
     {
         printf("Failed to load beat music! SDL_mixer Error: %s\n", Mix_GetError());
     }
+
+    //Prepare to fight
+    *prepareToFight = Mix_LoadWAV("resources/prepare-to-fight.wav");
+    if (prepareToFight == NULL)
+    {
+        printf("Failed to load beat music! SDL_mixer Error: %s\n", Mix_GetError());
+    }
+
+    //Volume
     Mix_Volume(-1, 5);
     
     

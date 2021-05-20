@@ -35,6 +35,8 @@ int tileGrid[24][36] = {
 
 int tileGridHits[24][36] = { 0 };
 
+int tilegridReset[24][36];
+
 int wallCordStartX;
 int wallCordEndX;
 int wallCordStartY;
@@ -103,7 +105,10 @@ PUBLIC bool getWallCollisionBullet(int x, int y, int h, int w) {
 
                 if (x + w >= wallCordStartX && x <= wallCordEndX && y + h >= wallCordStartY && y <= wallCordEndY)
                 {
-                    if(tileGrid[i][j] == wa || tileGrid[i][j] == wall2 || tileGrid[i][j] == wall3) countWallHits(i, j);  // Ta bort kommentaren om du vill förstöra väggar
+                    if(tileGrid[i][j] == wa || tileGrid[i][j] == wall2 || tileGrid[i][j] == wall3)
+                    {
+                        countWallHits(i, j);  // Ta bort kommentaren om du vill förstöra väggar
+                    }
                     return true;
                 }
             }
@@ -128,4 +133,27 @@ void countWallHits(int i, int j)
       tileGrid[i][j] = br;
     }
     return;
+}
+
+// skapar kopia av orginalkarta
+void initTileGridReset()
+{
+    for (int i = 0; i < tileRows; i++)
+    {
+        for (int j = 0; j < tileColumns; j++)
+        {
+            tilegridReset[i][j] = tileGrid[i][j];
+        }
+    }
+}
+
+void resetTileGridMap()
+{
+    for (int i = 0; i < tileRows; i++)
+    {
+        for (int j = 0; j < tileColumns; j++)
+        {
+            tileGrid[i][j] = tilegridReset[i][j];
+        }
+    }
 }

@@ -59,16 +59,16 @@ PUBLIC Server createServer()
     server->noOfPlayers = 0;
 
     // Hårdkodade startpositioner för spelare
-    server->spawnPoint[0].x = 1;
-    server->spawnPoint[0].y = 1;
-    server->spawnPoint[1].x = WINDOWWIDTH - 1;
-    server->spawnPoint[1].y = 1;
-    server->spawnPoint[2].x = 1;
-    server->spawnPoint[2].y = WINDOWHEIGHT - 1;
-    server->spawnPoint[3].x = WINDOWWIDTH - 1;
-    server->spawnPoint[3].y = WINDOWHEIGHT - 1;
-    server->spawnPoint[4].x = 500;
-    server->spawnPoint[4].y = 500;
+    server->spawnPoint[0].x = 96;
+    server->spawnPoint[0].y = 256;
+    server->spawnPoint[1].x = 550;
+    server->spawnPoint[1].y = 90;
+    server->spawnPoint[2].x = 1056;
+    server->spawnPoint[2].y = 256;
+    server->spawnPoint[3].x = 256;
+    server->spawnPoint[3].y = 672;
+    server->spawnPoint[4].x = 864;
+    server->spawnPoint[4].y = 672;
     for (int i = 0; i < MAX_PLAYERS; i++)
     {
         setNetplayerPos(server->state, i, server->spawnPoint[i].x, server->spawnPoint[i].y);
