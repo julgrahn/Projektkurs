@@ -13,8 +13,7 @@ int getWallCollisionPlayer(int x, int y);
 bool getWallCollisionBullet(int x, int y, int h, int w);
 void countWallHits(int i, int j);
 int getTileGridHits(int x, int y);
-void initTileGridReset(void);
-void resetTileGridMap(void);
-
+void initTileGridReset();
+void resetTileGridMap();
 
 #endif /* world_h */

@@ -23,7 +23,6 @@ void handleClientTCP(TCPsocket* tcpsock, SDLNet_SocketSet* set, Networkgamestate
 int main(int argc, char* args[])
 {
     // Variables
-
     SDL_Event event;
     SDL_Renderer* renderer = NULL;
     UDPsocket sd;
@@ -50,6 +49,7 @@ int main(int argc, char* args[])
     Mix_Chunk* sound;
     Mix_Chunk* soundWall;
     Mix_Chunk* soundDeath;
+    Mix_Chunk* prepareToFight;
     gunFireRect.w = 40;
     gunFireRect.h = 40;
     SDL_Texture* bloodTexture = NULL;
@@ -81,7 +81,7 @@ int main(int argc, char* args[])
     SDL_Texture* hostTextures[3];
     SDL_Texture* quitTextures[3];
     int tcpMessage = 0;
-
+    bool newRoundFlag = false;
 
     // Init functions
     set = SDLNet_AllocSocketSet(1);
@@ -93,8 +93,11 @@ int main(int argc, char* args[])
     initClient(&sd, &p, &p2);
     loadMedia(renderer, gridTiles, &tiles, playerRect, &playerText, &cursor, &bulletTexture, 
             &gunFireTexture, &explosionTexture, &bloodTexture, 
-            &sound, explosionTiles, bloodTiles, &soundWall, &soundDeath, &bloodTexture2, bloodTiles2);
+            &sound, explosionTiles, bloodTiles, &soundWall, &soundDeath, &bloodTexture2, bloodTiles2, &prepareToFight);
+            
 
+    // För ny runda återställ kartan
+    initTileGridReset();
 
     // Synligare bullets för testing 
     SDL_Texture* bulletTEST;
@@ -145,13 +148,20 @@ int main(int argc, char* args[])
     // Main loop
     while (isPlaying)
     {
-        playerTick(players[playerID]);
-        handleEvents(&event, &up, &down, &right, &left, &isPlaying, &mouse, &shooting, &reload, &mute, &tcpMessage, &scoreScreen);
-        if (tcpMessage && host)
+        //Om ny runda
+        if (getRoundState(networkgamestate) == 1)
         {
-            sendTCPtoServer(&tcpsock, tcpMessage);
-            tcpMessage = 0;
+            if (newRoundFlag)
+            {
+                newRound(prepareToFight);
+                newRoundFlag = false;
+            }
         }
+        else
+        {
+            newRoundFlag = true;
+        }
+        //Ljud av/på
         if (mute)
         {
             Mix_Volume(-1, 0);
@@ -159,6 +169,14 @@ int main(int argc, char* args[])
         else
         {
             Mix_Volume(-1, 5);
+        }
+        //Spel
+        playerTick(players[playerID]);
+        handleEvents(&event, &up, &down, &right, &left, &isPlaying, &mouse, &shooting, &reload, &mute, &tcpMessage, &scoreScreen);
+        if (tcpMessage && host)
+        {
+            sendTCPtoServer(&tcpsock, tcpMessage);
+            tcpMessage = 0;
         }
         if (isPlayerAlive(players[playerID]))
         {
