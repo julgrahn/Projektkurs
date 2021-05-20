@@ -55,10 +55,12 @@ int main(int argc, char* args[])
     gunFireRect.w = 40;
     gunFireRect.h = 40;
     SDL_Texture* bloodTexture = NULL;
+    SDL_Texture* bloodTexture2 = NULL;
     SDL_Rect bloodRect;
     bloodRect.w = 64;
     bloodRect.h = 64;
     SDL_Rect bloodTiles[48];
+    SDL_Rect bloodTiles2[48];
     SDL_Texture* explosionTexture = NULL;
     SDL_Rect explosionRect;
     explosionRect.w = 40;
@@ -88,7 +90,7 @@ int main(int argc, char* args[])
     initClient(&sd, &p, &p2);
     loadMedia(renderer, gridTiles, &tiles, playerRect, &playerText, &cursor, &bulletTexture, 
             &gunFireTexture, &explosionTexture, &bloodTexture, 
-            &sound, explosionTiles, bloodTiles, &soundWall, &soundDeath);
+            &sound, explosionTiles, bloodTiles, &soundWall, &soundDeath, &bloodTexture2, bloodTiles2);
 
 
     // Synligare bullets för testing 
@@ -169,7 +171,7 @@ int main(int argc, char* args[])
         renderGame(renderer, tiles, gridTiles, bullets, bulletTexture, players, playerText, 
                     playerRect, &playerRotationPoint, gunFireTexture, gunFireRect, 
                     explosionTexture, explosionRect,  &muzzleRotationPoint, bloodTexture, 
-                    bloodRect, sound, explosionTiles, bloodTiles, soundWall, soundDeath);
+                    bloodRect, sound, explosionTiles, bloodTiles, soundWall, soundDeath, bloodTexture2, bloodTiles2);
         
         renderTestBullets(renderer, bullets, bulletTEST); // Synligare bullets för testing    
 

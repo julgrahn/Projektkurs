@@ -34,6 +34,7 @@ struct Player_type {
     int lives;
     double shotAngle;
     bool killed;
+    int killTimer;
 };
 
 PUBLIC Player createPlayer(int x, int y)
@@ -61,6 +62,7 @@ PUBLIC Player createPlayer(int x, int y)
     a->gun = createWeapon();
     a->lives = 0;
     a->killed = false;
+    a->killTimer = 5;
     return a;
 }
 
@@ -351,9 +353,19 @@ PUBLIC bool checkKilled(Player a) // experiment för att testa dödsljud
     if (a->killed)
     {
         a->killed = false;
-        printf("killed2\n");
         return true;
     }
     else return false;
 }
+
+PUBLIC bool killedTimer(Player a)
+{
+    a->killTimer-1; 
+    if (a->killTimer == 0)
+    {
+        a->killTimer = 5;
+        return false; 
+    }
+    return true; 
+}   
 
