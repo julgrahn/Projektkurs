@@ -33,6 +33,10 @@ int tileGrid[24][36] = {
     {br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br},
 };
 
+tilegridReset[24][36];
+
+
+
 int tileGridHits[24][36] = { 0 };
 
 int wallCordStartX;
@@ -128,4 +132,28 @@ void countWallHits(int i, int j)
       tileGrid[i][j] = br;
     }
     return;
+}
+
+// skapar kopia av orginalkarta
+void initTileGridReset()
+{
+    for (int i = 0; i < tileRows; i++)
+    {
+        for (int j = 0; j < tileColumns; j++)
+        {
+            tilegridReset[i][j] = tileGrid[i][j];
+        }
+    }
+}
+
+
+void resetTileGridMap()
+{
+    for (int i = 0; i < tileRows; i++)
+    {
+        for (int j = 0; j < tileColumns; j++)
+        {
+            tileGrid[i][j] = tilegridReset[i][j];
+        }
+    }
 }
