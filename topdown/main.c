@@ -18,8 +18,6 @@ void renderTestBullets(SDL_Renderer *renderer, Bullet bullets[][MAX_BULLETS], SD
 
 void handleEvents(SDL_Event* event, int* up, int* down, int* right, int* left, bool* isPlaying, SDL_Point *mouse, bool* shooting, bool* newGame, bool *reload);
 void startPrompt(int* playerID, Server* server, bool* host);
-void startNewGame(TCPsocket* tcpsock);
-void handleClientTCP(TCPsocket* tcpsock, SDLNet_SocketSet* set, Networkgamestate networkgamestate, Player players[], int playerID);
 
 
 int main(int argc, char* args[])
