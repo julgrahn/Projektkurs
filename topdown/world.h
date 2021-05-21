@@ -4,6 +4,11 @@
 #include <stdio.h>
 #include <stdbool.h>
 
+#define TILE_ROWS 22
+#define TILE_COLUMNS 22
+#define TILE_WIDTH 32
+#define TILE_HEIGHT 32
+
 int getTileRows();
 int getTileColumns();
 int getTileWidth();

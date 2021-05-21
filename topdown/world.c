@@ -5,7 +5,7 @@
 #define PRIVATE static
 
 PRIVATE void wallColMultiAngleCompensation(double *xPos, double *yPos, int xWall, int yWall, int minDistance);
-PRIVATE void wallColSignleAngleCompensation(double *pos, int wallStart, int wallEnd, int minDistance);
+PRIVATE void wallColSingleAngleCompensation(double *pos, int wallStart, int wallEnd, int minDistance);
 
 enum material { bricks = 120, wall = 186, truck = 102, wall2 = 246, wall3 = 216 };
 // enum material { bricks = 222, wall = 186, truck = 102, wall2 = 246, wall3 = 216 };
@@ -86,11 +86,11 @@ PUBLIC void wallPlayerCollisionHandling(double *posX, double *posY, int r)
 
                 // X-AXIS
                 if(*posX+r > wallCordStartX && *posX-r < wallCordEndX && *posY > wallCordStartY && *posY < wallCordEndY)
-                    wallColSignleAngleCompensation(posX, wallCordStartX, wallCordEndX, r);
+                    wallColSingleAngleCompensation(posX, wallCordStartX, wallCordEndX, r);
                 
                 // Y-AXIS
                 else if(*posY+r > wallCordStartY && *posY-r < wallCordEndY && *posX > wallCordStartX && *posX < wallCordEndX)
-                    wallColSignleAngleCompensation(posY, wallCordStartY, wallCordEndY, r);
+                    wallColSingleAngleCompensation(posY, wallCordStartY, wallCordEndY, r);
                 
                 // TOP LEFT
                 else if(*posX < wallCordStartX && *posY < wallCordStartY)
@@ -112,7 +112,7 @@ PUBLIC void wallPlayerCollisionHandling(double *posX, double *posY, int r)
     }
 }
 
-PRIVATE void wallColSignleAngleCompensation(double *pos, int wallStart, int wallEnd, int minDistance)
+PRIVATE void wallColSingleAngleCompensation(double *pos, int wallStart, int wallEnd, int minDistance)
 {
     double delta;
     delta = fabs(*pos - wallStart);
@@ -134,7 +134,8 @@ PRIVATE void wallColMultiAngleCompensation(double *xPos, double *yPos, int xWall
     }
 }
 
-PUBLIC bool getWallCollisionBullet(int x, int y, int h, int w) {
+PUBLIC bool getWallCollisionBullet(int x, int y, int h, int w)
+{
     for (int i = 0; i < tileRows; i++)
     {
         for (int j = 0; j < tileColumns; j++)

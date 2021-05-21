@@ -131,6 +131,20 @@ PUBLIC void loadMedia(SDL_Renderer* renderer, SDL_Rect gTiles[], SDL_Texture** t
             explosionTiles[i * 11 + j].h = 93;
         }
     }
+    explosionTiles[45].x = 147-25;
+    explosionTiles[45].y = 437-25;
+    explosionTiles[45].w = 50;
+    explosionTiles[45].h = 50;
+    
+    explosionTiles[34].x = 147-25;
+    explosionTiles[34].y = 340-25;
+    explosionTiles[34].w = 50;
+    explosionTiles[34].h = 50;
+
+    explosionTiles[23].x = 147-25;
+    explosionTiles[23].y = 242-25;
+    explosionTiles[23].w = 50;
+    explosionTiles[23].h = 50;
 
     // Blod
     SDL_Surface* bloodSurface = IMG_Load("resources/blood - right 1.png");
@@ -158,7 +172,7 @@ PUBLIC void loadMedia(SDL_Renderer* renderer, SDL_Rect gTiles[], SDL_Texture** t
     Mix_Volume(-1, 20);
 }
 
-PUBLIC void initGameHUD(SDL_Renderer *renderer, SDL_Rect textRect[], SDL_Texture **textTexture, SDL_Rect *healthBar, SDL_Rect *reloadTimer)
+PUBLIC void initGameHUD(SDL_Renderer *renderer, SDL_Rect textRect[], SDL_Texture **textTexture)
 {
     TTF_Init();
     TTF_Font *font;
@@ -173,8 +187,6 @@ PUBLIC void initGameHUD(SDL_Renderer *renderer, SDL_Rect textRect[], SDL_Texture
         textSurface = TTF_RenderText_Solid(font,"0123456789|HP: ",color);
         *textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
         SDL_FreeSurface(textSurface);
-        healthBar->h = 10, healthBar->w = 150, healthBar->x = 100, healthBar->y = 7;
-        reloadTimer->x = 35, reloadTimer->y = 2, reloadTimer->w = 24; 
         int width, height;
         TTF_SizeText(font, "0123456789|HP: ", &width, &height);
         for(int i = 0; i < 11; i++)

@@ -43,11 +43,11 @@ PUBLIC void updateplayerbullets(Networkgamestate networkgamestate, int playerID,
         {
             for(int j = 0; j < MAX_BULLETS; j++)
             {
-                if(!isNetbulletActive(networkgamestate, i, j) && isBulletActive(*((bullets+i*MAX_BULLETS) + j)))
+                if(!isNetbulletActive(networkgamestate, i, j) && isBulletActive(*((bullets+i*MAX_BULLETS) + j)) && netbulletStatus(networkgamestate, i, j))
                 {
                     freeBullet(*((bullets+i*MAX_BULLETS) + j));
                 }
-                else if(isNetbulletActive(networkgamestate, i, j) && !isBulletActive(*((bullets+i*MAX_BULLETS) + j)))
+                else if(isNetbulletActive(networkgamestate, i, j) && !isBulletActive(*((bullets+i*MAX_BULLETS) + j)) && !getBulletHitValue(*((bullets+i*MAX_BULLETS) + j)))
                 {
                     spawnBullet(*((bullets+i*MAX_BULLETS) + j), getNetBulletX(networkgamestate, i, j), getNetBulletY(networkgamestate, i, j), getNetbulletAngle(networkgamestate, i, j), 0);
                 }

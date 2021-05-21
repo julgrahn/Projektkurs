@@ -115,8 +115,7 @@ PUBLIC void setNetPlayerAlive(Networkgamestate a, int n, bool alive)
 
 PUBLIC void setNetBullets(Networkgamestate a, int playerID, Bullet bullets[])
 {
-    int i;
-    for (i = 0; i < MAX_BULLETS; i++)
+    for (int i = 0; i < MAX_BULLETS; i++)
     {
         a->aPlayer[playerID].aBullet[i].control_active = (a->aPlayer[playerID].aBullet[i].control_active |= 0b01) * isBulletActive(bullets[i]) + (a->aPlayer[playerID].aBullet[i].control_active &= 0b10) * !isBulletActive(bullets[i]);
         a->aPlayer[playerID].aBullet[i].angle = getBulletDirection(bullets[i])*10000;
