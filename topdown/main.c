@@ -20,10 +20,6 @@ SDL_mutex* mutex;
 void renderTestBullets(SDL_Renderer *renderer, Bullet bullets[][MAX_BULLETS], SDL_Texture *testText); // Synligare bullets för testing 
 
 void handleEvents(SDL_Event* event, int* up, int* down, int* right, int* left, bool* isPlaying, SDL_Point *mouse, bool* shooting, bool* newGame, bool *reload);
-void startNewGame(TCPsocket* tcpsock);
-void startNewGame(TCPsocket* tcpsock);
-void startNewGame(TCPsocket* tcpsock);
-void startNewGame(TCPsocket* tcpsock);
 void handleClientTCP(TCPsocket* tcpsock, SDLNet_SocketSet* set, Networkgamestate networkgamestate, Player players[], int playerID);
 void connectPrompt(char* ip);
 
@@ -139,6 +135,11 @@ int main(int argc, char* args[])
             }
         }
     }
+      
+    // Main loop
+    while (isPlaying)
+    {
+        SDL_Delay(1000 / 60);
         //Om ny runda
         if (getRoundState(networkgamestate) == 1)
         {
@@ -162,9 +163,7 @@ int main(int argc, char* args[])
             Mix_Volume(-1, 5);
         }
         //Spel
-    // Main loop
-    while (isPlaying)
-    {
+
         playerTick(players[playerID]);
         handleEvents(&event, &up, &down, &right, &left, &isPlaying, &mouse, &shooting, &reload, &mute, &tcpMessage, &scoreScreen);
         if (tcpMessage && host)
