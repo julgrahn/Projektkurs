@@ -7,43 +7,47 @@
 PRIVATE void wallColMultiAngleCompensation(double *xPos, double *yPos, int xWall, int yWall, int minDistance);
 PRIVATE void wallColSingleAngleCompensation(double *pos, int wallStart, int wallEnd, int minDistance);
 
-enum material { bricks = 120, wall = 186, truck = 102, wall2 = 246, wall3 = 216 };
-// enum material { bricks = 222, wall = 186, truck = 102, wall2 = 246, wall3 = 216 };
+enum material { sp = 121, br = 120, wa = 186, wall2 = 246, wall3 = 216 };
+// enum material { br = 222, wall = 186, truck = 102, wall2 = 246, wall3 = 216 };
 
-int tileGrid[22][22] = {
-    {bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks},
-    {bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks},
-    {bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks},
-    {bricks,bricks,bricks,bricks,wall,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,wall,bricks,bricks,bricks,bricks},
-    {bricks,bricks,bricks,bricks,wall,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,wall,bricks,bricks,bricks,bricks},
-    {bricks,bricks,bricks,bricks,wall,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,wall,bricks,bricks,bricks,bricks},
-    {bricks,bricks,wall,wall,wall,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,wall,wall,wall,bricks,bricks},
-    {bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks},
-    {bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks},
-    {bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks},
-    {bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks},
-    {bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks},
-    {bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks},
-    {bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks},
-    {bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks},
-    {bricks,bricks,wall,wall,wall,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,wall,wall,wall,bricks,bricks},
-    {bricks,bricks,bricks,bricks,wall,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,wall,bricks,bricks,bricks,bricks},
-    {bricks,bricks,bricks,bricks,wall,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,wall,bricks,bricks,bricks,bricks},
-    {bricks,bricks,bricks,bricks,wall,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,wall,bricks,bricks,bricks,bricks},
-    {bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks},
-    {bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks},
-    {bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks},
+int tileGrid[24][36] = {
+    {br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,wa,br,br,br,br,br,br,br,br,br,br,br},
+    {br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,wa,br,br,br,br,br,br,br,br,br,br,br},
+    {br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,sp,br,br,sp,br,br,br,br,wa,wa,br,br,br,br,br,br,br,br,br,br,br},
+    {br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,sp,br,br,sp,br,br,br,br,wa,br,br,br,br,br,br,br,br,br,br,br,br},
+    {br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,sp,sp,sp,sp,br,br,br,br,wa,br,br,br,br,br,br,br,br,br,br,br,br},
+    {br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,wa,br,br,br,br,br,br,br,br,br},
+    {br,br,sp,sp,sp,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,wa,br,br,br,br,sp,sp,sp,br,br},
+    {br,br,br,br,sp,br,br,br,wa,wa,wa,wa,br,br,br,br,br,br,br,br,br,br,br,br,br,wa,wa,br,br,br,br,sp,br,br,br,br},
+    {br,br,br,br,sp,br,br,br,br,br,wa,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,sp,br,br,br,br},
+    {br,br,sp,sp,sp,br,br,br,br,br,wa,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,sp,sp,sp,br,br},
+    {br,br,br,br,br,br,br,br,br,br,wa,br,br,br,br,br,br,br,br,wa,wa,wa,wa,br,br,br,br,br,br,br,br,br,br,br,br,br},
+    {br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,wa,br,br,br,br,br,wa,wa,wa,wa,wa,wa,wa,br,br,br,br,br,br,br},
+    {br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,wa,br,br,br,br,br,br,br,br,br,wa,br,br,br,br,br,br,br,br,br},
+    {wa,wa,wa,wa,wa,wa,br,br,br,br,br,br,wa,wa,wa,wa,wa,br,br,br,br,br,br,br,br,br,wa,br,br,br,br,br,br,br,br,br},
+    {br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,wa,br,br,br,wa,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br},
+    {br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,wa,br,br,br,wa,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br},
+    {br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,wa,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br},
+    {br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br},
+    {br,br,br,br,br,br,br,br,br,br,br,br,br,br,wa,wa,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br},
+    {br,br,br,br,br,br,sp,sp,sp,sp,br,br,br,br,br,wa,br,br,br,br,br,br,br,br,br,sp,sp,sp,sp,br,br,br,br,br,br,br},
+    {br,br,br,br,br,br,sp,br,br,sp,br,br,br,br,br,wa,wa,wa,wa,br,br,br,br,br,br,sp,br,br,sp,br,br,br,br,br,br,br},
+    {br,br,br,br,br,br,sp,br,br,sp,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,sp,br,br,sp,br,br,br,br,br,br,br},
+    {br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br},
+    {br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br},
 };
 
-int tileGridHits[22][22] = { 0 };
+int tileGridHits[24][36] = { 0 };
+
+int tilegridReset[24][36];
 
 int wallCordStartX;
 int wallCordEndX;
 int wallCordStartY;
 int wallCordEndY;
 
-int tileRows = 22;
-int tileColumns = 22;
+int tileRows = 24;
+int tileColumns = 36;
 
 int tileWidth = 32;
 int tileHeight = 32;
@@ -77,7 +81,7 @@ PUBLIC void wallPlayerCollisionHandling(double *posX, double *posY, int r)
     {
         for (int j = 0; j < tileColumns; j++)
         {
-            if (tileGrid[i][j] != bricks)
+            if (tileGrid[i][j] != br)
             {
                 wallCordStartX = j * 32;
                 wallCordEndX = j * 32 + 32;
@@ -140,7 +144,7 @@ PUBLIC bool getWallCollisionBullet(int x, int y, int h, int w)
     {
         for (int j = 0; j < tileColumns; j++)
         {
-            if (tileGrid[i][j] != bricks)
+            if (tileGrid[i][j] != br)
             {
                 wallCordStartX = j * 32;
                 wallCordEndX = j * 32 + 32;
@@ -149,7 +153,10 @@ PUBLIC bool getWallCollisionBullet(int x, int y, int h, int w)
 
                 if (x + w >= wallCordStartX && x <= wallCordEndX && y + h >= wallCordStartY && y <= wallCordEndY)
                 {
-                    countWallHits(i, j);  // Ta bort kommentaren om du vill förstöra väggar
+                    if(tileGrid[i][j] == wa || tileGrid[i][j] == wall2 || tileGrid[i][j] == wall3)
+                    {
+                        countWallHits(i, j);  // Ta bort kommentaren om du vill förstöra väggar
+                    }
                     return true;
                 }
             }
@@ -169,9 +176,32 @@ void countWallHits(int i, int j)
     {
         tileGrid[i][j] = wall3;
     }
-    //else if (tileGridHits[i][j] == 200)
-    //{
-    //   tileGrid[i][j] = bricks;
-    //}
+    else if (tileGridHits[i][j] == 200)
+    {
+      tileGrid[i][j] = br;
+    }
     return;
+}
+
+// skapar kopia av orginalkarta
+void initTileGridReset()
+{
+    for (int i = 0; i < tileRows; i++)
+    {
+        for (int j = 0; j < tileColumns; j++)
+        {
+            tilegridReset[i][j] = tileGrid[i][j];
+        }
+    }
+}
+
+void resetTileGridMap()
+{
+    for (int i = 0; i < tileRows; i++)
+    {
+        for (int j = 0; j < tileColumns; j++)
+        {
+            tileGrid[i][j] = tilegridReset[i][j];
+        }
+    }
 }

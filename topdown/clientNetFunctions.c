@@ -121,8 +121,10 @@ PUBLIC void handleClientTCP(TCPsocket* tcpsock, SDLNet_SocketSet* set, Networkga
     }
 }
 
-PUBLIC void startNewGame(TCPsocket* tcpsock)
+// PUBLIC void startNewGame(TCPsocket* tcpsock)
+
+
+void sendTCPtoServer(TCPsocket* tcpsock, int message)
 {
-    int message = 1;
     SDLNet_TCP_Send(*tcpsock, &message, sizeof(message));
 }

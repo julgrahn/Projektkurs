@@ -1,7 +1,5 @@
 #include <stdlib.h>
 #include "player.h"
-#include "world.h"
-#include "weapon.h"
 #include <math.h>
 
 #define PUBLIC
@@ -34,6 +32,8 @@ struct Player_type {
     int gunBarrelX, gunBarrelY;
     int lives;
     double shotAngle;
+    bool killed;// tillfälligt för dödsljud
+    int kills;
 };
 
 PUBLIC Player createPlayer(int x, int y)
@@ -60,6 +60,8 @@ PUBLIC Player createPlayer(int x, int y)
     a->newDirection = 0;
     a->gun = createWeapon();
     a->lives = 0;
+    a->killed = false;//tillfälligt för dödsljud
+    a->kills = 0;
     return a;
 }
 
@@ -131,6 +133,26 @@ PUBLIC int getPlayerY(Player p)
 PUBLIC void activatePlayer(Player p)
 {
     p->active = true;
+}
+
+PUBLIC void setActivePlayer(Player p, bool newValue)
+{
+    p->active = newValue;
+}
+
+PUBLIC bool isPlayerActive(Player p)
+{
+    return p->active;
+}
+
+PUBLIC int getPlayerKills(Player p)
+{
+    return p->kills;
+}
+
+PUBLIC void setPlayerKills(Player p, int newValue)
+{
+    p->kills = newValue;
 }
 
 PUBLIC void updatePlayerPosition(Player p, int x, int y, int direction, bool alive)
@@ -320,4 +342,18 @@ PUBLIC double getPlayerShotAngle(Player a)
 PUBLIC int getPlayerRadius()
 {
     return PLAYER_RADIUS;
+}
+PUBLIC bool checkKilled(Player a) // experiment f�r att testa d�dsljud
+{
+    if (a->killed)
+    {
+        a->killed = false;
+        return true;
+    }
+    else return false;
+}
+
+PUBLIC void setKilled(Player p, bool n)
+{
+    p->killed = n;
 }

@@ -12,12 +12,14 @@ typedef struct NetworkPlayer_type{
     short direction;
     short posX, posY;
     Uint8 status;   // bitpattern: 2 - alive, 1 - active, 0 - invulnerable
-    Sint8 lives, health;  
+    Sint8 lives, health, kills;
+    bool killed;//tillfälligt för dödsljud
     Networkbullet aBullet[MAX_BULLETS];
 }Networkplayer;
 
 struct Networkgamestate_type {
     Networkplayer aPlayer[5];
+    Uint8 roundState;
 };
 
 PUBLIC Networkgamestate createNetworkgamestate()
@@ -30,18 +32,31 @@ PUBLIC Networkgamestate createNetworkgamestate()
         a->aPlayer[i].health = 100;
         a->aPlayer[i].lives = 0;
         a->aPlayer[i].status = 0;
+        a->aPlayer[i].killed = false;
+        a->aPlayer[i].kills = 0;
         for (int j = 0; j < MAX_BULLETS; j++)
         {
             a->aPlayer[i].aBullet[j].control_active = 0;
         }
+
+        a->roundState = 0;
     }
     return a;
 }
 
-
 PUBLIC Uint32 getGamestatesize()
 {
     return sizeof(struct Networkgamestate_type);
+}
+
+PUBLIC void setRoundState(Networkgamestate a, int newValue)
+{
+    a->roundState = newValue;
+}
+
+PUBLIC Uint8 getRoundState(Networkgamestate a)
+{
+    return a->roundState;
 }
 
 PUBLIC int getNetPlayerX(Networkgamestate a, int n)
@@ -52,6 +67,11 @@ PUBLIC int getNetPlayerX(Networkgamestate a, int n)
 PUBLIC int getNetPlayerY(Networkgamestate a, int n)
 {
     return a->aPlayer[n].posY;
+}
+
+PUBLIC void setNetPlayerKills(Networkgamestate a, int n, int newValue)
+{
+    a->aPlayer[n].kills = newValue;
 }
 
 PUBLIC void setNetPlayer(Networkgamestate a, int n, Player b)
@@ -78,6 +98,11 @@ PUBLIC void reviveNetPlayer(Networkgamestate a, int n)
     a->aPlayer[n].status |= 0b100;
 }
 
+PUBLIC int getNetPlayerKills(Networkgamestate a, int n)
+{
+    return a->aPlayer[n].kills;
+}
+
 PUBLIC bool isNetPlayerActive(Networkgamestate a, int n)
 {
     return (a->aPlayer[n].status & 0b010) >> 1; 
@@ -86,6 +111,7 @@ PUBLIC bool isNetPlayerActive(Networkgamestate a, int n)
 PUBLIC void freeNetPlayer(Networkgamestate a, int n)
 {
     a->aPlayer[n].status &= 0b101;
+    a->aPlayer[n].kills = 0;
 }
 
 PUBLIC void activateNetPlayer(Networkgamestate a, int n)
@@ -140,13 +166,15 @@ PUBLIC bool isNetbulletActive(Networkgamestate a, int playerID, int bulletNo)
     return a->aPlayer[playerID].aBullet[bulletNo].control_active & 0b01;
 }
 
-PUBLIC void damageNetplayer(Networkgamestate a, int playerID, int damage)
+PUBLIC void damageNetplayer(Networkgamestate a, int playerID, int damage, int shooterID)
 {
     a->aPlayer[playerID].health -= damage;
     if(a->aPlayer[playerID].health <= 0)
     {
+        // a->aPlayer[playerID].killed = true;//tillfälligt för dödsljud
         if(--a->aPlayer[playerID].lives < 0) a->aPlayer[playerID].lives = 0;
         killNetPlayer(a, playerID);
+        a->aPlayer[shooterID].kills++;
     }
 }
 
@@ -218,4 +246,19 @@ PUBLIC double getNetbulletAngle(Networkgamestate a, int playerID, int bulletID)
 PUBLIC int getNetbulletdamage(Networkgamestate a, int playerID, int bulletID)
 {
     return a->aPlayer[playerID].aBullet[bulletID].damage;
+}
+
+
+// för dödsljud
+PUBLIC bool getNetPlayerKilled(Networkgamestate a, int playerID)
+{
+    return a->aPlayer[playerID].killed;
+}
+
+PUBLIC void resetPlayerKilled(Networkgamestate a, int playerID)
+{
+    if(a->aPlayer[playerID].killed){
+        printf("skicka paket\n");
+    }
+    a->aPlayer[playerID].killed = false;
 }

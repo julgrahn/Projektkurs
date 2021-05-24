@@ -16,14 +16,12 @@ SDL_mutex* mutex;
 
 void renderTestBullets(SDL_Renderer *renderer, Bullet bullets[][MAX_BULLETS], SDL_Texture *testText); // Synligare bullets för testing 
 
-void handleEvents(SDL_Event* event, int* up, int* down, int* right, int* left, bool* isPlaying, SDL_Point *mouse, bool* shooting, bool* newGame, bool *reload);
+void handleEvents(SDL_Event* event, int* up, int* down, int* right, int* left, bool* isPlaying, SDL_Point *mouse, bool* shooting, bool *reload, bool *mute, int *tcpMessage, bool* scoreScreen);
 void startPrompt(int* playerID, Server* server, bool* host);
-
 
 int main(int argc, char* args[])
 {
     // Variables
-
     SDL_Event event;
     SDL_Renderer* renderer = NULL;
     UDPsocket sd;
@@ -42,15 +40,22 @@ int main(int argc, char* args[])
     Bullet bullets[MAX_PLAYERS][MAX_BULLETS];
     SDL_Texture* tiles = NULL;
     SDL_Rect gridTiles[900];   // Kommer innehålla alla 900 rutor från bakgrundsbilden, kan optmiseras.
-    bool isPlaying = true, shooting = false, host = false, connected = false, newGame = false, reload = false;
+    bool isPlaying = true, shooting = false, host = false, connected = false, reload = false, mute = false, scoreScreen = false;
     SDL_Texture* bulletTexture = NULL;
     SDL_Texture* gunFireTexture = NULL;
     Mix_Chunk* sound;
+    Mix_Chunk* soundWall;
+    Mix_Chunk* soundDeath;
+    Mix_Chunk* prepareToFight;
     SDL_Texture* bloodTexture = NULL;
     SDL_Rect bloodTiles[48];
     SDL_Texture* explosionTexture = NULL;
     SDL_Texture *textTexture;
     SDL_Rect textRect[15];
+    SDL_Rect aRoundStateRect[3];
+    SDL_Texture* roundStateTexture;
+    SDL_Rect aScoreRect[4];
+    SDL_Texture* scoreTexture;
     SDL_Rect explosionTiles[121]; // Rutor från explosions.png
     int up = 0, down = 0, left = 0, right = 0;
     Networkgamestate networkgamestate = createNetworkgamestate();
@@ -58,20 +63,24 @@ int main(int argc, char* args[])
     SDL_Texture* connectTextures[3];
     SDL_Texture* hostTextures[3];
     SDL_Texture* quitTextures[3];
-
+    int tcpMessage = 0;
+    bool newRoundFlag = false;
 
     // Init functions
     set = SDLNet_AllocSocketSet(1);
     mutex = SDL_CreateMutex();
-    if (!initSDL(&renderer, &sound)) return 1;
+    if (!initSDL(&renderer, &sound, &soundWall, &soundDeath)) return 1;
     initGameObjects(players, bullets);
-    initGameHUD(renderer, textRect, &textTexture);
+    initGameHUD(renderer, textRect, &textTexture, aScoreRect, &scoreTexture, aRoundStateRect, &roundStateTexture);
     loadMenu(renderer, connectTextures, hostTextures, quitTextures);
     initClient(&sd, &p, &p2);
     loadMedia(renderer, gridTiles, &tiles, playerRect, &playerText, &cursor, &bulletTexture, 
             &gunFireTexture, &explosionTexture, &bloodTexture, 
-            &sound, explosionTiles, bloodTiles);
+            &sound, explosionTiles, bloodTiles, &soundWall, &soundDeath,
+            &prepareToFight);
 
+    // För ny runda återställ kartan
+    initTileGridReset();
 
     // Synligare bullets för testing 
     SDL_Texture* bulletTEST;
@@ -85,7 +94,7 @@ int main(int argc, char* args[])
     buttons[2] = createButton((WINDOWWIDTH / 2) - BUTTON_HEIGHT, QUIT_Y_POS);
     while (isPlaying && !connected)
     {
-        handleEvents(&event, &up, &down, &right, &left, &isPlaying, &mouse, &shooting, &newGame, &reload);
+        handleEvents(&event, &up, &down, &right, &left, &isPlaying, &mouse, &shooting, &reload, &mute, &tcpMessage, &scoreScreen);
         renderMenu(renderer, connectTextures, hostTextures, quitTextures, buttons, mouse.x, mouse.y, shooting);
 
         if (mouse.x >= (WINDOWWIDTH / 2) - BUTTON_HEIGHT && mouse.x <= (WINDOWWIDTH / 2) + BUTTON_HEIGHT)
@@ -122,12 +131,35 @@ int main(int argc, char* args[])
     // Main loop
     while (isPlaying)
     {
-        playerTick(players[playerID]);
-        handleEvents(&event, &up, &down, &right, &left, &isPlaying, &mouse, &shooting, &newGame, &reload);
-        if (newGame && host)
+        //Om ny runda
+        if (getRoundState(networkgamestate) == 1)
         {
-            startNewGame(&tcpsock);
-            newGame = false;
+            if (newRoundFlag)
+            {
+                newRound(prepareToFight);
+                newRoundFlag = false;
+            }
+        }
+        else
+        {
+            newRoundFlag = true;
+        }
+        //Ljud av/på
+        if (mute)
+        {
+            Mix_Volume(-1, 0);
+        }
+        else
+        {
+            Mix_Volume(-1, 5);
+        }
+        //Spel
+        playerTick(players[playerID]);
+        handleEvents(&event, &up, &down, &right, &left, &isPlaying, &mouse, &shooting, &reload, &mute, &tcpMessage, &scoreScreen);
+        if (tcpMessage && host)
+        {
+            sendTCPtoServer(&tcpsock, tcpMessage);
+            tcpMessage = 0;
         }
         SDL_LockMutex(mutex);
         if (isPlayerAlive(players[playerID]))
@@ -142,6 +174,7 @@ int main(int argc, char* args[])
                 moveOtherPlayers(players[i]);
             }
         }
+        //printf("%d\n", getRoundState(networkgamestate)); // felsökningsprintf
         simulateBullets(bullets);
         setNetPlayer(networkgamestate, playerID, players[playerID]);
         setNetBullets(networkgamestate, playerID, bullets[playerID]);
@@ -151,11 +184,18 @@ int main(int argc, char* args[])
         SDL_RenderClear(renderer);
 
         renderGame(renderer, tiles, gridTiles, bullets, bulletTexture, players, playerText, playerRect, 
-                    gunFireTexture, explosionTexture, bloodTexture, sound, explosionTiles, bloodTiles);
+                    gunFireTexture, explosionTexture, bloodTexture, sound, explosionTiles, bloodTiles, soundWall, soundDeath);
         
         renderTestBullets(renderer, bullets, bulletTEST); // Synligare bullets för testing    
 
         renderHUD(renderer, players[playerID], textRect, textTexture);
+        // renderGame(renderer, tiles, gridTiles, bullets, bulletTexture, players, playerText, 
+        //             playerRect, &playerRotationPoint, gunFireTexture, gunFireRect, 
+        //             explosionTexture, explosionRect,  &muzzleRotationPoint, bloodTexture, 
+        //             bloodRect, sound, explosionTiles, bloodTiles, soundWall, soundDeath);
+          
+        renderRoundState(renderer, aRoundStateRect, roundStateTexture, getRoundState(networkgamestate));
+        if (scoreScreen) renderScoreScreen(renderer, aScoreRect, scoreTexture, textRect, textTexture, players);
         SDL_UnlockMutex(mutex);
         
         SDL_RenderPresent(renderer);
@@ -167,7 +207,7 @@ int main(int argc, char* args[])
     return 0;
 }
 
-void handleEvents(SDL_Event* event, int* up, int* down, int* right, int* left, bool* isPlaying, SDL_Point *mouse, bool* shooting, bool* newGame, bool *reload)
+void handleEvents(SDL_Event* event, int* up, int* down, int* right, int* left, bool* isPlaying, SDL_Point *mouse, bool* shooting, bool *reload, bool *mute, int *tcpMessage, bool* scoreScreen)
 {
     SDL_GetMouseState(&mouse->x, &mouse->y);
     while (SDL_PollEvent(event))
@@ -197,10 +237,26 @@ void handleEvents(SDL_Event* event, int* up, int* down, int* right, int* left, b
                 *right = 1;
                 break;
             case SDL_SCANCODE_P:
-                *newGame = true;
+                *tcpMessage = 1;
+                break;
+            case SDL_SCANCODE_O:
+                *tcpMessage = 2;
+                break;
+            case SDL_SCANCODE_TAB:
+                *scoreScreen = true;
                 break;
             case SDL_SCANCODE_R:
                 *reload = true;
+                break;
+            case SDL_SCANCODE_M:
+                if(*mute)
+                {
+                    *mute = false;
+                }
+                else
+                {
+                    *mute = true;
+                }
                 break;
             default:
                 break;
@@ -227,6 +283,9 @@ void handleEvents(SDL_Event* event, int* up, int* down, int* right, int* left, b
                 break;
             case SDL_SCANCODE_R:
                 *reload = false;
+                break;
+            case SDL_SCANCODE_TAB:
+                *scoreScreen = false;
                 break;
             default:
                 break;

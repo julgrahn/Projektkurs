@@ -1,11 +1,22 @@
 #ifndef SDLINCLUDE_H
 #define SDLINCLUDE_H
 
-//  #include <SDL.h>
+/****************
+* Vad siffrorna i TCP-paketen betyder
+* 
+* Host till server
+* 1: Starta en ny spelomg�ng
+* 2: Starta warmup
+* 
+*********************/
+
+
+// #include <SDL.h>
 // #include <SDL_image.h>
 // #include <SDL_timer.h>
 // #include <SDL_net.h>
 // #include <SDL_mixer.h>
+// #include <SDL_ttf.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_timer.h>
@@ -14,8 +25,8 @@
 #include <SDL2/SDL_ttf.h>
 
 
-#define WINDOWWIDTH 704
-#define WINDOWHEIGHT 704
+#define WINDOWWIDTH 1152
+#define WINDOWHEIGHT 768
 #define MAX_BULLETS 10
 #define BUTTON_HEIGHT 64
 #define CONNECT_Y_POS 100
@@ -27,5 +38,6 @@
 #define LOCAL_IP "127.0.0.1"
 #define MAX_PLAYERS 5
 #define START_LIVES 3
+#define STANDARDSPAWNTIME 180
 
 #endif

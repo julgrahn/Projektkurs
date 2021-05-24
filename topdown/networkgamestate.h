@@ -8,6 +8,10 @@
 typedef struct Networkgamestate_type* Networkgamestate;
 
 Networkgamestate createNetworkgamestate();
+
+void setRoundState(Networkgamestate a, int newValue);
+Uint8 getRoundState(Networkgamestate a);
+
 void* getNetPlayer(Networkgamestate a, int n);
 void killNetPlayer(Networkgamestate a, int n);
 void reviveNetPlayer(Networkgamestate a, int n);
@@ -28,7 +32,9 @@ void setNetBullets(Networkgamestate a, int playerID, Bullet bullets[]);
 int getNetBulletX(Networkgamestate a, int playerID, int bulletNo);
 int getNetBulletY(Networkgamestate a, int playerID, int bulletNo);
 bool isNetbulletActive(Networkgamestate a, int playerID, int bulletNo);
-void damageNetplayer(Networkgamestate a, int playerID, int damage);
+void damageNetplayer(Networkgamestate a, int playerID, int damage, int shooterID);
+int getNetPlayerKills(Networkgamestate a, int n);
+void setNetPlayerKills(Networkgamestate a, int n, int newValue);
 int getNetplayerHealth(Networkgamestate a, int playerID);
 bool isNetplayerInvulnerable(Networkgamestate a, int playerID);
 void setNetplayerInvulnerable(Networkgamestate a, int playerID, bool value);
@@ -42,5 +48,7 @@ double getNetbulletspeedX(Networkgamestate a, int playerID, int bulletID);
 double getNetbulletspeedY(Networkgamestate a, int playerID, int bulletID);
 double getNetbulletAngle(Networkgamestate a, int playerID, int bulletID);
 int getNetbulletdamage(Networkgamestate a, int playerID, int bulletID);
+bool getNetPlayerKilled(Networkgamestate a, int playerID);
+void resetPlayerKilled(Networkgamestate a, int playerID);
 
 #endif
