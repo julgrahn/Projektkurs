@@ -1,10 +1,14 @@
-﻿#include "world.h"
+#include "world.h"
 #include "player.h"
 #define PUBLIC
 
 #define PUBLIC
 
+#define PUBLIC 
+
+
 enum material { bricks = 120, wall = 186, truck = 102, wall2 = 246, wall3 = 216 };
+// enum material { bricks = 222, wall = 186, truck = 102, wall2 = 246, wall3 = 216 };
 
 int tileGrid[22][22] = {
     {bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks,bricks},
@@ -59,6 +63,9 @@ int getTileHeight() {
 int getTileGrid(int x, int y) {
     return tileGrid[x][y];
 }
+int getTileGridHits(int x, int y) {
+    return tileGridHits[x][y];
+}
 PUBLIC int getWallCollisionPlayer(int x, int y) {
     int wallCordStartX;
     int wallCordEndX;
@@ -75,7 +82,7 @@ PUBLIC int getWallCollisionPlayer(int x, int y) {
                 wallCordStartY = i * 32;
                 wallCordEndY = i * 32 + 32;
 
-                if (x + 64 >= wallCordStartX + 20 && x <= wallCordEndX && y + 64 >= wallCordStartY + 15 && y <= wallCordEndY - 15) // addition och sub i IF sats baseras p� spelarrektangel och kan beh�va anpassas. 
+                if (x + 64 >= wallCordStartX + 20 && x <= wallCordEndX && y + 64 >= wallCordStartY + 15 && y <= wallCordEndY - 15) // addition och sub med konstanterna i IF sats baseras p� spelarrektangel och kan beh�va anpassas. 
                 {
                     return 1;
                 }
@@ -98,7 +105,7 @@ PUBLIC bool getWallCollisionBullet(int x, int y, int h, int w) {
 
                 if (x + w >= wallCordStartX && x <= wallCordEndX && y + h >= wallCordStartY && y <= wallCordEndY)
                 {
-                    // countWallHits(i, j);  // Ta bort kommentaren om du vill förstöra väggar
+                    countWallHits(i, j);  // Ta bort kommentaren om du vill förstöra väggar
                     return true;
                 }
             }
@@ -110,13 +117,17 @@ PUBLIC bool getWallCollisionBullet(int x, int y, int h, int w) {
 void countWallHits(int i, int j)
 {
     tileGridHits[i][j]++;
-    if (tileGridHits[i][j] == 3)
+    if (tileGridHits[i][j] == 70)
+    {
+        tileGrid[i][j] = wall2;
+    }
+    else if (tileGridHits[i][j] == 140)
     {
         tileGrid[i][j] = wall3;
     }
-    else if (tileGridHits[i][j] == 6)
-    {
-        tileGrid[i][j] = bricks;
-    }
+    //else if (tileGridHits[i][j] == 200)
+    //{
+    //   tileGrid[i][j] = bricks;
+    //}
     return;
 }

@@ -17,36 +17,52 @@ PUBLIC void updateplayers(Networkgamestate networkgamestate, Player players[], i
     {
         if (i != playerID)
         {
-            updatePlayerPosition(&players[i], getNetworkgamestateplayerX(&networkgamestate, i), getNetworkgamestateplayerY(&networkgamestate, i), getNetworkgamestateplayerDirection(&networkgamestate, i), isNetworkgamestateplayerAlive(&networkgamestate, i), isNetworkgamestateplayerShooting(&networkgamestate, i), getNetworkgamestateplayerXtarget(&networkgamestate, i), getNetworkgamestateplayerYtarget(&networkgamestate, i));
+            updatePlayerPosition(players[i], getNetPlayerX(networkgamestate, i), getNetPlayerY(networkgamestate, i), getNetPlayerDirection(networkgamestate, i), isNetPlayerAlive(networkgamestate, i));
         }
         else
         {
-            setPlayerAlive(players[playerID], isNetworkgamestateplayerAlive(&networkgamestate, playerID));
+            setPlayerLives(players[playerID], getNetplayerLives(networkgamestate, playerID));
+            setPlayerAlive(players[playerID], isNetPlayerAlive(networkgamestate, playerID));
+            setPlayerhealth(players[playerID], getNetplayerHealth(networkgamestate, playerID));
             if (!isPlayerAlive(players[playerID]))
             {
-                snapPlayer(players[playerID], getNetworkgamestateplayerX(&networkgamestate, playerID), getNetworkgamestateplayerY(&networkgamestate, playerID));
+                resetPlayer(players[playerID]);
+                snapPlayer(players[playerID], getNetPlayerX(networkgamestate, playerID), getNetPlayerY(networkgamestate, playerID));
             }
         }
     }
 }
 
-PUBLIC void playerBulletCollisionCheck(Bullet bullets[], Player players[])
+PUBLIC void updateplayerbullets(Networkgamestate networkgamestate, int playerID, Bullet *bullets)//Bullet bullets[][MAX_BULLETS])
 {
     for (int i = 0; i < MAX_BULLETS; i++)
     {
-        if (isBulletActive(bullets[i]))
+        if(isBulletActive( *((bullets+playerID*MAX_BULLETS) + i) ) && netbulletStatus(networkgamestate, playerID, i))
         {
-            moveBullet(bullets[i]);
-            for (int j = 0; j < MAX_PLAYERS; j++)
+            if(!isNetbulletActive(networkgamestate, playerID, i))
             {
-                if (rectCollisionTest(getBulletRect(bullets[i]), getPlayerRect(players[j]))
-                    && (getBulletOwner(bullets[i]) != j) && isPlayerAlive(players[j]))
+                freeBullet(*((bullets+playerID*MAX_BULLETS) + i));
+            }
+        }
+    }
+    for (int i = 0; i < MAX_PLAYERS; i++)
+    {
+        if(i!=playerID)
+        {
+            for(int j = 0; j < MAX_BULLETS; j++)
+            {
+                if(!isNetbulletActive(networkgamestate, i, j) && isBulletActive(*((bullets+i*MAX_BULLETS) + j)))
                 {
-                    freeBullet(bullets[i]);
+                    freeBullet(*((bullets+i*MAX_BULLETS) + j));
+                }
+                else if(isNetbulletActive(networkgamestate, i, j) && !isBulletActive(*((bullets+i*MAX_BULLETS) + j)))
+                {
+                    spawnBullet(*((bullets+i*MAX_BULLETS) + j), getNetBulletX(networkgamestate, i, j), getNetBulletY(networkgamestate, i, j), getNetbulletAngle(networkgamestate, i, j), 0);
                 }
             }
         }
     }
+    
 }
 
 PUBLIC bool rectCollisionTest(SDL_Rect* a, SDL_Rect* b)
@@ -56,14 +72,17 @@ PUBLIC bool rectCollisionTest(SDL_Rect* a, SDL_Rect* b)
     return false;
 }
 
-PUBLIC void fire(Bullet bullets[], Player* p, int playerID, int xTarget, int yTarget)
+PUBLIC void fire(Bullet bullets[], Player p)
 {
-    for (int i = 0; i < MAX_BULLETS; i++)
+    if(canShoot(p))
     {
-        if (!isBulletActive(bullets[i]))
+        for (int i = 0; i < MAX_BULLETS; i++)
         {
-            spawnBullet(bullets[i], getPlayerX(*p), getPlayerY(*p), xTarget, yTarget, playerID);
-            break;
+            if (!isBulletActive(bullets[i]) && !getBulletHitValue(bullets[i]))
+            {
+                spawnBullet(bullets[i], getPlayerGunbarrelX(p), getPlayerGunbarrelY(p), getPlayerShotAngle(p), getPlayerWeapondamage(p));            
+                return;
+            }
         }
     }
 }

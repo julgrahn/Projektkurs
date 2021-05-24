@@ -3,38 +3,44 @@
 
 #include "sdlinclude.h"
 #include "player.h"
-// #include "networkbullet.h"
-// #include "networkplayer.h"
+#include "bullet.h"
 
 typedef struct Networkgamestate_type* Networkgamestate;
-// typedef struct Networkgamestate_type {
-//     Networkplayer players[5];
-// }Networkgamestate;
 
 Networkgamestate createNetworkgamestate();
-void* getNetworkgamestateplayer(Networkgamestate* a, int n);
-void setGamastateplayerpos(Networkgamestate *a, int n, int x, int y);
-
-void killNetworkgamestateplayer(Networkgamestate *a, int n);
-void reviveNetworkgamestateplayer(Networkgamestate *a, int n);
-bool isNetworkplayeractive(Networkgamestate *a, int n);
-void freeNetworkgamestateplayer(Networkgamestate *a, int n);
-void activateNetworkgamestateplayer(Networkgamestate *a, int n);
-void setGamestateplayer(Networkgamestate *a, void *player, int n);
-Uint32 getNetworkplayersize();
-void setNetworkgamestateplayer(Networkgamestate *a, int n, Player b);
-int getNetworkgamestateplayerX(Networkgamestate *a, int n);
-int getNetworkgamestateplayerY(Networkgamestate *a, int n);
-int getNetworkgamestateplayerDirection(Networkgamestate *a, int n);
-bool isNetworkgamestateplayerAlive(Networkgamestate *a, int n);
-int getNetworkgamestateplayerXtarget(Networkgamestate *a, int n);
-int getNetworkgamestateplayerYtarget(Networkgamestate *a, int n);
-bool isNetworkgamestateplayerShooting(Networkgamestate *a, int n);
+void* getNetPlayer(Networkgamestate a, int n);
+void killNetPlayer(Networkgamestate a, int n);
+void reviveNetPlayer(Networkgamestate a, int n);
+bool isNetPlayerActive(Networkgamestate a, int n);
+void freeNetPlayer(Networkgamestate a, int n);
+void activateNetPlayer(Networkgamestate a, int n);
+Uint32 getNetPlayerSize();
+void setNetPlayer(Networkgamestate a, int n, Player b);
+void setNetplayerLives(Networkgamestate a, int playerID, int lives);
+int getNetPlayerX(Networkgamestate a, int n);
+int getNetPlayerY(Networkgamestate a, int n);
+int getNetPlayerDirection(Networkgamestate a, int n);
+bool isNetPlayerAlive(Networkgamestate a, int n);
 Uint32 getGamestatesize();
-void setNetworkplayeralive(Networkgamestate *a, int n, bool alive);
-bool iisplayershoot(void *player);
+void setNetPlayerAlive(Networkgamestate a, int n, bool alive);
 
-// void setGamestateplayerID(Networkplayer *a, int id);
-// int getGamestateplayerID(Networkplayer *a, int n);
+void setNetBullets(Networkgamestate a, int playerID, Bullet bullets[]);
+int getNetBulletX(Networkgamestate a, int playerID, int bulletNo);
+int getNetBulletY(Networkgamestate a, int playerID, int bulletNo);
+bool isNetbulletActive(Networkgamestate a, int playerID, int bulletNo);
+void damageNetplayer(Networkgamestate a, int playerID, int damage);
+int getNetplayerHealth(Networkgamestate a, int playerID);
+bool isNetplayerInvulnerable(Networkgamestate a, int playerID);
+void setNetplayerInvulnerable(Networkgamestate a, int playerID, bool value);
+int getNetplayerLives(Networkgamestate a, int playerID);
+void setNetplayerHealth(Networkgamestate a, int playerID, int health);
+void freeNetbullet(Networkgamestate a, int playerID, int bulletNo);
+void setNetplayerPos(Networkgamestate a, int playerID, int x, int y);
+bool netbulletStatus(Networkgamestate a, int playerID, int bulletID);
+void netBulletclearcontrol(Networkgamestate a, int playerID, int bulletID);
+double getNetbulletspeedX(Networkgamestate a, int playerID, int bulletID);
+double getNetbulletspeedY(Networkgamestate a, int playerID, int bulletID);
+double getNetbulletAngle(Networkgamestate a, int playerID, int bulletID);
+int getNetbulletdamage(Networkgamestate a, int playerID, int bulletID);
 
 #endif
