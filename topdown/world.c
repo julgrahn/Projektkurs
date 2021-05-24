@@ -89,27 +89,27 @@ PUBLIC void wallPlayerCollisionHandling(double *posX, double *posY, int r)
                 wallCordEndY = i * 32 + 32;
 
                 // X-AXIS
-                if(*posX+r > wallCordStartX && *posX-r < wallCordEndX && *posY > wallCordStartY && *posY < wallCordEndY)
+                if(round(*posX)+r > wallCordStartX && round(*posX)-r < wallCordEndX && round(*posY) > wallCordStartY && round(*posY) < wallCordEndY)
                     wallColSingleAngleCompensation(posX, wallCordStartX, wallCordEndX, r);
                 
                 // Y-AXIS
-                else if(*posY+r > wallCordStartY && *posY-r < wallCordEndY && *posX > wallCordStartX && *posX < wallCordEndX)
+                else if(round(*posY)+r > wallCordStartY && round(*posY)-r < wallCordEndY && round(*posX) > wallCordStartX && round(*posX) < wallCordEndX)
                     wallColSingleAngleCompensation(posY, wallCordStartY, wallCordEndY, r);
                 
                 // TOP LEFT
-                else if(*posX < wallCordStartX && *posY < wallCordStartY)
+                else if(round(*posX) < wallCordStartX && round(*posY) < wallCordStartY)
                     wallColMultiAngleCompensation(posX, posY, wallCordStartX, wallCordStartY, r);
                 
                 // TOP RIGHT
-                else if(*posX > wallCordEndX && *posY < wallCordStartY)
+                else if(round(*posX) > wallCordEndX && round(*posY) < wallCordStartY)
                     wallColMultiAngleCompensation(posX, posY, wallCordEndX, wallCordStartY, r);
             
                 // BOTTOM LEFT
-                else if(*posX < wallCordStartX && *posY > wallCordEndY)
+                else if(round(*posX) < wallCordStartX && round(*posY) > wallCordEndY)
                     wallColMultiAngleCompensation(posX, posY, wallCordStartX, wallCordEndY, r);
 
                 // BOTTOM RIGHT
-                else if(*posX > wallCordEndX && *posY > wallCordEndY)
+                else if(round(*posX) > wallCordEndX && round(*posY) > wallCordEndY)
                     wallColMultiAngleCompensation(posX, posY, wallCordEndX, wallCordEndY, r);
             }
         }
