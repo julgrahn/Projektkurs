@@ -44,42 +44,28 @@ int main(int argc, char* args[])
     Player players[MAX_PLAYERS];
     SDL_Texture* playerText;
     SDL_Rect playerRect[4];
-    SDL_Point mouse;
-    mouse.x = 0, mouse.y = 0;
+    SDL_Point mouse = {0, 0};
     Bullet bullets[MAX_PLAYERS][MAX_BULLETS];
     SDL_Texture* tiles = NULL;
     SDL_Rect gridTiles[900];   // Kommer innehålla alla 900 rutor från bakgrundsbilden, kan optmiseras.
     bool isPlaying = true, shooting = false, host = false, connected = false, reload = false, mute = false, scoreScreen = false;
     SDL_Texture* bulletTexture = NULL;
     SDL_Texture* gunFireTexture = NULL;
-    SDL_Rect gunFireRect;
     Mix_Chunk* sound;
     Mix_Chunk* soundWall;
     Mix_Chunk* soundDeath;
     Mix_Chunk* prepareToFight;
-    gunFireRect.w = 40;
-    gunFireRect.h = 40;
     SDL_Texture* bloodTexture = NULL;
-    SDL_Rect bloodRect;
-    bloodRect.w = 64;
-    bloodRect.h = 64;
     SDL_Rect bloodTiles[48];
     SDL_Texture* explosionTexture = NULL;
-    SDL_Rect explosionRect;
-    explosionRect.w = 40;
-    explosionRect.h = 40;
     SDL_Texture *textTexture;
     SDL_Rect textRect[15];
-    SDL_Rect healthBar;
-    SDL_Rect reloadTimer;
     SDL_Rect aRoundStateRect[3];
     SDL_Texture* roundStateTexture;
     SDL_Rect aScoreRect[4];
     SDL_Texture* scoreTexture;
     SDL_Rect explosionTiles[121]; // Rutor från explosions.png
     int up = 0, down = 0, left = 0, right = 0;
-    SDL_Point playerRotationPoint = { 20, 32 };
-    SDL_Point muzzleRotationPoint = { 14, 16 };
     Networkgamestate networkgamestate = createNetworkgamestate();
     Button buttons[3];
     char hostIP[20];
@@ -94,7 +80,7 @@ int main(int argc, char* args[])
     mutex = SDL_CreateMutex();
     if (!initSDL(&renderer, &sound, &soundWall, &soundDeath)) return 1;
     initGameObjects(players, bullets);
-    initGameHUD(renderer, textRect, &textTexture, &healthBar, &reloadTimer, aScoreRect, &scoreTexture, aRoundStateRect, &roundStateTexture);
+    initGameHUD(renderer, textRect, &textTexture, aScoreRect, &scoreTexture, aRoundStateRect, &roundStateTexture);
     loadMenu(renderer, connectTextures, hostTextures, quitTextures);
     initClient(&sd, &p, &p2);
     loadMedia(renderer, gridTiles, &tiles, playerRect, &playerText, &cursor, &bulletTexture, 
@@ -131,10 +117,6 @@ int main(int argc, char* args[])
                 connectToServer(hostIP, &srvadd, &tcpsock, networkgamestate, &playerID, players, &sd, &connected);
                 startUDPreceiveThread(&sd, &p2, bullets, players, &networkgamestate, playerID, &mutex);
                 SDLNet_TCP_AddSocket(set, tcpsock);
-                //if (tcpsock == !NULL)
-                //{
-                    
-                //}     
             }
 
             // Host button
@@ -190,12 +172,12 @@ int main(int argc, char* args[])
             sendTCPtoServer(&tcpsock, tcpMessage);
             tcpMessage = 0;
         }
+        SDL_LockMutex(mutex);
         if (isPlayerAlive(players[playerID]))
         {
             movePlayer(players[playerID], up, down, right, left, mouse.x, mouse.y, reload);
             if (shooting) fire(bullets[playerID], players[playerID]);
         }
-        SDL_LockMutex(mutex);
         //Flytta på alla andra spelare
         for (int i = 0; i < MAX_PLAYERS; i++)
         {
@@ -210,14 +192,19 @@ int main(int argc, char* args[])
         sendUDP(getNetPlayer(networkgamestate, playerID), &sd, &srvadd, &p, &p2);
         handleClientTCP(&tcpsock, &set, networkgamestate, players, playerID);
 
-        renderGame(renderer, tiles, gridTiles, bullets, bulletTexture, players, playerText, 
-                    playerRect, &playerRotationPoint, gunFireTexture, gunFireRect, 
-                    explosionTexture, explosionRect,  &muzzleRotationPoint, bloodTexture, 
-                    bloodRect, sound, explosionTiles, bloodTiles, soundWall, soundDeath);
+        SDL_RenderClear(renderer);
+
+        renderGame(renderer, tiles, gridTiles, bullets, bulletTexture, players, playerText, playerRect, 
+                    gunFireTexture, explosionTexture, bloodTexture, sound, explosionTiles, bloodTiles, soundWall, soundDeath);
         
         renderTestBullets(renderer, bullets, bulletTEST); // Synligare bullets för testing    
 
-        renderHUD(renderer, players[playerID], textRect, textTexture, &healthBar, &reloadTimer);
+        renderHUD(renderer, players[playerID], textRect, textTexture);
+        // renderGame(renderer, tiles, gridTiles, bullets, bulletTexture, players, playerText, 
+        //             playerRect, &playerRotationPoint, gunFireTexture, gunFireRect, 
+        //             explosionTexture, explosionRect,  &muzzleRotationPoint, bloodTexture, 
+        //             bloodRect, sound, explosionTiles, bloodTiles, soundWall, soundDeath);
+          
         renderRoundState(renderer, aRoundStateRect, roundStateTexture, getRoundState(networkgamestate));
         if (scoreScreen) renderScoreScreen(renderer, aScoreRect, scoreTexture, textRect, textTexture, players);
         SDL_UnlockMutex(mutex);

@@ -67,9 +67,8 @@ PRIVATE void moveBullet(Bullet bullet)
 		bullet->dimensions.y = round(bullet->yPos)-BULLET_CENTER_OFFSET_Y/2;
 
 		if (getWallCollisionBullet(bullet->dimensions.x, bullet->dimensions.y, bullet->dimensions.h, bullet->dimensions.w))
-		{
 			freeBullet(bullet);
-		}
+			
 		if (bullet->dimensions.x < 0 || bullet->dimensions.x > WINDOWWIDTH || bullet->dimensions.y < 0 || bullet->dimensions.y > WINDOWHEIGHT)
 			bullet->active = false;
 	}
@@ -93,12 +92,12 @@ PUBLIC double getBulletDirection(Bullet a)
 
 PUBLIC int getBulletX(Bullet a)
 {
-	return a->xPos; //a->dimensions.x;
+	return round(a->xPos); //a->dimensions.x;
 }
 
 PUBLIC int getBulletY(Bullet a)
 {
-	return a->yPos; //a->dimensions.y;
+	return round(a->yPos); //a->dimensions.y;
 }
 
 PUBLIC int getBulletDamage(Bullet b)

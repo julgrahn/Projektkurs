@@ -45,6 +45,7 @@ int getPlayerlives(Player a);
 int getPlayerReloadprogress(Player a);
 void resetPlayer(Player a);
 double getPlayerShotAngle(Player a);
+int getPlayerRadius();
 bool checkKilled(Player a);
 void setKilled(Player p, bool n);
 

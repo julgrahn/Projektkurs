@@ -194,7 +194,6 @@ PRIVATE void handleUDPreceive(Server server)
                 int lives = getNetplayerLives(server->state, i);
                 int kills = getNetPlayerKills(server->state, i);
                 bool invulnerable = isNetplayerInvulnerable(server->state, i);
-
                 memcpy(getNetPlayer(server->state, i), server->pRecive->data, getNetPlayerSize());
                 for(int j = 0; j < MAX_BULLETS; j++)
                 {

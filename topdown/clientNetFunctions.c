@@ -123,6 +123,7 @@ PUBLIC void handleClientTCP(TCPsocket* tcpsock, SDLNet_SocketSet* set, Networkga
     }
 }
 
+// PUBLIC void startNewGame(TCPsocket* tcpsock)
 
 
 void sendTCPtoServer(TCPsocket* tcpsock, int message)

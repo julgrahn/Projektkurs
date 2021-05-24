@@ -1,7 +1,11 @@
 #include "world.h"
+#include "player.h"
+
 #define PUBLIC
+#define PRIVATE static
 
-
+PRIVATE void wallColMultiAngleCompensation(double *xPos, double *yPos, int xWall, int yWall, int minDistance);
+PRIVATE void wallColSingleAngleCompensation(double *pos, int wallStart, int wallEnd, int minDistance);
 
 enum material { sp = 121, br = 120, wa = 186, wall2 = 246, wall3 = 216 };
 // enum material { br = 222, wall = 186, truck = 102, wall2 = 246, wall3 = 216 };
@@ -66,7 +70,9 @@ int getTileGrid(int x, int y) {
 int getTileGridHits(int x, int y) {
     return tileGridHits[x][y];
 }
-PUBLIC int getWallCollisionPlayer(int x, int y) {
+
+PUBLIC void wallPlayerCollisionHandling(double *posX, double *posY, int r)
+{
     int wallCordStartX;
     int wallCordEndX;
     int wallCordStartY;
@@ -82,16 +88,58 @@ PUBLIC int getWallCollisionPlayer(int x, int y) {
                 wallCordStartY = i * 32;
                 wallCordEndY = i * 32 + 32;
 
-                if (x + 64 >= wallCordStartX + 20 && x <= wallCordEndX && y + 64 >= wallCordStartY + 15 && y <= wallCordEndY - 15) // addition och sub med konstanterna i IF sats baseras p� spelarrektangel och kan beh�va anpassas. 
-                {
-                    return 1;
-                }
+                // X-AXIS
+                if(round(*posX)+r > wallCordStartX && round(*posX)-r < wallCordEndX && round(*posY) > wallCordStartY && round(*posY) < wallCordEndY)
+                    wallColSingleAngleCompensation(posX, wallCordStartX, wallCordEndX, r);
+                
+                // Y-AXIS
+                else if(round(*posY)+r > wallCordStartY && round(*posY)-r < wallCordEndY && round(*posX) > wallCordStartX && round(*posX) < wallCordEndX)
+                    wallColSingleAngleCompensation(posY, wallCordStartY, wallCordEndY, r);
+                
+                // TOP LEFT
+                else if(round(*posX) < wallCordStartX && round(*posY) < wallCordStartY)
+                    wallColMultiAngleCompensation(posX, posY, wallCordStartX, wallCordStartY, r);
+                
+                // TOP RIGHT
+                else if(round(*posX) > wallCordEndX && round(*posY) < wallCordStartY)
+                    wallColMultiAngleCompensation(posX, posY, wallCordEndX, wallCordStartY, r);
+            
+                // BOTTOM LEFT
+                else if(round(*posX) < wallCordStartX && round(*posY) > wallCordEndY)
+                    wallColMultiAngleCompensation(posX, posY, wallCordStartX, wallCordEndY, r);
+
+                // BOTTOM RIGHT
+                else if(round(*posX) > wallCordEndX && round(*posY) > wallCordEndY)
+                    wallColMultiAngleCompensation(posX, posY, wallCordEndX, wallCordEndY, r);
             }
         }
     }
-    return 0;
 }
-PUBLIC bool getWallCollisionBullet(int x, int y, int h, int w) {
+
+PRIVATE void wallColSingleAngleCompensation(double *pos, int wallStart, int wallEnd, int minDistance)
+{
+    double delta;
+    delta = fabs(*pos - wallStart);
+    if(delta < fabs(*pos - wallEnd))
+        *pos = wallStart - minDistance;
+    else *pos = wallEnd + minDistance;
+}
+
+PRIVATE void wallColMultiAngleCompensation(double *xPos, double *yPos, int xWall, int yWall, int minDistance)
+{
+    double xDelta, yDelta;
+    double distance = sqrt((round(*xPos) - xWall)*(round(*xPos) - xWall) + (round(*yPos) - yWall)*(round(*yPos) - yWall));
+    if(distance < minDistance)
+    {
+        xDelta = round(*xPos)-xWall;
+        yDelta = round(*yPos)-yWall;
+        *xPos += (minDistance-distance)*xDelta/distance;
+        *yPos += (minDistance-distance)*yDelta/distance;
+    }
+}
+
+PUBLIC bool getWallCollisionBullet(int x, int y, int h, int w)
+{
     for (int i = 0; i < tileRows; i++)
     {
         for (int j = 0; j < tileColumns; j++)
