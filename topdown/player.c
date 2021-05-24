@@ -17,7 +17,7 @@ struct Player_type {
     double speed;
     double diaSpeed;
     double posX, posY;
-    SDL_Rect pDimensions;
+    // SDL_Rect pDimensions;
     int frame;
     int frameCounter;
     int isMoving;
@@ -29,7 +29,6 @@ struct Player_type {
     double xSpeed, ySpeed;
     int newDirection;
     Weapon gun;
-    int gunBarrelX, gunBarrelY;
     int lives;
     double shotAngle;
     bool killed;// tillfälligt för dödsljud
@@ -48,10 +47,10 @@ PUBLIC Player createPlayer(int x, int y)
     a->direction = 0;
     a->posX = x;
     a->posY = y;
-    a->pDimensions.x = x-PLAYER_CENTER_OFFSET_X;
-    a->pDimensions.y = y-PLAYER_CENTER_OFFSET_Y;
-    a->pDimensions.w = 64;
-    a->pDimensions.h = 64;
+    // a->pDimensions.x = x-PLAYER_CENTER_OFFSET_X;
+    // a->pDimensions.y = y-PLAYER_CENTER_OFFSET_Y;
+    // a->pDimensions.w = 64;
+    // a->pDimensions.h = 64;
     a->newX = x;
     a->newY = y;
     a->active = false;
@@ -93,14 +92,15 @@ PUBLIC void movePlayer(Player p, int up, int down, int right, int left, int mous
     if (p->posX+PLAYER_RADIUS >= WINDOWWIDTH) p->posX = WINDOWWIDTH - PLAYER_RADIUS;
 
     // Update player rectangle
-    p->pDimensions.x = round(p->posX)-PLAYER_CENTER_OFFSET_X;
-    p->pDimensions.y = round(p->posY)-PLAYER_CENTER_OFFSET_Y;
+    // p->pDimensions.x = round(p->posX)-PLAYER_CENTER_OFFSET_X;
+    // p->pDimensions.y = round(p->posY)-PLAYER_CENTER_OFFSET_Y;
 
     // Update player sprite frame
     p->frameCounter = (p->frameCounter + p->isMoving) % (ANIMATIONSPEED + 1);
     p->frame = (p->frame + ((p->frameCounter / ANIMATIONSPEED) * p->isMoving)) % 4;
     // Rotate player
-    p->direction = (atan2(mouseY - p->pDimensions.y - 34, mouseX - p->pDimensions.x - 18) * 180 / M_PI) - 6;
+    p->direction = (atan2(mouseY - p->posY, mouseX - p->posX) * 180 / M_PI) - 6;
+    // p->direction = (atan2(mouseY - p->pDimensions.y - 34, mouseX - p->pDimensions.x - 18) * 180 / M_PI) - 6;
     // Update shooting angle
     p->shotAngle = atan2(mouseY - getPlayerGunbarrelY(p), mouseX - getPlayerGunbarrelX(p));
 }
@@ -115,10 +115,10 @@ PUBLIC int getPlayerHealth(Player p)
     return p->health;
 }
 
-PUBLIC SDL_Rect* getPlayerRect(Player p)
-{
-    return &p->pDimensions;
-}
+// PUBLIC SDL_Rect* getPlayerRect(Player p)
+// {
+//     return &p->pDimensions;
+// }
 
 PUBLIC int getPlayerX(Player p)
 {
@@ -183,8 +183,8 @@ PUBLIC void moveOtherPlayers(Player p)
         p->posX += p->xSpeed;
         p->posY += p->ySpeed;
 
-        p->pDimensions.x = round(p->posX)-PLAYER_CENTER_OFFSET_X;
-        p->pDimensions.y = round(p->posY)-PLAYER_CENTER_OFFSET_Y;
+        // p->pDimensions.x = round(p->posX)-PLAYER_CENTER_OFFSET_X;
+        // p->pDimensions.y = round(p->posY)-PLAYER_CENTER_OFFSET_Y;
         p->frameCounter = (p->frameCounter + 1) % (ANIMATIONSPEED + 1);
         p->frame = (p->frame + ((p->frameCounter / ANIMATIONSPEED))) % 4;
     }
@@ -252,8 +252,8 @@ PUBLIC void moveOtherPlayers(Player p)
 
 PUBLIC void snapPlayer(Player p, int x, int y)
 {
-    p->pDimensions.x = x-PLAYER_CENTER_OFFSET_X;
-    p->pDimensions.y = y-PLAYER_CENTER_OFFSET_Y;
+    // p->pDimensions.x = x-PLAYER_CENTER_OFFSET_X;
+    // p->pDimensions.y = y-PLAYER_CENTER_OFFSET_Y;
     p->newX = x;
     p->newY = y;
     p->posX = x;

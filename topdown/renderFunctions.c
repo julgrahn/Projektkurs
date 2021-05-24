@@ -20,7 +20,7 @@ PUBLIC void renderGame(SDL_Renderer* renderer, SDL_Texture* mTiles, SDL_Rect gTi
     static SDL_Rect bloodRect = { 0, 0, BLOODSPLATTERSIZE, BLOODSPLATTERSIZE };
     static SDL_Rect gunFireRect = { 0, 0, 40, 40 };
     static SDL_Rect position = { 0, 0, TILE_WIDTH, TILE_HEIGHT };
-
+    static SDL_Rect player = { 0, 0, 64, 64 };
 
     for (int i = 0; i < getTileRows(); i++)
     {
@@ -49,7 +49,8 @@ PUBLIC void renderGame(SDL_Renderer* renderer, SDL_Texture* mTiles, SDL_Rect gTi
     {
         if (isPlayerAlive(players[i]))
         {
-            SDL_RenderCopyEx(renderer, playerText, &playerRect[getPlayerFrame(players[i])], getPlayerRect(players[i]), getPlayerDirection(players[i]), &playerRotationPoint, SDL_FLIP_NONE);
+            player.x = getPlayerX(players[i])-20, player.y = getPlayerY(players[i])-32;
+            SDL_RenderCopyEx(renderer, playerText, &playerRect[getPlayerFrame(players[i])], &player, getPlayerDirection(players[i]), &playerRotationPoint, SDL_FLIP_NONE);
         }
         else // dödsljud fungerar ej optimalt än
         {
@@ -59,8 +60,7 @@ PUBLIC void renderGame(SDL_Renderer* renderer, SDL_Texture* mTiles, SDL_Rect gTi
             }
         }
     }
-
-    // Render Gunfire
+    // Render Muzzleflash, Bullet Hit
     for (int i = 0; i < MAX_PLAYERS; i++)
     {
         for (int j = 0; j < MAX_BULLETS; j++)
@@ -69,7 +69,7 @@ PUBLIC void renderGame(SDL_Renderer* renderer, SDL_Texture* mTiles, SDL_Rect gTi
             {
                 if (getWallCollisionBullet(getBulletX(bullets[i][j])-2, getBulletY(bullets[i][j])-2, 4, 4))
                 {
-                    explosionRect.x = getBulletX(bullets[i][j]) - explosionRect.w/2; // gunfireRect bör bytas till en annan då denna avser muzzle från vapnet. 
+                    explosionRect.x = getBulletX(bullets[i][j]) - explosionRect.w/2;
                     explosionRect.y = getBulletY(bullets[i][j]) - explosionRect.h/2;
 
                     if (getBulletHitValue(bullets[i][j]) > 12)
@@ -93,7 +93,7 @@ PUBLIC void renderGame(SDL_Renderer* renderer, SDL_Texture* mTiles, SDL_Rect gTi
                 // else traff på spelare, visa blod. 
                 else
                 {
-                    bloodRect.x = getBulletX(bullets[i][j]) - bloodRect.w/2; // gunfireRect bör bytas till en annan då denna avser muzzle från vapnet. 
+                    bloodRect.x = getBulletX(bullets[i][j]) - bloodRect.w/2;
                     bloodRect.y = getBulletY(bullets[i][j]) - bloodRect.h/2;
                     if (getBulletHitValue(bullets[i][j]) > 12)
                     {
@@ -117,8 +117,8 @@ PUBLIC void renderGame(SDL_Renderer* renderer, SDL_Texture* mTiles, SDL_Rect gTi
             }
             if (bulletShot(bullets[i][j]))
             {
-                gunFireRect.x = getPlayerGunbarrelX(players[i]) - 14;//getBulletOriginX(bullets[i][j]) - 14;
-                gunFireRect.y = getPlayerGunbarrelY(players[i]) - 16;//getBulletOriginY(bullets[i][j]) - 16;
+                gunFireRect.x = getPlayerGunbarrelX(players[i]) - 14;
+                gunFireRect.y = getPlayerGunbarrelY(players[i]) - 16;
                 SDL_RenderCopyEx(renderer, gunFireTexture, NULL, &gunFireRect, getPlayerDirection(players[i]), &muzzleRotationPoint, SDL_FLIP_NONE);
 
                 if(checkShot(bullets[i][j]))

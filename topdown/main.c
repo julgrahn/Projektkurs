@@ -145,14 +145,7 @@ int main(int argc, char* args[])
             newRoundFlag = true;
         }
         //Ljud av/på
-        if (mute)
-        {
-            Mix_Volume(-1, 0);
-        }
-        else
-        {
-            Mix_Volume(-1, 5);
-        }
+        Mix_Volume(-1, 5*!mute);
         //Spel
         playerTick(players[playerID]);
         handleEvents(&event, &up, &down, &right, &left, &isPlaying, &mouse, &shooting, &reload, &mute, &tcpMessage, &scoreScreen);
@@ -189,10 +182,6 @@ int main(int argc, char* args[])
         renderTestBullets(renderer, bullets, bulletTEST); // Synligare bullets för testing    
 
         renderHUD(renderer, players[playerID], textRect, textTexture);
-        // renderGame(renderer, tiles, gridTiles, bullets, bulletTexture, players, playerText, 
-        //             playerRect, &playerRotationPoint, gunFireTexture, gunFireRect, 
-        //             explosionTexture, explosionRect,  &muzzleRotationPoint, bloodTexture, 
-        //             bloodRect, sound, explosionTiles, bloodTiles, soundWall, soundDeath);
           
         renderRoundState(renderer, aRoundStateRect, roundStateTexture, getRoundState(networkgamestate));
         if (scoreScreen) renderScoreScreen(renderer, aScoreRect, scoreTexture, textRect, textTexture, players);

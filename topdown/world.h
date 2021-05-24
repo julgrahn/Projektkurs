@@ -16,9 +16,7 @@ int getTileHeight();
 int getTileGrid(int x, int y);
 void wallPlayerCollisionHandling(double *posX, double *posY, int r);
 bool getWallCollisionBullet(int x, int y, int h, int w);
-void countWallHits(int i, int j);
 int getTileGridHits(int x, int y);
-
 bool getWallCollisionBullet(int x, int y, int h, int w);
 void initTileGridReset();
 void resetTileGridMap();
