@@ -1,6 +1,9 @@
-﻿#include <stdio.h>
+﻿#pragma warning(disable : 4996)
+
+#include <stdio.h>
 #include "sdlinclude.h"
 #include <stdbool.h>
+#include <string.h>
 #include <stdlib.h>
 #include "player.h"
 #include "world.h"
@@ -16,9 +19,13 @@ SDL_mutex* mutex;
 
 void renderTestBullets(SDL_Renderer *renderer, Bullet bullets[][MAX_BULLETS], SDL_Texture *testText); // Synligare bullets för testing 
 
-void handleEvents(SDL_Event* event, int* up, int* down, int* right, int* left, bool* isPlaying, SDL_Point *mouse, bool* shooting, bool *reload, bool *mute, int *tcpMessage, bool* scoreScreen);
-void startPrompt(int* playerID, Server* server, bool* host);
+void handleEvents(SDL_Event* event, int* up, int* down, int* right, int* left, bool* isPlaying, SDL_Point *mouse, bool* shooting, bool* newGame, bool *reload);
+void startNewGame(TCPsocket* tcpsock);
+void startNewGame(TCPsocket* tcpsock);
+void startNewGame(TCPsocket* tcpsock);
+void startNewGame(TCPsocket* tcpsock);
 void handleClientTCP(TCPsocket* tcpsock, SDLNet_SocketSet* set, Networkgamestate networkgamestate, Player players[], int playerID);
+void connectPrompt(char* ip);
 
 int main(int argc, char* args[])
 {
@@ -75,11 +82,12 @@ int main(int argc, char* args[])
     SDL_Point muzzleRotationPoint = { 14, 16 };
     Networkgamestate networkgamestate = createNetworkgamestate();
     Button buttons[3];
+    char hostIP[20];
+    int tcpMessage = 0;
+    bool newRoundFlag = false;
     SDL_Texture* connectTextures[3];
     SDL_Texture* hostTextures[3];
     SDL_Texture* quitTextures[3];
-    int tcpMessage = 0;
-    bool newRoundFlag = false;
 
     // Init functions
     set = SDLNet_AllocSocketSet(1);
@@ -118,9 +126,15 @@ int main(int argc, char* args[])
             if (mouse.y > CONNECT_Y_POS && mouse.y < CONNECT_Y_POS + BUTTON_HEIGHT && shooting)
             {
                 setButtonPressed(buttons[0], true);
-                connectToServer(LOCAL_IP, &srvadd, &tcpsock, networkgamestate, &playerID, players, &sd, &connected);
+                connectPrompt(hostIP);
+                printf("%s", hostIP);
+                connectToServer(hostIP, &srvadd, &tcpsock, networkgamestate, &playerID, players, &sd, &connected);
                 startUDPreceiveThread(&sd, &p2, bullets, players, &networkgamestate, playerID, &mutex);
                 SDLNet_TCP_AddSocket(set, tcpsock);
+                //if (tcpsock == !NULL)
+                //{
+                    
+                //}     
             }
 
             // Host button
@@ -143,9 +157,6 @@ int main(int argc, char* args[])
             }
         }
     }
-    // Main loop
-    while (isPlaying)
-    {
         //Om ny runda
         if (getRoundState(networkgamestate) == 1)
         {
@@ -169,6 +180,9 @@ int main(int argc, char* args[])
             Mix_Volume(-1, 5);
         }
         //Spel
+    // Main loop
+    while (isPlaying)
+    {
         playerTick(players[playerID]);
         handleEvents(&event, &up, &down, &right, &left, &isPlaying, &mouse, &shooting, &reload, &mute, &tcpMessage, &scoreScreen);
         if (tcpMessage && host)
@@ -329,17 +343,47 @@ void handleEvents(SDL_Event* event, int* up, int* down, int* right, int* left, b
 }
 
 
-// Ska ersättas med menyn
-void startPrompt(int* playerID, Server* server, bool* host)
+void connectPrompt(char* hostIP)
 {
-    printf("Host(h) or client(c): ");
-    char input;
-    scanf(" %c", &input);
-    if (input == 'h')
+    int nrOfHosts = 3;
+    int userChoice;
+    printf("Available hosts: \n");
+    char hosts[3][20] = { "Local",
+                          "Andreas",
+                          "Alex"
+                        };
+
+    //printf("%s\n", hosts[0]);
+    //printf("%s\n", hosts[1]);
+    for(int i = 0; i < nrOfHosts; i++)
     {
-        printf("hosted!\n");
-        *host = true;
+        printf("%s [%d]\n", hosts[i], i);
     }
+
+
+    printf("Connect to IP [0 - 2] or enter a custom IP [3]: ");
+    scanf("%d", &userChoice);
+
+    switch (userChoice)
+    {
+    case 0: 
+        strcpy(hostIP, "127.0.0.1");
+        break;
+    case 1:
+        strcpy(hostIP, "78.71.16.247");
+        break;
+    case 2:
+        strcpy(hostIP, "178.78.213.173");
+        break;
+    default:
+        printf("Enter IP: ");
+        scanf("%s", hostIP);
+        break;
+    }
+    //fgets(hostIP, sizeof(hostIP), stdin);
+
+
+    return 0;
 }
 
 void renderTestBullets(SDL_Renderer *renderer, Bullet bullets[][MAX_BULLETS], SDL_Texture *testText)
