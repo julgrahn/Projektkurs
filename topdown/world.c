@@ -155,7 +155,7 @@ PUBLIC bool getWallCollisionBullet(int x, int y, int h, int w)
                 {
                     if(tileGrid[i][j] == wa || tileGrid[i][j] == wall2 || tileGrid[i][j] == wall3)
                     {
-                        countWallHits(i, j);  // Ta bort kommentaren om du vill förstöra väggar
+                        //countWallHits(i, j);  // Ta bort kommentaren om du vill förstöra väggar
                     }
                     return true;
                 }

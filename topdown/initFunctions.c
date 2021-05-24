@@ -261,15 +261,16 @@ PUBLIC void initGameHUD(SDL_Renderer *renderer, SDL_Rect textRect[], SDL_Texture
         TTF_CloseFont(font);
         // Roundstate
         font = TTF_OpenFont("unispace_bd.ttf", 72);
-        textSurface = TTF_RenderText_Solid(font, "WARMUP          PREPARE TO FIGHT", color);
+        //textSurface = TTF_RenderText_Solid(font, "WARMUP          PREPARE TO FIGHT", color);
+        textSurface = TTF_RenderText_Solid(font, "WARMUP              PREPARE TO FIGHT    THE WINNER IS PLAYER", color);
         *roundStateTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
         SDL_FreeSurface(textSurface);
-        TTF_SizeText(font, "WARMUP          PREPARE TO FIGHT", &width, &height);
-        for (int i = 0; i < 3; i++)
+        TTF_SizeText(font, "WARMUP              PREPARE TO FIGHT    THE WINNER IS PLAYER", &width, &height);
+        for (int i = 0; i < 4; i++)
         {
-            aRoundStateRect[i].x = 0 + i*width/2;
+            aRoundStateRect[i].x = 0 + i*width/3;
             aRoundStateRect[i].y = 0;
-            aRoundStateRect[i].w = width/2;
+            aRoundStateRect[i].w = width/3;
             aRoundStateRect[i].h = height;
         }
 

@@ -128,18 +128,32 @@ PUBLIC void renderGame(SDL_Renderer* renderer, SDL_Texture* mTiles, SDL_Rect gTi
     }
 }
 
-PUBLIC void renderRoundState(SDL_Renderer* renderer, SDL_Rect aRoundStateRect[], SDL_Texture* roundStateTexture, int roundState)
+PUBLIC void renderRoundState(SDL_Renderer* renderer, SDL_Rect aRoundStateRect[], SDL_Texture* roundStateTexture, int roundState, int winner, SDL_Rect textrect[], SDL_Texture* texttexture)
 {
     if (roundState == 0 || roundState == 1)
     {
         if (roundState == 0) SDL_SetRenderDrawColor(renderer, 255, 255, 255, 0);
         else SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-        aRoundStateRect[2].x = 0;
-        aRoundStateRect[2].y = WINDOWHEIGHT / 2;
-        SDL_RenderFillRect(renderer, &aRoundStateRect[2]);
-        SDL_RenderCopy(renderer, roundStateTexture, &aRoundStateRect[roundState], &aRoundStateRect[2]);
+        aRoundStateRect[3].x = 0;
+        aRoundStateRect[3].y = WINDOWHEIGHT / 2;
+        SDL_RenderFillRect(renderer, &aRoundStateRect[3]);
+        SDL_RenderCopy(renderer, roundStateTexture, &aRoundStateRect[roundState], &aRoundStateRect[3]);
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-    } 
+    }
+    else if (roundState == 3)
+    {        
+        aRoundStateRect[3].x = 0;
+        aRoundStateRect[3].y = WINDOWHEIGHT / 2;
+        
+        SDL_RenderCopy(renderer, roundStateTexture, &aRoundStateRect[2], &aRoundStateRect[3]);
+        aRoundStateRect[3].x += 900;
+        int temp = aRoundStateRect[3].w;
+        aRoundStateRect[3].w = 50;
+        SDL_RenderCopy(renderer, texttexture, &textrect[winner], &aRoundStateRect[3]);
+        aRoundStateRect[3].w = temp;
+        aRoundStateRect[3].x -= 900;
+
+    }
 }
 
 PUBLIC void renderScoreScreen(SDL_Renderer* renderer, SDL_Rect aScorerect[], SDL_Texture* scoreTexture, SDL_Rect textrect[], SDL_Texture* texttexture, Player players[])

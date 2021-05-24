@@ -384,6 +384,7 @@ PRIVATE void handleGameLogic(Server server, int respawnDelay[], SDL_Point *a, SD
                                         }
                                         if (noOfPlayersAlive == 1)
                                         {
+                                            setRoundState(server->state, 3);
                                             printf("----------------------------------------\n");
                                             printf("%d seconds | Player % d has won!!!\n", SDL_GetTicks() / 1000, i);
                                             printf("----------------------------------------\n");

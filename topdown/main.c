@@ -60,7 +60,7 @@ int main(int argc, char* args[])
     SDL_Texture* explosionTexture = NULL;
     SDL_Texture *textTexture;
     SDL_Rect textRect[15];
-    SDL_Rect aRoundStateRect[3];
+    SDL_Rect aRoundStateRect[4];
     SDL_Texture* roundStateTexture;
     SDL_Rect aScoreRect[4];
     SDL_Texture* scoreTexture;
@@ -70,6 +70,7 @@ int main(int argc, char* args[])
     Button buttons[3];
     char hostIP[20];
     int tcpMessage = 0;
+    int winner = 0;
     bool newRoundFlag = false;
     SDL_Texture* connectTextures[3];
     SDL_Texture* hostTextures[3];
@@ -161,11 +162,24 @@ int main(int argc, char* args[])
         {
             Mix_Volume(-1, 5);
         }
+
         //Spel
     // Main loop
     while (isPlaying)
     {
         playerTick(players[playerID]);
+
+        if (getRoundState(networkgamestate) == 3)
+        {
+            for (int i = 0; i < MAX_PLAYERS; i++)
+            {
+                if (isPlayerAlive(players[i]))
+                {
+                    winner = i;
+                    break;
+                }
+            }
+        }
         handleEvents(&event, &up, &down, &right, &left, &isPlaying, &mouse, &shooting, &reload, &mute, &tcpMessage, &scoreScreen);
         if (tcpMessage && host)
         {
@@ -205,7 +219,7 @@ int main(int argc, char* args[])
         //             explosionTexture, explosionRect,  &muzzleRotationPoint, bloodTexture, 
         //             bloodRect, sound, explosionTiles, bloodTiles, soundWall, soundDeath);
           
-        renderRoundState(renderer, aRoundStateRect, roundStateTexture, getRoundState(networkgamestate));
+        renderRoundState(renderer, aRoundStateRect, roundStateTexture, getRoundState(networkgamestate), winner, textRect, textTexture);
         if (scoreScreen) renderScoreScreen(renderer, aScoreRect, scoreTexture, textRect, textTexture, players);
         SDL_UnlockMutex(mutex);
         
