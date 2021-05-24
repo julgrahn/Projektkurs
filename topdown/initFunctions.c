@@ -3,7 +3,7 @@
 #define PUBLIC /* empty */
 #define PRIVATE static
 
-PUBLIC bool initSDL(SDL_Renderer** renderer, Mix_Chunk** sound)
+PUBLIC bool initSDL(SDL_Renderer** renderer, Mix_Chunk** sound, Mix_Chunk** soundWall, Mix_Chunk** soundDeath)
 {
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_AUDIO) != 0)
     {
@@ -77,7 +77,8 @@ PUBLIC void loadMedia(SDL_Renderer* renderer, SDL_Rect gTiles[], SDL_Texture** t
                         SDL_Texture** pTexture, SDL_Cursor** cursor, SDL_Texture** bulletTexture, 
                         SDL_Texture** gunFireTexture, SDL_Texture** explosionTexture, 
                         SDL_Texture** bloodTexture, Mix_Chunk** sound,
-                        SDL_Rect explosionTiles[], SDL_Rect bloodTiles[])
+                        SDL_Rect explosionTiles[], SDL_Rect bloodTiles[], Mix_Chunk** soundWall,
+                        Mix_Chunk** soundDeath, Mix_Chunk** prepareToFight)
 {
     SDL_Surface* gTilesSurface = IMG_Load("resources/tilemap.png");
     *tiles = SDL_CreateTextureFromSurface(renderer, gTilesSurface);
@@ -131,6 +132,20 @@ PUBLIC void loadMedia(SDL_Renderer* renderer, SDL_Rect gTiles[], SDL_Texture** t
             explosionTiles[i * 11 + j].h = 93;
         }
     }
+    explosionTiles[45].x = 147-25;
+    explosionTiles[45].y = 437-25;
+    explosionTiles[45].w = 50;
+    explosionTiles[45].h = 50;
+    
+    explosionTiles[34].x = 147-25;
+    explosionTiles[34].y = 340-25;
+    explosionTiles[34].w = 50;
+    explosionTiles[34].h = 50;
+
+    explosionTiles[23].x = 147-25;
+    explosionTiles[23].y = 242-25;
+    explosionTiles[23].w = 50;
+    explosionTiles[23].h = 50;
 
     // Blod
     SDL_Surface* bloodSurface = IMG_Load("resources/blood - right 1.png");
@@ -154,11 +169,36 @@ PUBLIC void loadMedia(SDL_Renderer* renderer, SDL_Rect gTiles[], SDL_Texture** t
     {
         printf( "Failed to load beat music! SDL_mixer Error: %s\n", Mix_GetError() );
     }
-    // Volume
-    Mix_Volume(-1, 20);
+    
+    //Wall hit soundeffect
+    *soundWall = Mix_LoadWAV("resources/thwack-10.wav");
+    if (soundWall == NULL)
+    {
+        printf("Failed to load beat music! SDL_mixer Error: %s\n", Mix_GetError());
+    }
+    
+    //Killed player sound
+    *soundDeath = Mix_LoadWAV("resources/death.wav");
+    if (soundDeath == NULL)
+    {
+        printf("Failed to load beat music! SDL_mixer Error: %s\n", Mix_GetError());
+    }
+
+    //Prepare to fight
+    *prepareToFight = Mix_LoadWAV("resources/prepare-to-fight.wav");
+    if (prepareToFight == NULL)
+    {
+        printf("Failed to load beat music! SDL_mixer Error: %s\n", Mix_GetError());
+    }
+
+    //Volume
+    Mix_Volume(-1, 5);
+    
+    
 }
 
-PUBLIC void initGameHUD(SDL_Renderer *renderer, SDL_Rect textRect[], SDL_Texture **textTexture, SDL_Rect *healthBar, SDL_Rect *reloadTimer)
+// PUBLIC void initGameHUD(SDL_Renderer *renderer, SDL_Rect textRect[], SDL_Texture **textTexture)
+PUBLIC void initGameHUD(SDL_Renderer *renderer, SDL_Rect textRect[], SDL_Texture **textTexture, SDL_Rect aScorerect[], SDL_Texture **scoreTexture, SDL_Rect aRoundStateRect[], SDL_Texture **roundStateTexture)
 {
     TTF_Init();
     TTF_Font *font;
@@ -168,13 +208,12 @@ PUBLIC void initGameHUD(SDL_Renderer *renderer, SDL_Rect textRect[], SDL_Texture
     }
     else
     {
+        // Ammo, hp och liv
         SDL_Color color = {255,255,255};
         SDL_Surface *textSurface;
         textSurface = TTF_RenderText_Solid(font,"0123456789|HP: ",color);
         *textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
         SDL_FreeSurface(textSurface);
-        healthBar->h = 10, healthBar->w = 150, healthBar->x = 100, healthBar->y = 7;
-        reloadTimer->x = 35, reloadTimer->y = 2, reloadTimer->w = 24; 
         int width, height;
         TTF_SizeText(font, "0123456789|HP: ", &width, &height);
         for(int i = 0; i < 11; i++)
@@ -195,6 +234,46 @@ PUBLIC void initGameHUD(SDL_Renderer *renderer, SDL_Rect textRect[], SDL_Texture
         textRect[11].y = 0;
         textRect[11].w = width/15*4;
         textRect[11].h = height;
+
+        // Scorescreen
+
+        aScorerect[0].x = 0;
+        aScorerect[0].y = 0;
+        aScorerect[0].w = width/15;
+        aScorerect[0].h = height;
+
+        textSurface = TTF_RenderText_Solid(font, "Player Kills", color);
+        *scoreTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
+        SDL_FreeSurface(textSurface);
+        TTF_SizeText(font, "Player Kills", &width, &height);
+
+        for (int i = 1; i < 3; i++)
+        {
+            aScorerect[i].x = 0;
+            aScorerect[i].y = 0;
+            aScorerect[i].w = width;
+            aScorerect[i].h = height;
+        }
+        aScorerect[3].x = 0;
+        aScorerect[3].y = 0;
+        aScorerect[3].w = width;
+        aScorerect[3].h = height;
+        TTF_CloseFont(font);
+        // Roundstate
+        font = TTF_OpenFont("unispace_bd.ttf", 72);
+        textSurface = TTF_RenderText_Solid(font, "WARMUP          PREPARE TO FIGHT", color);
+        *roundStateTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
+        SDL_FreeSurface(textSurface);
+        TTF_SizeText(font, "WARMUP          PREPARE TO FIGHT", &width, &height);
+        for (int i = 0; i < 3; i++)
+        {
+            aRoundStateRect[i].x = 0 + i*width/2;
+            aRoundStateRect[i].y = 0;
+            aRoundStateRect[i].w = width/2;
+            aRoundStateRect[i].h = height;
+        }
+
+        
         TTF_CloseFont(font);
     }
 }

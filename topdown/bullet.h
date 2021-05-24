@@ -1,6 +1,7 @@
 #ifndef BULLET_H
 #define BULLET_H
 #include "sdlinclude.h"
+#include "world.h"
 #include <stdbool.h>
 
 #define BULLET_SPEED 10
@@ -24,5 +25,4 @@ bool bulletShot(Bullet a);
 int getBulletOriginX(Bullet a);
 int getBulletOriginY(Bullet a);
 bool checkShot(Bullet a);
-
 #endif

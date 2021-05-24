@@ -1,7 +1,5 @@
 #include <stdlib.h>
 #include "player.h"
-#include "world.h"
-#include "weapon.h"
 #include <math.h>
 
 #define PUBLIC
@@ -12,6 +10,7 @@
 #define SNAP_DISTANCE 10
 #define PLAYER_CENTER_OFFSET_X 20
 #define PLAYER_CENTER_OFFSET_Y 32
+#define PLAYER_RADIUS 20
 
 struct Player_type {
     int health;
@@ -33,6 +32,8 @@ struct Player_type {
     int gunBarrelX, gunBarrelY;
     int lives;
     double shotAngle;
+    bool killed;// tillfälligt för dödsljud
+    int kills;
 };
 
 PUBLIC Player createPlayer(int x, int y)
@@ -59,6 +60,8 @@ PUBLIC Player createPlayer(int x, int y)
     a->newDirection = 0;
     a->gun = createWeapon();
     a->lives = 0;
+    a->killed = false;//tillfälligt för dödsljud
+    a->kills = 0;
     return a;
 }
 
@@ -81,48 +84,25 @@ PUBLIC void movePlayer(Player p, int up, int down, int right, int left, int mous
     p->posX += p->diaSpeed * diagonal * newX + p->speed * !diagonal * newX;
     p->posY += p->diaSpeed * diagonal * newY + p->speed * !diagonal * newY;
 
-    // Set new pixel pos of player
+    wallPlayerCollisionHandling(&(p->posX), &(p->posY), PLAYER_RADIUS);
+    
+    // Collision detection with window
+    if (p->posY-PLAYER_RADIUS <= 0) p->posY = PLAYER_RADIUS;
+    if (p->posY+PLAYER_RADIUS >= WINDOWHEIGHT) p->posY = WINDOWHEIGHT - PLAYER_RADIUS;
+    if (p->posX-PLAYER_RADIUS <= 0) p->posX = PLAYER_RADIUS;
+    if (p->posX+PLAYER_RADIUS >= WINDOWWIDTH) p->posX = WINDOWWIDTH - PLAYER_RADIUS;
+
+    // Update player rectangle
     p->pDimensions.x = round(p->posX)-PLAYER_CENTER_OFFSET_X;
     p->pDimensions.y = round(p->posY)-PLAYER_CENTER_OFFSET_Y;
-    if (getWallCollisionPlayer(p->pDimensions.x, p->pDimensions.y))   // Collision x-led
-    {
-        if (right)
-        {
-            p->posX -= 2;
-            p->pDimensions.x -= 2;
-        }
-        if (left)
-        {
-            p->posX += 2;
-            p->pDimensions.x += 2;
-        }
-    }
-    if (getWallCollisionPlayer(p->pDimensions.x, p->pDimensions.y))   // Collision y-led
-    {
-        if (up)
-        {
-            p->posY += 2;
-            p->pDimensions.y += 2;
-        }
-        if (down)
-        {
-            p->posY -= 2;
-            p->pDimensions.y -= 2;
-        }
-    }
+
     // Update player sprite frame
     p->frameCounter = (p->frameCounter + p->isMoving) % (ANIMATIONSPEED + 1);
     p->frame = (p->frame + ((p->frameCounter / ANIMATIONSPEED) * p->isMoving)) % 4;
     // Rotate player
     p->direction = (atan2(mouseY - p->pDimensions.y - 34, mouseX - p->pDimensions.x - 18) * 180 / M_PI) - 6;
-
+    // Update shooting angle
     p->shotAngle = atan2(mouseY - getPlayerGunbarrelY(p), mouseX - getPlayerGunbarrelX(p));
-    // Collision detection with window
-    if (p->pDimensions.y <= 0) {p->pDimensions.y = 0; p->posY = PLAYER_CENTER_OFFSET_Y;}
-    if (p->pDimensions.y >= WINDOWHEIGHT - p->pDimensions.h) { p->pDimensions.y = WINDOWHEIGHT - p->pDimensions.h; p->posY = p->pDimensions.y + PLAYER_CENTER_OFFSET_Y;}
-    if (p->pDimensions.x <= 0) {p->pDimensions.x = 0; p->posX = PLAYER_CENTER_OFFSET_X;}
-    if (p->pDimensions.x >= WINDOWWIDTH - p->pDimensions.w) { p->pDimensions.x = WINDOWWIDTH - p->pDimensions.w; p->posX = p->pDimensions.x + PLAYER_CENTER_OFFSET_X;}
-
 }
 
 PUBLIC double getPlayerDirection(Player p)
@@ -153,6 +133,26 @@ PUBLIC int getPlayerY(Player p)
 PUBLIC void activatePlayer(Player p)
 {
     p->active = true;
+}
+
+PUBLIC void setActivePlayer(Player p, bool newValue)
+{
+    p->active = newValue;
+}
+
+PUBLIC bool isPlayerActive(Player p)
+{
+    return p->active;
+}
+
+PUBLIC int getPlayerKills(Player p)
+{
+    return p->kills;
+}
+
+PUBLIC void setPlayerKills(Player p, int newValue)
+{
+    p->kills = newValue;
 }
 
 PUBLIC void updatePlayerPosition(Player p, int x, int y, int direction, bool alive)
@@ -337,4 +337,23 @@ PUBLIC void resetPlayer(Player a)
 PUBLIC double getPlayerShotAngle(Player a)
 {
     return a->shotAngle;
+}
+
+PUBLIC int getPlayerRadius()
+{
+    return PLAYER_RADIUS;
+}
+PUBLIC bool checkKilled(Player a) // experiment f�r att testa d�dsljud
+{
+    if (a->killed)
+    {
+        a->killed = false;
+        return true;
+    }
+    else return false;
+}
+
+PUBLIC void setKilled(Player p, bool n)
+{
+    p->killed = n;
 }
