@@ -55,6 +55,7 @@ int main(int argc, char* args[])
     SDL_Rect bloodTiles[48];
     SDL_Texture* explosionTexture = NULL;
     SDL_Texture *textTexture;
+    SDL_Texture* backgroundTexture = NULL;
     SDL_Rect textRect[15];
     SDL_Rect aRoundStateRect[3];
     SDL_Texture* roundStateTexture;
@@ -77,7 +78,7 @@ int main(int argc, char* args[])
     if (!initSDL(&renderer, &sound, &soundWall, &soundDeath)) return 1;
     initGameObjects(players, bullets);
     initGameHUD(renderer, textRect, &textTexture, aScoreRect, &scoreTexture, aRoundStateRect, &roundStateTexture);
-    loadMenu(renderer, connectTextures, hostTextures, quitTextures);
+    loadMenu(renderer, connectTextures, hostTextures, quitTextures, &backgroundTexture);
     initClient(&sd, &p, &p2);
     loadMedia(renderer, gridTiles, &tiles, playerRect, &playerText, &cursor, &bulletTexture, 
             &gunFireTexture, &explosionTexture, &bloodTexture, 
@@ -100,7 +101,7 @@ int main(int argc, char* args[])
     while (isPlaying && !connected)
     {
         handleEvents(&event, &up, &down, &right, &left, &isPlaying, &mouse, &shooting, &reload, &mute, &tcpMessage, &scoreScreen);
-        renderMenu(renderer, connectTextures, hostTextures, quitTextures, buttons, mouse.x, mouse.y, shooting);
+        renderMenu(renderer, connectTextures, hostTextures, quitTextures, buttons, backgroundTexture, mouse.x, mouse.y, shooting);
 
         if (mouse.x >= (WINDOWWIDTH / 2) - BUTTON_HEIGHT && mouse.x <= (WINDOWWIDTH / 2) + BUTTON_HEIGHT)
         {
@@ -109,7 +110,7 @@ int main(int argc, char* args[])
             {
                 setButtonPressed(buttons[0], true);
                 connectPrompt(hostIP);
-                printf("%s", hostIP);
+                printf("%s\n", hostIP);
                 connectToServer(hostIP, &srvadd, &tcpsock, networkgamestate, &playerID, players, &sd, &connected);
                 startUDPreceiveThread(&sd, &p2, bullets, players, &networkgamestate, playerID, &mutex);
                 SDLNet_TCP_AddSocket(set, tcpsock);

@@ -14,7 +14,7 @@ bool initSDL(SDL_Renderer** renderer, Mix_Chunk** sound, Mix_Chunk** soundWall, 
 void initClient(UDPsocket* sd, UDPpacket** p, UDPpacket** p2);
 void initGameHUD(SDL_Renderer *renderer, SDL_Rect textRect[], SDL_Texture **textTexture, SDL_Rect aScorerect[], SDL_Texture** scoreTexture, SDL_Rect aRoundStateRect[], SDL_Texture** roundStateTexture);
 // void initGameHUD(SDL_Renderer* renderer, SDL_Rect textRect[], SDL_Texture** textTexture, SDL_Rect* healthBar, SDL_Rect* reloadTimer, SDL_Rect aScorerect[], SDL_Texture** scoreTexture, SDL_Rect aRoundStateRect[], SDL_Texture** roundStateTexture);
-void loadMenu(SDL_Renderer* renderer, SDL_Texture* connectTextures[], SDL_Texture* hostTexture[], SDL_Texture* quitTexture[]);
+void loadMenu(SDL_Renderer* renderer, SDL_Texture* connectTextures[], SDL_Texture* hostTextures[], SDL_Texture* quitTextures[], SDL_Texture* backgroundTexture);
 void loadMedia(SDL_Renderer* renderer, SDL_Rect gTiles[], SDL_Texture** tiles, SDL_Rect playerRect[], 
                 SDL_Texture** pTexture, SDL_Cursor** cursor, SDL_Texture** bulletTexture, 
                 SDL_Texture** gunFireTexture, SDL_Texture** explosionTexture, 
