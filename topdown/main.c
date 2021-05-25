@@ -53,7 +53,6 @@ int main(int argc, char* args[])
     Mix_Chunk* prepareToFight;
     SDL_Texture* bloodTexture = NULL;
     SDL_Rect bloodTiles[48];
-    SDL_Rect bloodTiles2[48];
     SDL_Texture* explosionTexture = NULL;
     SDL_Texture *textTexture;
     SDL_Rect textRect[15];
@@ -83,7 +82,7 @@ int main(int argc, char* args[])
     initClient(&sd, &p, &p2);
     loadMedia(renderer, gridTiles, &tiles, playerRect, &playerText, &cursor, &bulletTexture, 
             &gunFireTexture, &explosionTexture, &bloodTexture, 
-            &sound, explosionTiles, bloodTiles, &soundWall, &soundDeath, &bloodTexture2, bloodTiles2, &prepareToFight);
+            &sound, explosionTiles, bloodTiles, &soundWall, &soundDeath, &prepareToFight);
             
 
     // För ny runda återställ kartan

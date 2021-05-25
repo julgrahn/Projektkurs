@@ -78,7 +78,7 @@ PUBLIC void loadMedia(SDL_Renderer* renderer, SDL_Rect gTiles[], SDL_Texture** t
                         SDL_Texture** gunFireTexture, SDL_Texture** explosionTexture, 
                         SDL_Texture** bloodTexture, Mix_Chunk** sound, SDL_Rect explosionTiles[],
                         SDL_Rect bloodTiles[], Mix_Chunk** soundWall, Mix_Chunk** soundDeath,
-                        SDL_Texture** bloodTexture2, SDL_Rect bloodTiles2[], Mix_Chunk** prepareToFight)
+                        Mix_Chunk** prepareToFight)
                         
                     
 {
@@ -163,22 +163,6 @@ PUBLIC void loadMedia(SDL_Renderer* renderer, SDL_Rect gTiles[], SDL_Texture** t
             bloodTiles[i * 4 + j].h = 512;
         }
     }
-
-    SDL_Surface* bloodSurface2 = IMG_Load("resources/blood - left 1.png");
-    *bloodTexture2 = SDL_CreateTextureFromSurface(renderer, bloodSurface2);
-    SDL_FreeSurface(bloodSurface2);
-    for (int i = 0; i < 4; i++)
-    {
-        for (int j = 0; j < 4; j++)
-        {
-            bloodTiles2[i * 4 + j].x = j * 512;
-            bloodTiles2[i * 4 + j].y = i * 512;
-            bloodTiles2[i * 4 + j].w = 512;
-            bloodTiles2[i * 4 + j].h = 512;
-        }
-    }
-    
-
 
     // Gunfire Soundeffect
     *sound = Mix_LoadWAV("resources/gunsound2.wav");
