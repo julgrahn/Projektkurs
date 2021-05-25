@@ -1,7 +1,15 @@
 #include "gameFunctions.h"
+#include "button.h"
+#include "bullet.h"
+#include "server.h"
+#include "networkgamestate.h"
+#include "clientNetFunctions.h"
+#include "player.h"
+#include <stdbool.h>
 
 #define PUBLIC /* empty */
 #define PRIVATE static
+
 
 PUBLIC void updateplayers(Networkgamestate networkgamestate, Player players[], int playerID)
 {

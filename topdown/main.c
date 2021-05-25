@@ -16,8 +16,12 @@ SDL_mutex* mutex;
 
 void renderTestBullets(SDL_Renderer *renderer, Bullet bullets[][MAX_BULLETS], SDL_Texture *testText); // Synligare bullets för testing 
 
+<<<<<<< Updated upstream
 void handleEvents(SDL_Event* event, int* up, int* down, int* right, int* left, bool* isPlaying, SDL_Point *mouse, bool* shooting, bool *reload, int *tcpMessage, bool* scoreScreen);
 void startPrompt(int* playerID, Server* server, bool* host);
+=======
+void handleEvents(SDL_Event* event, int* up, int* down, int* right, int* left, bool* isPlaying, SDL_Point *mouse, bool* shooting, bool* newGame, bool *reload);
+>>>>>>> Stashed changes
 void handleClientTCP(TCPsocket* tcpsock, SDLNet_SocketSet* set, Networkgamestate networkgamestate, Player players[], int playerID);
 
 
@@ -61,6 +65,7 @@ int main(int argc, char* args[])
     explosionRect.w = 40;
     explosionRect.h = 40;
     SDL_Texture *textTexture;
+    SDL_Texture* backgroundTexture = NULL;
     SDL_Rect textRect[15];
     SDL_Rect healthBar;
     SDL_Rect reloadTimer;
@@ -85,8 +90,13 @@ int main(int argc, char* args[])
     mutex = SDL_CreateMutex();
     if (!initSDL(&renderer, &sound)) return 1;
     initGameObjects(players, bullets);
+<<<<<<< Updated upstream
     initGameHUD(renderer, textRect, &textTexture, &healthBar, &reloadTimer, aScoreRect, &scoreTexture, aRoundStateRect, &roundStateTexture);
     loadMenu(renderer, connectTextures, hostTextures, quitTextures);
+=======
+    initGameHUD(renderer, textRect, &textTexture, aScoreRect, &scoreTexture, aRoundStateRect, &roundStateTexture);
+    loadMenu(renderer, connectTextures, hostTextures, quitTextures, &backgroundTexture);
+>>>>>>> Stashed changes
     initClient(&sd, &p, &p2);
     loadMedia(renderer, gridTiles, &tiles, playerRect, &playerText, &cursor, &bulletTexture, 
             &gunFireTexture, &explosionTexture, &bloodTexture, 
@@ -105,8 +115,13 @@ int main(int argc, char* args[])
     buttons[2] = createButton((WINDOWWIDTH / 2) - BUTTON_HEIGHT, QUIT_Y_POS);
     while (isPlaying && !connected)
     {
+<<<<<<< Updated upstream
         handleEvents(&event, &up, &down, &right, &left, &isPlaying, &mouse, &shooting, &reload, &tcpMessage, &scoreScreen);
         renderMenu(renderer, connectTextures, hostTextures, quitTextures, buttons, mouse.x, mouse.y, shooting);
+=======
+        handleEvents(&event, &up, &down, &right, &left, &isPlaying, &mouse, &shooting, &reload, &mute, &tcpMessage, &scoreScreen);
+        renderMenu(renderer, connectTextures, hostTextures, quitTextures, buttons, backgroundTexture, mouse.x, mouse.y, shooting);
+>>>>>>> Stashed changes
 
         if (mouse.x >= (WINDOWWIDTH / 2) - BUTTON_HEIGHT && mouse.x <= (WINDOWWIDTH / 2) + BUTTON_HEIGHT)
         {
@@ -114,7 +129,13 @@ int main(int argc, char* args[])
             if (mouse.y > CONNECT_Y_POS && mouse.y < CONNECT_Y_POS + BUTTON_HEIGHT && shooting)
             {
                 setButtonPressed(buttons[0], true);
+<<<<<<< Updated upstream
                 connectToServer(LOCAL_IP, &srvadd, &tcpsock, networkgamestate, &playerID, players, &sd, &connected);
+=======
+                connectPrompt(hostIP);
+                printf("%s\n", hostIP);
+                connectToServer(hostIP, &srvadd, &tcpsock, networkgamestate, &playerID, players, &sd, &connected);
+>>>>>>> Stashed changes
                 startUDPreceiveThread(&sd, &p2, bullets, players, &networkgamestate, playerID, &mutex);
                 SDLNet_TCP_AddSocket(set, tcpsock);
             }
@@ -139,9 +160,42 @@ int main(int argc, char* args[])
             }
         }
     }
+<<<<<<< Updated upstream
     // Main loop
     while (isPlaying)
     {
+=======
+      
+    // Main loop
+    while (isPlaying)
+    {
+        SDL_Delay(1000 / 60);
+        //Om ny runda
+        if (getRoundState(networkgamestate) == 1)
+        {
+            if (newRoundFlag)
+            {
+                newRound(prepareToFight);
+                newRoundFlag = false;
+            }
+        }
+        else
+        {
+            newRoundFlag = true;
+        }
+        //Ljud av/på
+        if (mute)
+        {
+            Mix_Volume(-1, 0);
+        }
+        else
+        {
+            Mix_Volume(-1, 5);
+        }
+
+        //Spel
+
+>>>>>>> Stashed changes
         playerTick(players[playerID]);
         handleEvents(&event, &up, &down, &right, &left, &isPlaying, &mouse, &shooting, &reload, &tcpMessage, &scoreScreen);
         if (tcpMessage && host)

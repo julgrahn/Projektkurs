@@ -240,8 +240,10 @@ PUBLIC void initGameHUD(SDL_Renderer *renderer, SDL_Rect textRect[], SDL_Texture
     }
 }
 
-PUBLIC void loadMenu(SDL_Renderer* renderer, SDL_Texture* connectTextures[], SDL_Texture* hostTextures[], SDL_Texture* quitTextures[])
+PUBLIC void loadMenu(SDL_Renderer* renderer, SDL_Texture* connectTextures[], SDL_Texture* hostTextures[], SDL_Texture* quitTextures[], SDL_Texture** backgroundTexture)
 {
+    SDL_Surface* background = IMG_Load("resources/rambo-2.png");
+
     SDL_Surface* connectButton = IMG_Load("resources/ConnectGrey.png");
     SDL_Surface* connectButtonHover = IMG_Load("resources/ConnectWhite.png");
     SDL_Surface* connectButtonClick = IMG_Load("resources/ConnectGreen.png");
@@ -265,6 +267,8 @@ PUBLIC void loadMenu(SDL_Renderer* renderer, SDL_Texture* connectTextures[], SDL
     quitTextures[0] = SDL_CreateTextureFromSurface(renderer, quitButton);
     quitTextures[1] = SDL_CreateTextureFromSurface(renderer, quitButtonHover);
     quitTextures[2] = SDL_CreateTextureFromSurface(renderer, quitButtonClick);
+
+    *backgroundTexture = SDL_CreateTextureFromSurface(renderer, background);
 
     SDL_FreeSurface(connectButton);
     SDL_FreeSurface(connectButtonHover);
