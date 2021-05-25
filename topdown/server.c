@@ -38,6 +38,7 @@ struct Server_type {
     SDLNet_SocketSet set;
     bool warmup;
     int spawnTime;
+    uint32_t wallStates[27];
 };
 
 PUBLIC Server createServer()
@@ -129,11 +130,14 @@ PRIVATE void runServer(void* args)
     int Gamelogicdelay = 0;
     int invulnerabilityDelay[MAX_PLAYERS] = {0};
     int respawnDelay[MAX_PLAYERS] = {0}; 
+    copyWallState(server->wallStates);
 
+    for (int i = 0; i < MAX_PLAYERS; i++)
+    {
+        copyWallState(getWallState(server->state, i));
+    }
+    
     SDL_Point a, b;
-    // SDL_Rect a, b;
-    // a.w = a.h = 64;
-    // b.w = b.h = 4;
     // Main-loop
     while (true)
     {
@@ -313,6 +317,14 @@ PRIVATE void startNewGame(Server server, int respawnDelay[])
 {   
     server->warmup = false;
     setRoundState(server->state, 1);
+    
+    resetTileGridMap();
+    
+    copyWallState(server->wallStates);
+    for (int i = 0; i < MAX_PLAYERS; i++)
+    {
+        copyWallState(getWallState(server->state, i));
+    }
 
     for (int i = 0; i < MAX_PLAYERS; i++)
     {
@@ -428,6 +440,7 @@ PRIVATE void handleGameLogic(Server server, int respawnDelay[], SDL_Point *a, SD
             }
         }
     }
+    combineWallstates(server->state, server->wallStates);
 }
 
 PRIVATE bool circleHitDetect(SDL_Point *a, int rad0, SDL_Point *b, int rad1)

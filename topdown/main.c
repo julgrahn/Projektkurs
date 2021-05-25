@@ -188,7 +188,9 @@ int main(int argc, char* args[])
             }
         }
         //printf("%d\n", getRoundState(networkgamestate)); // felsökningsprintf
+        updateMap();
         simulateBullets(bullets);
+        copyWallState(getWallState(networkgamestate, playerID));
         setNetPlayer(networkgamestate, playerID, players[playerID]);
         setNetBullets(networkgamestate, playerID, bullets[playerID]);
         sendUDP(getNetPlayer(networkgamestate, playerID), &sd, &srvadd, &p, &p2);

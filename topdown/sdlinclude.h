@@ -27,7 +27,7 @@
 
 #define WINDOWWIDTH 1152
 #define WINDOWHEIGHT 768
-#define MAX_BULLETS 13
+#define MAX_BULLETS 9
 #define BUTTON_HEIGHT 64
 #define CONNECT_Y_POS 100
 #define HOST_Y_POS 200
