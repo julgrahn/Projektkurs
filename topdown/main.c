@@ -20,7 +20,6 @@ SDL_mutex* mutex;
 void renderTestBullets(SDL_Renderer *renderer, Bullet bullets[][MAX_BULLETS], SDL_Texture *testText); // Synligare bullets för testing 
 
 void handleEvents(SDL_Event* event, int* up, int* down, int* right, int* left, bool* isPlaying, SDL_Point *mouse, bool* shooting, bool *reload, bool *mute, int *tcpMessage, bool* scoreScreen);
-void handleClientTCP(TCPsocket* tcpsock, SDLNet_SocketSet* set, Networkgamestate networkgamestate, Player players[], int playerID);
 void connectPrompt(char* ip);
 
 int main(int argc, char* args[])
@@ -154,15 +153,7 @@ int main(int argc, char* args[])
             newRoundFlag = true;
         }
         //Ljud av/på
-        if (mute)
-        {
-            Mix_Volume(-1, 0);
-        }
-        else
-        {
-            Mix_Volume(-1, 5);
-        }
-
+        Mix_Volume(-1, 5*!mute);
         //Spel
         playerTick(players[playerID]);
 
@@ -267,14 +258,7 @@ void handleEvents(SDL_Event* event, int* up, int* down, int* right, int* left, b
                 *reload = true;
                 break;
             case SDL_SCANCODE_M:
-                if(*mute)
-                {
-                    *mute = false;
-                }
-                else
-                {
-                    *mute = true;
-                }
+                *mute = (*mute+1)%2;
                 break;
             default:
                 break;
