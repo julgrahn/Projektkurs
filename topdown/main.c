@@ -19,7 +19,7 @@ SDL_mutex* mutex;
 
 void renderTestBullets(SDL_Renderer *renderer, Bullet bullets[][MAX_BULLETS], SDL_Texture *testText); // Synligare bullets för testing 
 
-void handleEvents(SDL_Event* event, int* up, int* down, int* right, int* left, bool* isPlaying, SDL_Point *mouse, bool* shooting, bool* newGame, bool *reload);
+void handleEvents(SDL_Event* event, int* up, int* down, int* right, int* left, bool* isPlaying, SDL_Point *mouse, bool* shooting, bool *reload, bool *mute, int *tcpMessage, bool* scoreScreen);
 void handleClientTCP(TCPsocket* tcpsock, SDLNet_SocketSet* set, Networkgamestate networkgamestate, Player players[], int playerID);
 void connectPrompt(char* ip);
 
@@ -136,25 +136,26 @@ int main(int argc, char* args[])
             }
         }
     }
-    //Om ny runda
-    if (getRoundState(networkgamestate) == 1)
-    {
-        if (newRoundFlag)
-        {
-            newRound(prepareToFight);
-            newRoundFlag = false;
-        }
-    }
-    else
-    {
-        newRoundFlag = true;
-    }
-    //Ljud av/på
-    Mix_Volume(-1, 5*!mute);
     //Spel
     // Main loop
     while (isPlaying)
     {
+        //Om ny runda
+        if (getRoundState(networkgamestate) == 1)
+        {
+            if (newRoundFlag)
+            {
+                newRound(prepareToFight);
+                newRoundFlag = false;
+            }
+        }
+        else
+        {
+            newRoundFlag = true;
+        }
+        //Ljud av/på
+        Mix_Volume(-1, 5*!mute);
+        
         playerTick(players[playerID]);
 
         if (getRoundState(networkgamestate) == 3)
@@ -366,9 +367,6 @@ void connectPrompt(char* hostIP)
         break;
     }
     //fgets(hostIP, sizeof(hostIP), stdin);
-
-
-    return 0;
 }
 
 void renderTestBullets(SDL_Renderer *renderer, Bullet bullets[][MAX_BULLETS], SDL_Texture *testText)

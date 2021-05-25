@@ -11,23 +11,23 @@
 *********************/
 
 
-#include <SDL.h>
-#include <SDL_image.h>
-#include <SDL_timer.h>
-#include <SDL_net.h>
-#include <SDL_mixer.h>
-#include <SDL_ttf.h>
-// #include <SDL2/SDL.h>
-// #include <SDL2/SDL_image.h>
-// #include <SDL2/SDL_timer.h>
-// #include <SDL2/SDL_net.h>
-// #include <SDL2/SDL_mixer.h>
-// #include <SDL2/SDL_ttf.h>
+// #include <SDL.h>
+// #include <SDL_image.h>
+// #include <SDL_timer.h>
+// #include <SDL_net.h>
+// #include <SDL_mixer.h>
+// #include <SDL_ttf.h>
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
+#include <SDL2/SDL_timer.h>
+#include <SDL2/SDL_net.h>
+#include <SDL2/SDL_mixer.h>
+#include <SDL2/SDL_ttf.h>
 
 
 #define WINDOWWIDTH 1152
 #define WINDOWHEIGHT 768
-#define MAX_BULLETS 10
+#define MAX_BULLETS 13
 #define BUTTON_HEIGHT 64
 #define CONNECT_Y_POS 100
 #define HOST_Y_POS 200
