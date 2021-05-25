@@ -1,6 +1,7 @@
 #ifndef WAEPON_H
 #define WAEPON_H
-#include "sdlinclude.h"
+
+#include <stdlib.h>
 #include <stdbool.h>
 
 typedef struct Weapon_type* Weapon;

@@ -1,3 +1,5 @@
+#pragma warning(disable : 4996)
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -192,7 +194,6 @@ PRIVATE void handleUDPreceive(Server server)
                 int lives = getNetplayerLives(server->state, i);
                 int kills = getNetPlayerKills(server->state, i);
                 bool invulnerable = isNetplayerInvulnerable(server->state, i);
-
                 memcpy(getNetPlayer(server->state, i), server->pRecive->data, getNetPlayerSize());
                 for(int j = 0; j < MAX_BULLETS; j++)
                 {
@@ -383,6 +384,7 @@ PRIVATE void handleGameLogic(Server server, int respawnDelay[], SDL_Point *a, SD
                                         }
                                         if (noOfPlayersAlive == 1)
                                         {
+                                            setRoundState(server->state, 3);
                                             printf("----------------------------------------\n");
                                             printf("%d seconds | Player % d has won!!!\n", SDL_GetTicks() / 1000, i);
                                             printf("----------------------------------------\n");

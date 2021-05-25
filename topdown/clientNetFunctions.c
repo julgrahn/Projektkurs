@@ -1,3 +1,5 @@
+#pragma warning(disable : 4996)
+
 #include "clientNetFunctions.h"
 
 #define PUBLIC /* empty */
@@ -31,7 +33,7 @@ PUBLIC void connectToServer(char* ip, IPaddress* srvadd, TCPsocket* tcpsock, Net
     if (!*tcpsock)
     {
         fprintf(stderr, "SDLNet_TCP_Open: %s\n", SDLNet_GetError());
-        exit(EXIT_FAILURE);
+        return;
     }
     char msg[1024];
 
@@ -121,6 +123,7 @@ PUBLIC void handleClientTCP(TCPsocket* tcpsock, SDLNet_SocketSet* set, Networkga
     }
 }
 
+// PUBLIC void startNewGame(TCPsocket* tcpsock)
 
 
 void sendTCPtoServer(TCPsocket* tcpsock, int message)

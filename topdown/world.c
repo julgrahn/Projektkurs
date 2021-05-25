@@ -1,8 +1,12 @@
 #include "world.h"
+#include "player.h"
+
 #define PUBLIC
+#define PRIVATE static
 
-
-
+PRIVATE void wallColMultiAngleCompensation(double *xPos, double *yPos, int xWall, int yWall, int minDistance);
+PRIVATE void wallColSingleAngleCompensation(double *pos, int wallStart, int wallEnd, int minDistance);
+PRIVATE void countWallHits(int i, int j);
 enum material { sp = 121, br = 120, wa = 186, wall2 = 246, wall3 = 216 };
 // enum material { br = 222, wall = 186, truck = 102, wall2 = 246, wall3 = 216 };
 
@@ -70,32 +74,76 @@ int getTileGrid(int x, int y) {
 int getTileGridHits(int x, int y) {
     return tileGridHits[x][y];
 }
-PUBLIC int getWallCollisionPlayer(int x, int y) {
+
+PUBLIC void wallPlayerCollisionHandling(double *posX, double *posY, int r)
+{
     int wallCordStartX;
     int wallCordEndX;
     int wallCordStartY;
     int wallCordEndY;
-    for (int i = 0; i < tileRows; i++)
-    {
-        for (int j = 0; j < tileColumns; j++)
-        {
-            if (tileGrid[i][j] != br)
+    for(int n = 0; n < 2; n++)
+        for (int i = 0; i < tileRows; i++)
+            for (int j = 0; j < tileColumns; j++)
             {
-                wallCordStartX = j * 32;
-                wallCordEndX = j * 32 + 32;
-                wallCordStartY = i * 32;
-                wallCordEndY = i * 32 + 32;
-
-                if (x + 64 >= wallCordStartX + 20 && x <= wallCordEndX && y + 64 >= wallCordStartY + 15 && y <= wallCordEndY - 15) // addition och sub med konstanterna i IF sats baseras p� spelarrektangel och kan beh�va anpassas. 
+                if (tileGrid[i][j] != br)
                 {
-                    return 1;
+                    wallCordStartX = j * 32;
+                    wallCordEndX = j * 32 + 32;
+                    wallCordStartY = i * 32;
+                    wallCordEndY = i * 32 + 32;
+                    if(n == 0)
+                    {
+                        // X-AXIS
+                        if(*posX+r >= wallCordStartX && *posX-r <= wallCordEndX && *posY >= wallCordStartY && *posY <= wallCordEndY)
+                            wallColSingleAngleCompensation(posX, wallCordStartX, wallCordEndX, r);
+                        
+                        // Y-AXIS
+                        if(*posY+r >= wallCordStartY && *posY-r <= wallCordEndY && *posX >= wallCordStartX && *posX <= wallCordEndX)
+                            wallColSingleAngleCompensation(posY, wallCordStartY, wallCordEndY, r);
+                    }
+                    // TOP LEFT
+                    else if(*posX < wallCordStartX && *posY < wallCordStartY)
+                        wallColMultiAngleCompensation(posX, posY, wallCordStartX, wallCordStartY, r);
+                    
+                    // TOP RIGHT
+                    else if(*posX > wallCordEndX && *posY < wallCordStartY)
+                        wallColMultiAngleCompensation(posX, posY, wallCordEndX, wallCordStartY, r);
+                
+                    // BOTTOM LEFT
+                    else if(*posX < wallCordStartX && *posY > wallCordEndY)
+                        wallColMultiAngleCompensation(posX, posY, wallCordStartX, wallCordEndY, r);
+
+                    // BOTTOM RIGHT
+                    else if(*posX > wallCordEndX && *posY > wallCordEndY)
+                        wallColMultiAngleCompensation(posX, posY, wallCordEndX, wallCordEndY, r);
                 }
             }
-        }
-    }
-    return 0;
 }
-PUBLIC bool getWallCollisionBullet(int x, int y, int h, int w) {
+
+PRIVATE void wallColSingleAngleCompensation(double *pos, int wallStart, int wallEnd, int minDistance)
+{
+    double delta;
+    delta = fabs(*pos - wallStart);
+    if(delta < fabs(*pos - wallEnd))
+        *pos = wallStart - minDistance;
+    else *pos = wallEnd + minDistance;
+}
+
+PRIVATE void wallColMultiAngleCompensation(double *xPos, double *yPos, int xWall, int yWall, int minDistance)
+{
+    double xDelta, yDelta;
+    double distance = sqrt((*xPos - xWall)*(*xPos - xWall) + (*yPos - yWall)*(*yPos - yWall));
+    if(distance < minDistance)
+    {
+        xDelta = *xPos-xWall;
+        yDelta = *yPos-yWall;
+        *xPos += (minDistance-distance)*xDelta/distance;
+        *yPos += (minDistance-distance)*yDelta/distance;
+    }
+}
+
+PUBLIC bool getWallCollisionBullet(int x, int y, int h, int w)
+{
     for (int i = 0; i < tileRows; i++)
     {
         for (int j = 0; j < tileColumns; j++)
@@ -111,7 +159,7 @@ PUBLIC bool getWallCollisionBullet(int x, int y, int h, int w) {
                 {
                     if(tileGrid[i][j] == wa || tileGrid[i][j] == wall2 || tileGrid[i][j] == wall3)
                     {
-                        countWallHits(i, j);  // Ta bort kommentaren om du vill förstöra väggar
+                        //countWallHits(i, j);  // Ta bort kommentaren om du vill förstöra väggar
                     }
                     return true;
                 }
@@ -121,7 +169,7 @@ PUBLIC bool getWallCollisionBullet(int x, int y, int h, int w) {
     return false;
 }
 
-void countWallHits(int i, int j)
+PRIVATE void countWallHits(int i, int j)
 {
     tileGridHits[i][j]++;
     if (tileGridHits[i][j] == 70)
@@ -140,7 +188,7 @@ void countWallHits(int i, int j)
 }
 
 // skapar kopia av orginalkarta
-void initTileGridReset()
+PUBLIC void initTileGridReset()
 {
     for (int i = 0; i < tileRows; i++)
     {
@@ -151,7 +199,7 @@ void initTileGridReset()
     }
 }
 
-void resetTileGridMap()
+PUBLIC void resetTileGridMap()
 {
     for (int i = 0; i < tileRows; i++)
     {

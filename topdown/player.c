@@ -10,13 +10,14 @@
 #define SNAP_DISTANCE 10
 #define PLAYER_CENTER_OFFSET_X 20
 #define PLAYER_CENTER_OFFSET_Y 32
+#define PLAYER_RADIUS 20
 
 struct Player_type {
     int health;
     double speed;
     double diaSpeed;
     double posX, posY;
-    SDL_Rect pDimensions;
+    // SDL_Rect pDimensions;
     int frame;
     int frameCounter;
     int isMoving;
@@ -28,7 +29,6 @@ struct Player_type {
     double xSpeed, ySpeed;
     int newDirection;
     Weapon gun;
-    int gunBarrelX, gunBarrelY;
     int lives;
     double shotAngle;
     bool killed;// tillfälligt för dödsljud
@@ -47,10 +47,10 @@ PUBLIC Player createPlayer(int x, int y)
     a->direction = 0;
     a->posX = x;
     a->posY = y;
-    a->pDimensions.x = x-PLAYER_CENTER_OFFSET_X;
-    a->pDimensions.y = y-PLAYER_CENTER_OFFSET_Y;
-    a->pDimensions.w = 64;
-    a->pDimensions.h = 64;
+    // a->pDimensions.x = x-PLAYER_CENTER_OFFSET_X;
+    // a->pDimensions.y = y-PLAYER_CENTER_OFFSET_Y;
+    // a->pDimensions.w = 64;
+    // a->pDimensions.h = 64;
     a->newX = x;
     a->newY = y;
     a->active = false;
@@ -83,47 +83,26 @@ PUBLIC void movePlayer(Player p, int up, int down, int right, int left, int mous
     p->posX += p->diaSpeed * diagonal * newX + p->speed * !diagonal * newX;
     p->posY += p->diaSpeed * diagonal * newY + p->speed * !diagonal * newY;
 
-    // Set new pixel pos of player
-    p->pDimensions.x = round(p->posX)-PLAYER_CENTER_OFFSET_X;
-    p->pDimensions.y = round(p->posY)-PLAYER_CENTER_OFFSET_Y;
-    if (getWallCollisionPlayer(p->pDimensions.x, p->pDimensions.y))   // Collision x-led
-    {
-        if (right)
-        {
-            p->posX -= 2;
-            p->pDimensions.x -= 2;
-        }
-        if (left)
-        {
-            p->posX += 2;
-            p->pDimensions.x += 2;
-        }
-    }
-    if (getWallCollisionPlayer(p->pDimensions.x, p->pDimensions.y))   // Collision y-led
-    {
-        if (up)
-        {
-            p->posY += 2;
-            p->pDimensions.y += 2;
-        }
-        if (down)
-        {
-            p->posY -= 2;
-            p->pDimensions.y -= 2;
-        }
-    }
+    wallPlayerCollisionHandling(&(p->posX), &(p->posY), PLAYER_RADIUS);
+    
+    // Collision detection with window
+    if (p->posY-PLAYER_RADIUS <= 0) p->posY = PLAYER_RADIUS;
+    if (p->posY+PLAYER_RADIUS >= WINDOWHEIGHT) p->posY = WINDOWHEIGHT - PLAYER_RADIUS;
+    if (p->posX-PLAYER_RADIUS <= 0) p->posX = PLAYER_RADIUS;
+    if (p->posX+PLAYER_RADIUS >= WINDOWWIDTH) p->posX = WINDOWWIDTH - PLAYER_RADIUS;
+
+    // Update player rectangle
+    // p->pDimensions.x = round(p->posX)-PLAYER_CENTER_OFFSET_X;
+    // p->pDimensions.y = round(p->posY)-PLAYER_CENTER_OFFSET_Y;
+
     // Update player sprite frame
     p->frameCounter = (p->frameCounter + p->isMoving) % (ANIMATIONSPEED + 1);
     p->frame = (p->frame + ((p->frameCounter / ANIMATIONSPEED) * p->isMoving)) % 4;
     // Rotate player
-    p->direction = (atan2(mouseY - p->pDimensions.y - 34, mouseX - p->pDimensions.x - 18) * 180 / M_PI) - 6;
-
+    p->direction = (atan2(mouseY - p->posY, mouseX - p->posX) * 180 / M_PI) - 6;
+    // p->direction = (atan2(mouseY - p->pDimensions.y - 34, mouseX - p->pDimensions.x - 18) * 180 / M_PI) - 6;
+    // Update shooting angle
     p->shotAngle = atan2(mouseY - getPlayerGunbarrelY(p), mouseX - getPlayerGunbarrelX(p));
-    // Collision detection with window
-    if (p->pDimensions.y <= 0) {p->pDimensions.y = 0; p->posY = PLAYER_CENTER_OFFSET_Y;}
-    if (p->pDimensions.y >= WINDOWHEIGHT - p->pDimensions.h) { p->pDimensions.y = WINDOWHEIGHT - p->pDimensions.h; p->posY = p->pDimensions.y + PLAYER_CENTER_OFFSET_Y;}
-    if (p->pDimensions.x <= 0) {p->pDimensions.x = 0; p->posX = PLAYER_CENTER_OFFSET_X;}
-    if (p->pDimensions.x >= WINDOWWIDTH - p->pDimensions.w) { p->pDimensions.x = WINDOWWIDTH - p->pDimensions.w; p->posX = p->pDimensions.x + PLAYER_CENTER_OFFSET_X;}
 }
 
 PUBLIC double getPlayerDirection(Player p)
@@ -136,10 +115,10 @@ PUBLIC int getPlayerHealth(Player p)
     return p->health;
 }
 
-PUBLIC SDL_Rect* getPlayerRect(Player p)
-{
-    return &p->pDimensions;
-}
+// PUBLIC SDL_Rect* getPlayerRect(Player p)
+// {
+//     return &p->pDimensions;
+// }
 
 PUBLIC int getPlayerX(Player p)
 {
@@ -204,8 +183,8 @@ PUBLIC void moveOtherPlayers(Player p)
         p->posX += p->xSpeed;
         p->posY += p->ySpeed;
 
-        p->pDimensions.x = round(p->posX)-PLAYER_CENTER_OFFSET_X;
-        p->pDimensions.y = round(p->posY)-PLAYER_CENTER_OFFSET_Y;
+        // p->pDimensions.x = round(p->posX)-PLAYER_CENTER_OFFSET_X;
+        // p->pDimensions.y = round(p->posY)-PLAYER_CENTER_OFFSET_Y;
         p->frameCounter = (p->frameCounter + 1) % (ANIMATIONSPEED + 1);
         p->frame = (p->frame + ((p->frameCounter / ANIMATIONSPEED))) % 4;
     }
@@ -273,8 +252,8 @@ PUBLIC void moveOtherPlayers(Player p)
 
 PUBLIC void snapPlayer(Player p, int x, int y)
 {
-    p->pDimensions.x = x-PLAYER_CENTER_OFFSET_X;
-    p->pDimensions.y = y-PLAYER_CENTER_OFFSET_Y;
+    // p->pDimensions.x = x-PLAYER_CENTER_OFFSET_X;
+    // p->pDimensions.y = y-PLAYER_CENTER_OFFSET_Y;
     p->newX = x;
     p->newY = y;
     p->posX = x;
@@ -360,6 +339,10 @@ PUBLIC double getPlayerShotAngle(Player a)
     return a->shotAngle;
 }
 
+PUBLIC int getPlayerRadius()
+{
+    return PLAYER_RADIUS;
+}
 PUBLIC bool checkKilled(Player a) // experiment f�r att testa d�dsljud
 {
     if (a->killed)
