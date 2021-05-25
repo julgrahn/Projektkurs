@@ -92,6 +92,10 @@ PUBLIC void renderGame(SDL_Renderer* renderer, SDL_Texture* mTiles, SDL_Rect gTi
                 // else traff på spelare, visa blod. 
                 else
                 {
+                    gunFireRect.w = 20;
+                    gunFireRect.h = 20;
+                    
+
                     if (getBulletOriginX(bullets[i][j]) < gunFireRect.x) // Skott kommer från vanster, anvander blood-right.png
                     {
                         gunFireRect.x += 8; // justering av skott i x-led så att blod kommer battre fran kroppen. 

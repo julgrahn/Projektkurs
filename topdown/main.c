@@ -205,7 +205,7 @@ int main(int argc, char* args[])
         
         renderTestBullets(renderer, bullets, bulletTEST); // Synligare bullets för testing    
 
-        renderHUD(renderer, players[playerID], textRect, textTexture, &healthBar, &reloadTimer);
+        //renderHUD(renderer, players[playerID], textRect, textTexture, &healthBar, &reloadTimer);
         renderRoundState(renderer, aRoundStateRect, roundStateTexture, getRoundState(networkgamestate));
         if (scoreScreen) renderScoreScreen(renderer, aScoreRect, scoreTexture, textRect, textTexture, players);
         SDL_UnlockMutex(mutex);
