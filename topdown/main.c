@@ -20,10 +20,6 @@ SDL_mutex* mutex;
 void renderTestBullets(SDL_Renderer *renderer, Bullet bullets[][MAX_BULLETS], SDL_Texture *testText); // Synligare bullets för testing 
 
 void handleEvents(SDL_Event* event, int* up, int* down, int* right, int* left, bool* isPlaying, SDL_Point *mouse, bool* shooting, bool* newGame, bool *reload);
-void startNewGame(TCPsocket* tcpsock);
-void startNewGame(TCPsocket* tcpsock);
-void startNewGame(TCPsocket* tcpsock);
-void startNewGame(TCPsocket* tcpsock);
 void handleClientTCP(TCPsocket* tcpsock, SDLNet_SocketSet* set, Networkgamestate networkgamestate, Player players[], int playerID);
 void connectPrompt(char* ip);
 
@@ -140,30 +136,22 @@ int main(int argc, char* args[])
             }
         }
     }
-        //Om ny runda
-        if (getRoundState(networkgamestate) == 1)
+    //Om ny runda
+    if (getRoundState(networkgamestate) == 1)
+    {
+        if (newRoundFlag)
         {
-            if (newRoundFlag)
-            {
-                newRound(prepareToFight);
-                newRoundFlag = false;
-            }
+            newRound(prepareToFight);
+            newRoundFlag = false;
         }
-        else
-        {
-            newRoundFlag = true;
-        }
-        //Ljud av/på
-        if (mute)
-        {
-            Mix_Volume(-1, 0);
-        }
-        else
-        {
-            Mix_Volume(-1, 5);
-        }
-
-        //Spel
+    }
+    else
+    {
+        newRoundFlag = true;
+    }
+    //Ljud av/på
+    Mix_Volume(-1, 5*!mute);
+    //Spel
     // Main loop
     while (isPlaying)
     {
@@ -214,10 +202,6 @@ int main(int argc, char* args[])
         renderTestBullets(renderer, bullets, bulletTEST); // Synligare bullets för testing    
 
         renderHUD(renderer, players[playerID], textRect, textTexture);
-        // renderGame(renderer, tiles, gridTiles, bullets, bulletTexture, players, playerText, 
-        //             playerRect, &playerRotationPoint, gunFireTexture, gunFireRect, 
-        //             explosionTexture, explosionRect,  &muzzleRotationPoint, bloodTexture, 
-        //             bloodRect, sound, explosionTiles, bloodTiles, soundWall, soundDeath);
           
         renderRoundState(renderer, aRoundStateRect, roundStateTexture, getRoundState(networkgamestate), winner, textRect, textTexture);
         if (scoreScreen) renderScoreScreen(renderer, aScoreRect, scoreTexture, textRect, textTexture, players);
