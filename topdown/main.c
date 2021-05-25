@@ -55,6 +55,7 @@ int main(int argc, char* args[])
     SDL_Rect bloodTiles[48];
     SDL_Texture* explosionTexture = NULL;
     SDL_Texture *textTexture;
+    SDL_Texture* backgroundTexture = NULL;
     SDL_Rect textRect[15];
     SDL_Rect aRoundStateRect[4];
     SDL_Texture* roundStateTexture;
@@ -77,8 +78,13 @@ int main(int argc, char* args[])
     mutex = SDL_CreateMutex();
     if (!initSDL(&renderer, &sound, &soundWall, &soundDeath)) return 1;
     initGameObjects(players, bullets);
-    initGameHUD(renderer, textRect, &textTexture, aScoreRect, &scoreTexture, aRoundStateRect, &roundStateTexture);
+<<<<<<< Updated upstream
+    initGameHUD(renderer, textRect, &textTexture, &healthBar, &reloadTimer, aScoreRect, &scoreTexture, aRoundStateRect, &roundStateTexture);
     loadMenu(renderer, connectTextures, hostTextures, quitTextures);
+=======
+    initGameHUD(renderer, textRect, &textTexture, aScoreRect, &scoreTexture, aRoundStateRect, &roundStateTexture);
+    loadMenu(renderer, connectTextures, hostTextures, quitTextures, &backgroundTexture);
+>>>>>>> Stashed changes
     initClient(&sd, &p, &p2);
     loadMedia(renderer, gridTiles, &tiles, playerRect, &playerText, &cursor, &bulletTexture, 
             &gunFireTexture, &explosionTexture, &bloodTexture, 
@@ -102,6 +108,10 @@ int main(int argc, char* args[])
     {
         handleEvents(&event, &up, &down, &right, &left, &isPlaying, &mouse, &shooting, &reload, &mute, &tcpMessage, &scoreScreen);
         renderMenu(renderer, connectTextures, hostTextures, quitTextures, buttons, mouse.x, mouse.y, shooting);
+=======
+        handleEvents(&event, &up, &down, &right, &left, &isPlaying, &mouse, &shooting, &reload, &mute, &tcpMessage, &scoreScreen);
+        renderMenu(renderer, connectTextures, hostTextures, quitTextures, buttons, backgroundTexture, mouse.x, mouse.y, shooting);
+>>>>>>> Stashed changes
 
         if (mouse.x >= (WINDOWWIDTH / 2) - BUTTON_HEIGHT && mouse.x <= (WINDOWWIDTH / 2) + BUTTON_HEIGHT)
         {
@@ -109,9 +119,12 @@ int main(int argc, char* args[])
             if (mouse.y > CONNECT_Y_POS && mouse.y < CONNECT_Y_POS + BUTTON_HEIGHT && shooting)
             {
                 setButtonPressed(buttons[0], true);
+                connectToServer(LOCAL_IP, &srvadd, &tcpsock, networkgamestate, &playerID, players, &sd, &connected);
+=======
                 connectPrompt(hostIP);
-                printf("%s", hostIP);
+                printf("%s\n", hostIP);
                 connectToServer(hostIP, &srvadd, &tcpsock, networkgamestate, &playerID, players, &sd, &connected);
+>>>>>>> Stashed changes
                 startUDPreceiveThread(&sd, &p2, bullets, players, &networkgamestate, playerID, &mutex);
                 SDLNet_TCP_AddSocket(set, tcpsock);
             }
@@ -136,10 +149,16 @@ int main(int argc, char* args[])
             }
         }
     }
-    //Spel
+<<<<<<< Updated upstream
     // Main loop
     while (isPlaying)
     {
+=======
+      
+    // Main loop
+    while (isPlaying)
+    {
+        SDL_Delay(1000 / 60);
         //Om ny runda
         if (getRoundState(networkgamestate) == 1)
         {
@@ -154,8 +173,18 @@ int main(int argc, char* args[])
             newRoundFlag = true;
         }
         //Ljud av/på
-        Mix_Volume(-1, 5*!mute);
-        
+        if (mute)
+        {
+            Mix_Volume(-1, 0);
+        }
+        else
+        {
+            Mix_Volume(-1, 5);
+        }
+
+        //Spel
+
+>>>>>>> Stashed changes
         playerTick(players[playerID]);
 
         if (getRoundState(networkgamestate) == 3)

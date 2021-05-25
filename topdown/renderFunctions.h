@@ -27,6 +27,7 @@ void renderScoreScreen(SDL_Renderer* renderer, SDL_Rect aScorerect[], SDL_Textur
 //     SDL_Rect explosionTiles[], SDL_Rect bloodTiles[], Mix_Chunk* soundWall, Mix_Chunk* soundDeath);
 void newRound(Mix_Chunk* roundStartSound);
 
-void renderMenu(SDL_Renderer* renderer, SDL_Texture* connectTextures[], SDL_Texture* hostTextures[], SDL_Texture* quitTextures[], Button buttons[], int mouseX, int mouseY, bool shooting);
+void renderMenu(SDL_Renderer* renderer, SDL_Texture* connectTextures[], SDL_Texture* hostTextures[], SDL_Texture* quitTextures[], 
+    Button buttons[], SDL_Texture* backgroundTexture, int mouseX, int mouseY, bool shooting);
 
 #endif  // RENDERFUNCTIONS_H

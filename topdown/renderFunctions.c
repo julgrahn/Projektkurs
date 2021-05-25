@@ -209,14 +209,19 @@ PUBLIC void renderHUD(SDL_Renderer* renderer, Player player, SDL_Rect textrect[]
     SDL_SetRenderDrawColor(renderer,0,0,0,255);
 }
 
-PUBLIC void renderMenu(SDL_Renderer* renderer, SDL_Texture* connectTextures[], SDL_Texture* hostTextures[], SDL_Texture* quitTextures[], Button buttons[], int mouseX, int mouseY, bool shooting)
+PUBLIC void renderMenu(SDL_Renderer* renderer, SDL_Texture* connectTextures[], SDL_Texture* hostTextures[], SDL_Texture* quitTextures[], Button buttons[], 
+    SDL_Texture* backgroundTexture, int mouseX, int mouseY, bool shooting)
 {
 
+    SDL_Rect backgroundRect = { 0, 0, 0, 0 };
+
     SDL_RenderClear(renderer);
+    SDL_RenderCopy(renderer, backgroundTexture, NULL, NULL);
 
     // Connect button
     if (mouseX >= (WINDOWWIDTH / 2) - 64 && mouseX <= (WINDOWWIDTH / 2) + 64)
     {
+        //SDL_RenderCopy(renderer, backgroundTexture, NULL, getButtonRect(buttons[0]));
         SDL_RenderCopy(renderer, connectTextures[0], NULL, getButtonRect(buttons[0]));
         SDL_RenderCopy(renderer, hostTextures[0], NULL, getButtonRect(buttons[1]));
         SDL_RenderCopy(renderer, quitTextures[0], NULL, getButtonRect(buttons[2]));
