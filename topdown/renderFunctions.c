@@ -67,7 +67,7 @@ PUBLIC void renderGame(SDL_Renderer* renderer, SDL_Texture* mTiles, SDL_Rect gTi
         {
             if (bulletHit(bullets[i][j]))
             {
-                if (getWallCollisionBullet(getBulletX(bullets[i][j])-2, getBulletY(bullets[i][j])-2, 4, 4))
+                if (isWallhit(bullets[i][j]))
                 {
                     explosionRect.x = getBulletX(bullets[i][j]) - explosionRect.w/2;
                     explosionRect.y = getBulletY(bullets[i][j]) - explosionRect.h/2;
@@ -213,7 +213,7 @@ PUBLIC void renderMenu(SDL_Renderer* renderer, SDL_Texture* connectTextures[], S
     SDL_Texture* backgroundTexture, int mouseX, int mouseY, bool shooting)
 {
 
-    SDL_Rect backgroundRect = { 0, 0, 0, 0 };
+    // static SDL_Rect backgroundRect = { 0, 0, 0, 0 };
 
     SDL_RenderClear(renderer);
     SDL_RenderCopy(renderer, backgroundTexture, NULL, NULL);

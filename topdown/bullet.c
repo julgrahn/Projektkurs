@@ -8,6 +8,7 @@
 #define BULLET_CENTER_OFFSET_Y 4
 
 PRIVATE void moveBullet(Bullet bullet);
+PRIVATE void bulletWallHit(Bullet a);
 
 struct Bullet_type {
 	SDL_Rect dimensions;
@@ -23,6 +24,7 @@ struct Bullet_type {
 	int shotTimer;
 	bool shot;
 	int xOrigin, yOrigin;
+	bool hitWall;
 };
 
 PUBLIC Bullet createBullet()
@@ -36,6 +38,7 @@ PUBLIC Bullet createBullet()
 	b->hit = 0;
 	b->shotTimer = 0;
 	b->shot = false;
+	b->hitWall = false;
 	return b;
 }
 PUBLIC void spawnBullet(Bullet a, int xOrigin, int yOrigin, double angle, int damage)
@@ -67,11 +70,24 @@ PRIVATE void moveBullet(Bullet bullet)
 		bullet->dimensions.y = round(bullet->yPos)-BULLET_CENTER_OFFSET_Y/2;
 
 		if (getWallCollisionBullet(bullet->dimensions.x, bullet->dimensions.y, bullet->dimensions.h, bullet->dimensions.w))
+		{	
 			freeBullet(bullet);
+			bulletWallHit(bullet);
+		}
 			
 		if (bullet->dimensions.x < 0 || bullet->dimensions.x > WINDOWWIDTH || bullet->dimensions.y < 0 || bullet->dimensions.y > WINDOWHEIGHT)
 			bullet->active = false;
 	}
+}
+
+PUBLIC bool isWallhit(Bullet a)
+{
+	return a->hitWall;
+}
+
+PRIVATE void bulletWallHit(Bullet a)
+{
+	a->hitWall = true;
 }
 
 PUBLIC SDL_Rect* getBulletRect(Bullet bullet)
@@ -124,7 +140,11 @@ PUBLIC bool bulletHit(Bullet b)
 		b->hit--;
 		return true;
 	}
-	else return false;
+	else
+	{
+		b->hitWall = false;
+		return false;
+	}
 }
 
 PUBLIC int getBulletHitValue(Bullet b)
