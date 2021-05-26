@@ -13,8 +13,6 @@
 #include "networkgamestate.h"
 #include "weapon.h"
 
-//void handleMenu(int mouseX, int mouseY, bool shooting, Button buttons[], Bullet bullets[], IPaddress* srvadd, TCPsocket* tcpsock, Networkgamestate networkgamestate, int* playerID,
-//   Player players[], UDPsocket* sd, bool* connected, SDL_mutex* mutex, bool* isPlaying, UDPpacket** p2, Server server, bool* host);
 void updateplayers(Networkgamestate networkgamestate, Player players[], int playerID);
 bool rectCollisionTest(SDL_Rect* a, SDL_Rect* b);
 void fire(Bullet bullets[], Player p);

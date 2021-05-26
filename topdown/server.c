@@ -18,7 +18,7 @@ PRIVATE void handleTCP(Server server, int respawnDelay[]);
 PRIVATE void handleUDPreceive(Server server);
 PRIVATE void handleUDPsend(Server server);
 PRIVATE void startNewGame(Server server, int respawnDelay[]);
-PRIVATE bool circleHitDetect(SDL_Point *a, int rad0, SDL_Point *b, int rad1);
+PRIVATE bool circleHitDetect(SDL_Point *a, int r0, SDL_Point *b, int r1);
  
 
 struct Server_type {
@@ -443,7 +443,7 @@ PRIVATE void handleGameLogic(Server server, int respawnDelay[], SDL_Point *a, SD
     combineWallstates(server->state, server->wallStates);
 }
 
-PRIVATE bool circleHitDetect(SDL_Point *a, int rad0, SDL_Point *b, int rad1)
+PRIVATE bool circleHitDetect(SDL_Point *a, int r0, SDL_Point *b, int r1)
 {
-    return sqrt((a->x - b->x) * (a->x - b->x) + (a->y - b->y) * (a->y - b->y)) < (rad0 + rad1);
+    return sqrt((a->x - b->x) * (a->x - b->x) + (a->y - b->y) * (a->y - b->y)) < (r0 + r1);
 }

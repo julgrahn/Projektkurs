@@ -240,10 +240,7 @@ PUBLIC void updateMap()
     {
         for (int j = 0; j < tileColumns; j++)
         {
-            if(!getWallState(i*tileColumns+j))
-            {
-                tileGrid[i][j] = 120;    
-            }
+            tileGrid[i][j] = tileGrid[i][j]*getWallState(i*tileColumns+j) + 120*!getWallState(i*tileColumns+j);
         }
     }
 }
