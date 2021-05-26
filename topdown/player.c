@@ -66,8 +66,10 @@ PUBLIC int getPlayerFrame(Player p)
 
 PUBLIC void movePlayer(Player p, int up, int down, int right, int left, int mouseX, int mouseY, bool reload)
 {
-    if(reload) reloadWeapon(p->gun);
     int newX = 0, newY = 0, diagonal;
+    int xDelta, yDelta, distance, xComp = 0, yComp = 0;
+
+    if(reload) reloadWeapon(p->gun);
     p->isMoving = 0;
     if (up && !down) { newY--; p->isMoving = 1; }
     if (down && !up) { newY++; p->isMoving = 1; }
@@ -90,9 +92,18 @@ PUBLIC void movePlayer(Player p, int up, int down, int right, int left, int mous
     p->frameCounter = (p->frameCounter + p->isMoving) % (ANIMATIONSPEED + 1);
     p->frame = (p->frame + ((p->frameCounter / ANIMATIONSPEED) * p->isMoving)) % 4;
     // Rotate player
-    p->direction = (atan2(mouseY - p->posY, mouseX - p->posX) * 180 / M_PI) - 6;
+    p->direction = (atan2(mouseY - round(p->posY), mouseX - round(p->posX)) * 180 / M_PI); // -6
+
+    // Correct shotangle when mouse is close to player
+    xDelta = mouseX - round(p->posX);
+    yDelta = mouseY - round(p->posY);
+    xDelta += !xDelta & !yDelta;
+    distance = sqrt(xDelta*xDelta + yDelta*yDelta);
+    xComp = (distance < 200)*(200-distance)*xDelta/distance;
+    yComp = (distance < 200)*(200-distance)*yDelta/distance;
+
     // Update shooting angle
-    p->shotAngle = atan2(mouseY - getPlayerGunbarrelY(p), mouseX - getPlayerGunbarrelX(p));
+    p->shotAngle = atan2(mouseY+yComp - getPlayerGunbarrelY(p), mouseX+xComp - getPlayerGunbarrelX(p));
 }
 
 PUBLIC double getPlayerDirection(Player p)
