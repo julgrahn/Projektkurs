@@ -10,7 +10,6 @@ typedef struct Player_type* Player;
 
 Player createPlayer(int x, int y);
 void movePlayer(Player p, int up, int down, int right, int left, int mouseX, int mouseY, bool reload);
-// SDL_Rect* getPlayerRect(Player p);
 int getPlayerFrame(Player p);
 double getPlayerDirection(Player p);
 int getPlayerX(Player p);
@@ -48,5 +47,10 @@ double getPlayerShotAngle(Player a);
 int getPlayerRadius();
 bool checkKilled(Player a);
 void setKilled(Player p, bool n);
+
+
+bool isReloading(Player a);
+bool isPlayerMoving(Player a);
+bool isPlayerShooting(Player a);
 
 #endif

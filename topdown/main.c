@@ -20,7 +20,6 @@ SDL_mutex* mutex;
 void renderTestBullets(SDL_Renderer *renderer, Bullet bullets[][MAX_BULLETS], SDL_Texture *testText); // Synligare bullets för testing 
 
 void handleEvents(SDL_Event* event, int* up, int* down, int* right, int* left, bool* isPlaying, SDL_Point *mouse, bool* shooting, bool *reload, bool *mute, int *tcpMessage, bool* scoreScreen);
-void handleClientTCP(TCPsocket* tcpsock, SDLNet_SocketSet* set, Networkgamestate networkgamestate, Player players[], int playerID);
 void connectPrompt(char* ip);
 
 int main(int argc, char* args[])
@@ -73,6 +72,12 @@ int main(int argc, char* args[])
     SDL_Texture* hostTextures[3];
     SDL_Texture* quitTextures[3];
 
+    SDL_Texture* bodyTexture[20];
+    SDL_Texture* feetText[20];
+    SDL_Texture* reloadText[20];
+    SDL_Texture* idleTexture[20];
+    SDL_Texture* shootTexture[3];
+
     // Init functions
     set = SDLNet_AllocSocketSet(1);
     mutex = SDL_CreateMutex();
@@ -85,6 +90,8 @@ int main(int argc, char* args[])
             &gunFireTexture, &explosionTexture, &bloodTexture, 
             &sound, explosionTiles, bloodTiles, &soundWall, &soundDeath, &prepareToFight);
             
+
+    loadPlayer(renderer, bodyTexture, feetText, reloadText, idleTexture, shootTexture);
 
     // För ny runda återställ kartan
     initTileGridReset();
@@ -154,15 +161,7 @@ int main(int argc, char* args[])
             newRoundFlag = true;
         }
         //Ljud av/på
-        if (mute)
-        {
-            Mix_Volume(-1, 0);
-        }
-        else
-        {
-            Mix_Volume(-1, 5);
-        }
-
+        Mix_Volume(-1, 5*!mute);
         //Spel
         playerTick(players[playerID]);
 
@@ -197,7 +196,9 @@ int main(int argc, char* args[])
             }
         }
         //printf("%d\n", getRoundState(networkgamestate)); // felsökningsprintf
+        updateMap();
         simulateBullets(bullets);
+        copyWallState(getWallState(networkgamestate, playerID));
         setNetPlayer(networkgamestate, playerID, players[playerID]);
         setNetBullets(networkgamestate, playerID, bullets[playerID]);
         sendUDP(getNetPlayer(networkgamestate, playerID), &sd, &srvadd, &p, &p2);
@@ -205,9 +206,12 @@ int main(int argc, char* args[])
 
         SDL_RenderClear(renderer);
 
-        renderGame(renderer, tiles, gridTiles, bullets, bulletTexture, players, playerText, playerRect, 
+        // renderGame(renderer, tiles, gridTiles, bullets, bulletTexture, players, playerText, playerRect, 
+        //             gunFireTexture, explosionTexture, bloodTexture, sound, explosionTiles, bloodTiles, soundWall, soundDeath);
+
+        renderGame2(renderer, tiles, gridTiles, bullets, bulletTexture, players, bodyTexture, feetText, reloadText, idleTexture, shootTexture,
                     gunFireTexture, explosionTexture, bloodTexture, sound, explosionTiles, bloodTiles, soundWall, soundDeath);
-        
+
         renderTestBullets(renderer, bullets, bulletTEST); // Synligare bullets för testing    
 
         renderHUD(renderer, players[playerID], textRect, textTexture);
@@ -267,14 +271,7 @@ void handleEvents(SDL_Event* event, int* up, int* down, int* right, int* left, b
                 *reload = true;
                 break;
             case SDL_SCANCODE_M:
-                if(*mute)
-                {
-                    *mute = false;
-                }
-                else
-                {
-                    *mute = true;
-                }
+                *mute = (*mute+1)%2;
                 break;
             default:
                 break;

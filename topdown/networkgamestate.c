@@ -11,10 +11,11 @@ typedef struct NetworkBullet_type{
 typedef struct NetworkPlayer_type{
     short direction;
     short posX, posY;
-    Uint8 status;   // bitpattern: 2 - alive, 1 - active, 0 - invulnerable
+    Uint8 status;   // bit: 2 - alive, bit: 1 - active, bit: 0 - invulnerable
     Sint8 lives, health, kills;
     bool killed;//tillfälligt för dödsljud
     Networkbullet aBullet[MAX_BULLETS];
+    Uint32 wallState[27];
 }Networkplayer;
 
 struct Networkgamestate_type {
@@ -261,4 +262,22 @@ PUBLIC void resetPlayerKilled(Networkgamestate a, int playerID)
         printf("skicka paket\n");
     }
     a->aPlayer[playerID].killed = false;
+}
+
+PUBLIC uint32_t* getWallState(Networkgamestate a, int playerID)
+{
+    return a->aPlayer[playerID].wallState;
+}
+
+PUBLIC void combineWallstates(Networkgamestate a, uint32_t wallstates[])
+{
+    for (int i = 0; i < 27; i++)
+    {
+        wallstates[i] &= a->aPlayer[0].wallState[i];
+        wallstates[i] &= a->aPlayer[1].wallState[i];
+        wallstates[i] &= a->aPlayer[2].wallState[i];
+        wallstates[i] &= a->aPlayer[3].wallState[i];
+        wallstates[i] &= a->aPlayer[4].wallState[i];
+        a->aPlayer[0].wallState[i] = a->aPlayer[1].wallState[i] = a->aPlayer[2].wallState[i] = a->aPlayer[3].wallState[i] = a->aPlayer[4].wallState[i] = wallstates[i];
+    }
 }

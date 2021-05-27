@@ -49,7 +49,7 @@ PUBLIC bool fireWeapon(Weapon a)
         return true;
     }
     else{
-        if(!a->magazine && !a->reload) a->reload = 90;
+        if(!a->magazine && !a->reload) a->reload = 100;
         return false;
     }
 }
@@ -78,5 +78,5 @@ PUBLIC void resetWeapon(Weapon a)
 
 PUBLIC void reloadWeapon(Weapon a)
 {
-    if(!a->reload && a->magazine != a->magazineSize) { a->magazine = 0; a->reload = 90; }
+    if(!a->reload && a->magazine != a->magazineSize) { a->magazine = 0; a->reload = 100; }
 }

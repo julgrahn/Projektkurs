@@ -4,7 +4,7 @@
 
 #define PUBLIC
 #define SPEED 2
-#define ANIMATIONSPEED 8               //lower = faster
+#define ANIMATIONSPEED 1               //lower = faster
 #define HEALTH 100
 #define ROTATION_UPDATE_SPEED 5
 #define SNAP_DISTANCE 10
@@ -17,7 +17,6 @@ struct Player_type {
     double speed;
     double diaSpeed;
     double posX, posY;
-    // SDL_Rect pDimensions;
     int frame;
     int frameCounter;
     int isMoving;
@@ -33,6 +32,8 @@ struct Player_type {
     double shotAngle;
     bool killed;// tillfälligt för dödsljud
     int kills;
+    bool isRealoading;
+    bool isShooting;
 };
 
 PUBLIC Player createPlayer(int x, int y)
@@ -47,10 +48,6 @@ PUBLIC Player createPlayer(int x, int y)
     a->direction = 0;
     a->posX = x;
     a->posY = y;
-    // a->pDimensions.x = x-PLAYER_CENTER_OFFSET_X;
-    // a->pDimensions.y = y-PLAYER_CENTER_OFFSET_Y;
-    // a->pDimensions.w = 64;
-    // a->pDimensions.h = 64;
     a->newX = x;
     a->newY = y;
     a->active = false;
@@ -61,6 +58,8 @@ PUBLIC Player createPlayer(int x, int y)
     a->lives = 0;
     a->killed = false;//tillfälligt för dödsljud
     a->kills = 0;
+    a->isRealoading = false;
+    a->isShooting = false;
     return a;
 }
 
@@ -71,8 +70,10 @@ PUBLIC int getPlayerFrame(Player p)
 
 PUBLIC void movePlayer(Player p, int up, int down, int right, int left, int mouseX, int mouseY, bool reload)
 {
-    if(reload) reloadWeapon(p->gun);
     int newX = 0, newY = 0, diagonal;
+    int xDelta, yDelta, distance, xComp = 0, yComp = 0;
+
+    if(reload) { reloadWeapon(p->gun); p->isRealoading = true; }
     p->isMoving = 0;
     if (up && !down) { newY--; p->isMoving = 1; }
     if (down && !up) { newY++; p->isMoving = 1; }
@@ -91,18 +92,22 @@ PUBLIC void movePlayer(Player p, int up, int down, int right, int left, int mous
     if (p->posX-PLAYER_RADIUS <= 0) p->posX = PLAYER_RADIUS;
     if (p->posX+PLAYER_RADIUS >= WINDOWWIDTH) p->posX = WINDOWWIDTH - PLAYER_RADIUS;
 
-    // Update player rectangle
-    // p->pDimensions.x = round(p->posX)-PLAYER_CENTER_OFFSET_X;
-    // p->pDimensions.y = round(p->posY)-PLAYER_CENTER_OFFSET_Y;
-
     // Update player sprite frame
     p->frameCounter = (p->frameCounter + p->isMoving) % (ANIMATIONSPEED + 1);
-    p->frame = (p->frame + ((p->frameCounter / ANIMATIONSPEED) * p->isMoving)) % 4;
+    p->frame = (p->frame + ((p->frameCounter / ANIMATIONSPEED) * p->isMoving)) % 20;
     // Rotate player
-    p->direction = (atan2(mouseY - p->posY, mouseX - p->posX) * 180 / M_PI) - 6;
-    // p->direction = (atan2(mouseY - p->pDimensions.y - 34, mouseX - p->pDimensions.x - 18) * 180 / M_PI) - 6;
+    p->direction = (atan2(mouseY - round(p->posY), mouseX - round(p->posX)) * 180 / M_PI); // -6
+
+    // Correct shotangle when mouse is close to player
+    xDelta = mouseX - round(p->posX);
+    yDelta = mouseY - round(p->posY);
+    xDelta += !xDelta & !yDelta;
+    distance = sqrt(xDelta*xDelta + yDelta*yDelta);
+    xComp = (distance < 200)*(200-distance)*xDelta/distance;
+    yComp = (distance < 200)*(200-distance)*yDelta/distance;
+
     // Update shooting angle
-    p->shotAngle = atan2(mouseY - getPlayerGunbarrelY(p), mouseX - getPlayerGunbarrelX(p));
+    p->shotAngle = atan2(mouseY+yComp - getPlayerGunbarrelY(p), mouseX+xComp - getPlayerGunbarrelX(p));
 }
 
 PUBLIC double getPlayerDirection(Player p)
@@ -114,11 +119,6 @@ PUBLIC int getPlayerHealth(Player p)
 {
     return p->health;
 }
-
-// PUBLIC SDL_Rect* getPlayerRect(Player p)
-// {
-//     return &p->pDimensions;
-// }
 
 PUBLIC int getPlayerX(Player p)
 {
@@ -183,8 +183,6 @@ PUBLIC void moveOtherPlayers(Player p)
         p->posX += p->xSpeed;
         p->posY += p->ySpeed;
 
-        // p->pDimensions.x = round(p->posX)-PLAYER_CENTER_OFFSET_X;
-        // p->pDimensions.y = round(p->posY)-PLAYER_CENTER_OFFSET_Y;
         p->frameCounter = (p->frameCounter + 1) % (ANIMATIONSPEED + 1);
         p->frame = (p->frame + ((p->frameCounter / ANIMATIONSPEED))) % 4;
     }
@@ -252,8 +250,6 @@ PUBLIC void moveOtherPlayers(Player p)
 
 PUBLIC void snapPlayer(Player p, int x, int y)
 {
-    // p->pDimensions.x = x-PLAYER_CENTER_OFFSET_X;
-    // p->pDimensions.y = y-PLAYER_CENTER_OFFSET_Y;
     p->newX = x;
     p->newY = y;
     p->posX = x;
@@ -279,12 +275,20 @@ PUBLIC void setPlayerAlive(Player p, bool value)
 
 PUBLIC bool canShoot(Player a)
 {
-    return fireWeapon(a->gun);
+    if(fireWeapon(a->gun))
+    {
+        a->isShooting = true;
+        return true;
+    }
+    else return false;
 }
 
 PUBLIC void playerTick(Player a)
 {
     weaponTick(a->gun);
+    if(!getReloadprogress(a->gun))
+        a->isRealoading = false;
+    a->isShooting = false;
 }
 
 PUBLIC int getPlayerGunbarrelX(Player a)
@@ -356,4 +360,19 @@ PUBLIC bool checkKilled(Player a) // experiment f�r att testa d�dsljud
 PUBLIC void setKilled(Player p, bool n)
 {
     p->killed = n;
+}
+
+PUBLIC bool isReloading(Player a)
+{
+    return a->isRealoading;
+}
+
+PUBLIC bool isPlayerMoving(Player a)
+{
+    return a->isMoving;
+}
+
+PUBLIC bool isPlayerShooting(Player a)
+{
+    return a->isShooting;
 }

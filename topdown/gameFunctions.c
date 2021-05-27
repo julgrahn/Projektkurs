@@ -24,6 +24,7 @@ PUBLIC void updateplayers(Networkgamestate networkgamestate, Player players[], i
         }
         else
         {
+            updateWallstate(getWallState(networkgamestate, i));
             setPlayerLives(players[playerID], getNetplayerLives(networkgamestate, playerID));
             setPlayerAlive(players[playerID], isNetPlayerAlive(networkgamestate, playerID));
             setPlayerhealth(players[playerID], getNetplayerHealth(networkgamestate, playerID));
