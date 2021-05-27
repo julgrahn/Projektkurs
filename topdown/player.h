@@ -48,4 +48,9 @@ int getPlayerRadius();
 bool checkKilled(Player a);
 void setKilled(Player p, bool n);
 
+
+bool isReloading(Player a);
+bool isPlayerMoving(Player a);
+bool isPlayerShooting(Player a);
+
 #endif

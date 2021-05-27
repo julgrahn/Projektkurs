@@ -4,7 +4,7 @@
 
 #define PUBLIC
 #define SPEED 2
-#define ANIMATIONSPEED 8               //lower = faster
+#define ANIMATIONSPEED 1               //lower = faster
 #define HEALTH 100
 #define ROTATION_UPDATE_SPEED 5
 #define SNAP_DISTANCE 10
@@ -32,6 +32,8 @@ struct Player_type {
     double shotAngle;
     bool killed;// tillfälligt för dödsljud
     int kills;
+    bool isRealoading;
+    bool isShooting;
 };
 
 PUBLIC Player createPlayer(int x, int y)
@@ -56,6 +58,8 @@ PUBLIC Player createPlayer(int x, int y)
     a->lives = 0;
     a->killed = false;//tillfälligt för dödsljud
     a->kills = 0;
+    a->isRealoading = false;
+    a->isShooting = false;
     return a;
 }
 
@@ -69,7 +73,7 @@ PUBLIC void movePlayer(Player p, int up, int down, int right, int left, int mous
     int newX = 0, newY = 0, diagonal;
     int xDelta, yDelta, distance, xComp = 0, yComp = 0;
 
-    if(reload) reloadWeapon(p->gun);
+    if(reload) { reloadWeapon(p->gun); p->isRealoading = true; }
     p->isMoving = 0;
     if (up && !down) { newY--; p->isMoving = 1; }
     if (down && !up) { newY++; p->isMoving = 1; }
@@ -90,7 +94,7 @@ PUBLIC void movePlayer(Player p, int up, int down, int right, int left, int mous
 
     // Update player sprite frame
     p->frameCounter = (p->frameCounter + p->isMoving) % (ANIMATIONSPEED + 1);
-    p->frame = (p->frame + ((p->frameCounter / ANIMATIONSPEED) * p->isMoving)) % 4;
+    p->frame = (p->frame + ((p->frameCounter / ANIMATIONSPEED) * p->isMoving)) % 20;
     // Rotate player
     p->direction = (atan2(mouseY - round(p->posY), mouseX - round(p->posX)) * 180 / M_PI); // -6
 
@@ -271,12 +275,20 @@ PUBLIC void setPlayerAlive(Player p, bool value)
 
 PUBLIC bool canShoot(Player a)
 {
-    return fireWeapon(a->gun);
+    if(fireWeapon(a->gun))
+    {
+        a->isShooting = true;
+        return true;
+    }
+    else return false;
 }
 
 PUBLIC void playerTick(Player a)
 {
     weaponTick(a->gun);
+    if(!getReloadprogress(a->gun))
+        a->isRealoading = false;
+    a->isShooting = false;
 }
 
 PUBLIC int getPlayerGunbarrelX(Player a)
@@ -348,4 +360,19 @@ PUBLIC bool checkKilled(Player a) // experiment f�r att testa d�dsljud
 PUBLIC void setKilled(Player p, bool n)
 {
     p->killed = n;
+}
+
+PUBLIC bool isReloading(Player a)
+{
+    return a->isRealoading;
+}
+
+PUBLIC bool isPlayerMoving(Player a)
+{
+    return a->isMoving;
+}
+
+PUBLIC bool isPlayerShooting(Player a)
+{
+    return a->isShooting;
 }

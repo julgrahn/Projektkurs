@@ -325,3 +325,65 @@ PUBLIC void loadMenu(SDL_Renderer* renderer, SDL_Texture* connectTextures[], SDL
     else printf("texturen har laddats\n");*/
 
 }
+
+PUBLIC void loadPlayer(SDL_Renderer *renderer, SDL_Texture *bodyTexture[], SDL_Texture* feetText[], SDL_Texture* reloadText[], SDL_Texture* idleTexture[], SDL_Texture* shootTexture[])
+{
+    SDL_Surface *surface;
+    char rootPath[1024] = "resources/rifle/move/survivor-move_rifle_";
+    char name[1024];
+    char fullPath[1024];
+    for (int i = 0; i < 20; i++)
+    {
+        strcpy(fullPath, rootPath);
+        sprintf(name,"%d",i);
+        strcat(fullPath, name);
+        strcat(fullPath, ".png");
+        surface = IMG_Load(fullPath);
+        bodyTexture[i] = SDL_CreateTextureFromSurface(renderer, surface);
+        SDL_FreeSurface(surface);
+    }
+    strcpy(rootPath, "resources/feet/run/survivor-run_");
+    for (int i = 0; i < 20; i++)
+    {
+        strcpy(fullPath, rootPath);
+        sprintf(name,"%d",i);
+        strcat(fullPath, name);
+        strcat(fullPath, ".png");
+        surface = IMG_Load(fullPath);
+        feetText[i] = SDL_CreateTextureFromSurface(renderer, surface);
+        SDL_FreeSurface(surface);
+    }
+    strcpy(rootPath, "resources/rifle/reload/survivor-reload_rifle_");
+    for (int i = 0; i < 20; i++)
+    {
+        strcpy(fullPath, rootPath);
+        sprintf(name,"%d",i);
+        strcat(fullPath, name);
+        strcat(fullPath, ".png");
+        surface = IMG_Load(fullPath);
+        reloadText[i] = SDL_CreateTextureFromSurface(renderer, surface);
+        SDL_FreeSurface(surface);
+    }
+    strcpy(rootPath, "resources/rifle/idle/survivor-idle_rifle_");
+    for (int i = 0; i < 20; i++)
+    {
+        strcpy(fullPath, rootPath);
+        sprintf(name,"%d",i);
+        strcat(fullPath, name);
+        strcat(fullPath, ".png");
+        surface = IMG_Load(fullPath);
+        idleTexture[i] = SDL_CreateTextureFromSurface(renderer, surface);
+        SDL_FreeSurface(surface);
+    }
+    strcpy(rootPath, "resources/rifle/shoot/survivor-shoot_rifle_");
+    for (int i = 0; i < 3; i++)
+    {
+        strcpy(fullPath, rootPath);
+        sprintf(name,"%d",i);
+        strcat(fullPath, name);
+        strcat(fullPath, ".png");
+        surface = IMG_Load(fullPath);
+        shootTexture[i] = SDL_CreateTextureFromSurface(renderer, surface);
+        SDL_FreeSurface(surface);
+    }
+}

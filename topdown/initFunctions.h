@@ -21,4 +21,7 @@ void loadMedia(SDL_Renderer* renderer, SDL_Rect gTiles[], SDL_Texture** tiles, S
                 SDL_Rect explosionTiles[], SDL_Rect bloodTiles[], Mix_Chunk** soundWall,
                 Mix_Chunk** soundDeath, Mix_Chunk** prepareToFight);
                         
+
+void loadPlayer(SDL_Renderer *renderer, SDL_Texture *bodyTexture[], SDL_Texture* feetText[], SDL_Texture* reloadText[], SDL_Texture* idleTexture[], SDL_Texture* shootTexture[]);
+
 #endif  // INITFUNCTIONS_H

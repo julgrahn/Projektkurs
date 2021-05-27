@@ -30,4 +30,9 @@ void newRound(Mix_Chunk* roundStartSound);
 void renderMenu(SDL_Renderer* renderer, SDL_Texture* connectTextures[], SDL_Texture* hostTextures[], SDL_Texture* quitTextures[], 
     Button buttons[], SDL_Texture* backgroundTexture, int mouseX, int mouseY, bool shooting);
 
+void renderGame2(SDL_Renderer* renderer, SDL_Texture* mTiles, SDL_Rect gTiles[], Bullet bullets[][MAX_BULLETS],
+    SDL_Texture* bulletTexture, Player players[], SDL_Texture* playerText[], SDL_Texture* playerFeetText[], SDL_Texture* reloadText[20], SDL_Texture* idleText[20], SDL_Texture* shootText[],
+    SDL_Texture* gunFireTexture, SDL_Texture* explosionTexture, SDL_Texture* bloodTexture, Mix_Chunk* sound,
+    SDL_Rect explosionTiles[], SDL_Rect bloodTiles[], Mix_Chunk* soundWall, Mix_Chunk* soundDeath);
+
 #endif  // RENDERFUNCTIONS_H
