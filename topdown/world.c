@@ -159,7 +159,7 @@ PUBLIC bool getWallCollisionBullet(int x, int y, int h, int w)
                 {
                     if(tileGrid[i][j] == wa || tileGrid[i][j] == wall2 || tileGrid[i][j] == wall3)
                     {
-                        //countWallHits(i, j);  // Ta bort kommentaren om du vill förstöra väggar
+                        countWallHits(i, j);  // Ta bort kommentaren om du vill förstöra väggar
                     }
                     return true;
                 }
@@ -182,7 +182,7 @@ PRIVATE void countWallHits(int i, int j)
     }
     else if (tileGridHits[i][j] == 200)
     {
-      tileGrid[i][j] = br;
+        tileGrid[i][j] = br;
     }
     return;
 }
@@ -206,6 +206,7 @@ PUBLIC void resetTileGridMap()
         for (int j = 0; j < tileColumns; j++)
         {
             tileGrid[i][j] = tilegridReset[i][j];
+            tileGridHits[i][j] = 0;
         }
     }
 }
