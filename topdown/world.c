@@ -261,6 +261,6 @@ PUBLIC void updateWallstate(uint32_t source[])
 {
     for (int i = 0; i < 27; i++)
     {
-        wallState[i] &= source[i];
+        wallState[i] = source[i];
     }
 }
