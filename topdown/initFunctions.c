@@ -277,22 +277,21 @@ PUBLIC void initGameHUD(SDL_Renderer *renderer, SDL_Rect textRect[], SDL_Texture
         TTF_CloseFont(font);
         color.a = 255;
         font = TTF_OpenFont("unispace_bd.ttf", 72);
-        textSurface = TTF_RenderText_Blended(font, text[1], color);
-        roundStateTexture[1] = SDL_CreateTextureFromSurface(renderer, textSurface);
-        TTF_SizeText(font, text[1], &aWidth[1], &aHeight[1]);
-        SDL_FreeSurface(textSurface);
-        textSurface = TTF_RenderText_Blended(font, text[2], color);
-        roundStateTexture[2] = SDL_CreateTextureFromSurface(renderer, textSurface);
-        TTF_SizeText(font, text[2], &aWidth[2], &aHeight[2]);
-        SDL_FreeSurface(textSurface);
+        for(int i = 1; i < 3; i++)
+        {
+            textSurface = TTF_RenderText_Blended(font, text[i], color);
+            roundStateTexture[i] = SDL_CreateTextureFromSurface(renderer, textSurface);
+            TTF_SizeText(font, text[i], &aWidth[i], &aHeight[i]);
+            SDL_FreeSurface(textSurface);
+        }
+        TTF_CloseFont(font);
         for (int i = 0; i < 3; i++)
         {
-            aRoundStateRect[i].x = 0;
-            aRoundStateRect[i].y = 0;
+            aRoundStateRect[i].x = WINDOWWIDTH/2-aWidth[i]/2;
+            aRoundStateRect[i].y = WINDOWHEIGHT/2-aHeight[i]/2;
             aRoundStateRect[i].w = aWidth[i];
             aRoundStateRect[i].h = aHeight[i];
         }
-        TTF_CloseFont(font);
     }
 }
 

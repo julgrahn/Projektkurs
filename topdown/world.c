@@ -76,13 +76,19 @@ int getTileGridHits(int x, int y) {
 
 PUBLIC void wallPlayerCollisionHandling(double *posX, double *posY, int r)
 {
-    int wallCordStartX;
-    int wallCordEndX;
-    int wallCordStartY;
-    int wallCordEndY;
+    int wallCordStartX, wallCordEndX, wallCordStartY, wallCordEndY;
+    int startRow = *posY/tileHeight, endRow = *posY/tileHeight;
+    int startCol = *posX/tileWidth, endCol = *posX/tileWidth;
+    // Check area around player for walls
+    startRow -= (startRow-1 >= 0);
+    endRow += (endRow+1 < tileRows);
+    startCol -= (startCol-1 >= 0);
+    endCol += (endCol+1 < tileColumns);
     for(int n = 0; n < 2; n++)
-        for (int i = 0; i < tileRows; i++)
-            for (int j = 0; j < tileColumns; j++)
+    {
+        for (int i = startRow; i <= endRow; i++)
+        {
+            for (int j = startCol; j <= endCol; j++)
             {
                 if (tileGrid[i][j] != br)
                 {
@@ -117,6 +123,8 @@ PUBLIC void wallPlayerCollisionHandling(double *posX, double *posY, int r)
                         wallColMultiAngleCompensation(posX, posY, wallCordEndX, wallCordEndY, r);
                 }
             }
+        }
+    }
 }
 
 PRIVATE void wallColSingleAngleCompensation(double *pos, int wallStart, int wallEnd, int minDistance)
@@ -143,9 +151,15 @@ PRIVATE void wallColMultiAngleCompensation(double *xPos, double *yPos, int xWall
 
 PUBLIC bool getWallCollisionBullet(int x, int y, int h, int w)
 {
-    for (int i = 0; i < tileRows; i++)
+    int startRow = y/tileHeight, endRow = y/tileHeight;
+    int startCol = x/tileWidth, endCol = x/tileWidth;
+    startRow -= (startRow-1 >= 0);
+    endRow += (endRow+1 < tileRows);
+    startCol -= (startCol-1 >= 0);
+    endCol += (endCol+1 < tileColumns);
+    for(int i = startRow; i <= endRow; i++)
     {
-        for (int j = 0; j < tileColumns; j++)
+        for(int j = startCol; j <= endCol; j++)
         {
             if (tileGrid[i][j] != br)
             {
