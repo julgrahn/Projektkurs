@@ -55,4 +55,8 @@ void resetPlayerKilled(Networkgamestate a, int playerID);
 
 uint32_t* getWallState(Networkgamestate a, int playerID);
 void combineWallstates(Networkgamestate a, uint32_t wallstates[]);
+void resetWallStates(Networkgamestate a, uint32_t wallstates[]);
+void createWalls(Networkgamestate a, bool b);
+
+
 #endif

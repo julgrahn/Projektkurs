@@ -19,7 +19,6 @@ PRIVATE void handleUDPreceive(Server server);
 PRIVATE void handleUDPsend(Server server);
 PRIVATE void startNewGame(Server server, int respawnDelay[]);
 PRIVATE bool circleHitDetect(SDL_Point *a, int r0, SDL_Point *b, int r1);
- 
 
 struct Server_type {
     UDPsocket sd;       /* Socket descriptor */
@@ -39,15 +38,18 @@ struct Server_type {
     bool warmup;
     int spawnTime;
     uint32_t wallStates[27];
+    uint8_t wallSyncDelay;
 };
 
 PUBLIC Server createServer()
 {
+    srand(time(0));
     Server server = malloc(sizeof(struct Server_type));
     server->state = createNetworkgamestate();
     server->set = SDLNet_AllocSocketSet(MAX_PLAYERS);
     server->warmup = true;
     server->spawnTime = STANDARDSPAWNTIME;
+    server->wallSyncDelay = 0;
     for (int i = 0; i < MAX_PLAYERS + 1; i++)
     {
         server->tcpsockClient[i] = NULL;
@@ -144,7 +146,7 @@ PRIVATE void runServer(void* args)
         SDL_Delay(1); 
         TCPdelay = (TCPdelay + 1) % 200;
         UDPreceiveDelay = (UDPreceiveDelay + 1) % 1;
-        UDPsendDelay = (UDPsendDelay + 1) % 10;
+        UDPsendDelay = (UDPsendDelay + 1) % 16;
         Gamelogicdelay = (Gamelogicdelay + 1) % 8;
 
         // TCP
@@ -319,7 +321,7 @@ PRIVATE void startNewGame(Server server, int respawnDelay[])
     setRoundState(server->state, 1);
     
     resetTileGridMap();
-    
+    server->wallSyncDelay = 200;
     copyWallState(server->wallStates);
     for (int i = 0; i < MAX_PLAYERS; i++)
     {
@@ -350,15 +352,10 @@ PRIVATE void handleGameLogic(Server server, int respawnDelay[], SDL_Point *a, SD
 {
     // Loop för kollisionshanteringen för kulor, om spelare dör och om spelet är över
     for (int i = 0; i < MAX_PLAYERS; i++)
-    {
         if(isNetPlayerActive(server->state, i))
-        {
             for(int j = 0; j < MAX_BULLETS; j++)
-            {
                 if(isNetbulletActive(server->state, i, j))
-                {                    
                     for (int k = 0; k < MAX_PLAYERS; k++)
-                    {
                         if((i!=k) && isNetPlayerAlive(server->state, k))
                         {
                             if (isNetplayerInvulnerable(server->state, i))
@@ -405,11 +402,6 @@ PRIVATE void handleGameLogic(Server server, int respawnDelay[], SDL_Point *a, SD
                                 }
                             }
                         }
-                    }
-                }
-            } 
-        }
-    }
     // Loop för respawn
     for (int i = 0; i < MAX_PLAYERS; i++)
     {
@@ -440,7 +432,17 @@ PRIVATE void handleGameLogic(Server server, int respawnDelay[], SDL_Point *a, SD
             }
         }
     }
-    combineWallstates(server->state, server->wallStates);
+    if(server->wallSyncDelay)
+    {
+        resetWallStates(server->state, server->wallStates);
+        server->wallSyncDelay--;
+        createWalls(server->state, true);
+    }
+    else
+    {
+        combineWallstates(server->state, server->wallStates);
+        createWalls(server->state, false);
+    }
 }
 
 PRIVATE bool circleHitDetect(SDL_Point *a, int r0, SDL_Point *b, int r1)

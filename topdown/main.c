@@ -15,11 +15,13 @@
 #include "gameFunctions.h"
 #include "renderFunctions.h"
 
+#define TARGET_FRAME_RATE 60
+
 SDL_mutex* mutex;
 
 void renderTestBullets(SDL_Renderer *renderer, Bullet bullets[][MAX_BULLETS], SDL_Texture *testText); // Synligare bullets för testing 
 
-void handleEvents(SDL_Event* event, int* up, int* down, int* right, int* left, bool* isPlaying, SDL_Point *mouse, bool* shooting, bool *reload, bool *mute, int *tcpMessage, bool* scoreScreen);
+void handleEvents(SDL_Event* event, int* up, int* down, int* right, int* left, bool* isPlaying, SDL_Point *mouse, bool* shooting, bool *reload, bool *mute, int *tcpMessage, bool* scoreScreen, bool *teamColors);
 void connectPrompt(char* ip);
 
 int main(int argc, char* args[])
@@ -37,13 +39,13 @@ int main(int argc, char* args[])
     int playerID;
     SDL_Cursor* cursor = NULL;
     Player players[MAX_PLAYERS];
-    SDL_Texture* playerText;
+    SDL_Texture* playerText[6];
     SDL_Rect playerRect[4];
     SDL_Point mouse = {0, 0};
     Bullet bullets[MAX_PLAYERS][MAX_BULLETS];
     SDL_Texture* tiles = NULL;
     SDL_Rect gridTiles[900];   // Kommer innehålla alla 900 rutor från bakgrundsbilden, kan optmiseras.
-    bool isPlaying = true, shooting = false, host = false, connected = false, reload = false, mute = false, scoreScreen = false;
+    bool isPlaying = true, shooting = false, host = false, connected = false, reload = false, mute = false, scoreScreen = false, teamColors = true;
     SDL_Texture* bulletTexture = NULL;
     SDL_Texture* gunFireTexture = NULL;
     Mix_Chunk* sound;
@@ -56,9 +58,9 @@ int main(int argc, char* args[])
     SDL_Texture *textTexture;
     SDL_Texture* backgroundTexture = NULL;
     SDL_Rect textRect[15];
-    SDL_Rect aRoundStateRect[4];
-    SDL_Texture* roundStateTexture;
-    SDL_Rect aScoreRect[4];
+    SDL_Rect aRoundStateRect[3];
+    SDL_Texture* roundStateTexture[3];
+    SDL_Rect aScoreRect[3];
     SDL_Texture* scoreTexture;
     SDL_Rect explosionTiles[121]; // Rutor från explosions.png
     int up = 0, down = 0, left = 0, right = 0;
@@ -68,19 +70,22 @@ int main(int argc, char* args[])
     int tcpMessage = 0;
     int winner = 0;
     bool newRoundFlag = false;
+    bool warmup = false;
     SDL_Texture* connectTextures[3];
     SDL_Texture* hostTextures[3];
     SDL_Texture* quitTextures[3];
+
+    uint32_t frameTicks;
 
     // Init functions
     set = SDLNet_AllocSocketSet(1);
     mutex = SDL_CreateMutex();
     if (!initSDL(&renderer, &sound, &soundWall, &soundDeath)) return 1;
     initGameObjects(players, bullets);
-    initGameHUD(renderer, textRect, &textTexture, aScoreRect, &scoreTexture, aRoundStateRect, &roundStateTexture);
+    initGameHUD2(renderer, textRect, &textTexture, aScoreRect, &scoreTexture, aRoundStateRect, roundStateTexture);
     loadMenu(renderer, connectTextures, hostTextures, quitTextures, &backgroundTexture);
     initClient(&sd, &p, &p2);
-    loadMedia(renderer, gridTiles, &tiles, playerRect, &playerText, &cursor, &bulletTexture, 
+    loadMedia(renderer, gridTiles, &tiles, playerRect, playerText, &cursor, &bulletTexture, 
             &gunFireTexture, &explosionTexture, &bloodTexture, 
             &sound, explosionTiles, bloodTiles, &soundWall, &soundDeath,
             &prepareToFight);
@@ -100,7 +105,7 @@ int main(int argc, char* args[])
     buttons[2] = createButton((WINDOWWIDTH / 2) - BUTTON_HEIGHT, QUIT_Y_POS);
     while (isPlaying && !connected)
     {
-        handleEvents(&event, &up, &down, &right, &left, &isPlaying, &mouse, &shooting, &reload, &mute, &tcpMessage, &scoreScreen);
+        handleEvents(&event, &up, &down, &right, &left, &isPlaying, &mouse, &shooting, &reload, &mute, &tcpMessage, &scoreScreen, &teamColors);
         renderMenu(renderer, connectTextures, hostTextures, quitTextures, buttons, backgroundTexture, mouse.x, mouse.y, shooting);
         if (mouse.x >= (WINDOWWIDTH / 2) - BUTTON_HEIGHT && mouse.x <= (WINDOWWIDTH / 2) + BUTTON_HEIGHT)
         {
@@ -138,7 +143,7 @@ int main(int argc, char* args[])
     // Main loop
     while (isPlaying)
     {
-        SDL_Delay(1000 / 60);
+        frameTicks = SDL_GetTicks();
         //Om ny runda
         if (getRoundState(networkgamestate) == 1)
         {
@@ -168,7 +173,7 @@ int main(int argc, char* args[])
                 }
             }
         }
-        handleEvents(&event, &up, &down, &right, &left, &isPlaying, &mouse, &shooting, &reload, &mute, &tcpMessage, &scoreScreen);
+        handleEvents(&event, &up, &down, &right, &left, &isPlaying, &mouse, &shooting, &reload, &mute, &tcpMessage, &scoreScreen, &teamColors);
         if (tcpMessage && host)
         {
             sendTCPtoServer(&tcpsock, tcpMessage);
@@ -197,19 +202,21 @@ int main(int argc, char* args[])
         handleClientTCP(&tcpsock, &set, networkgamestate, players, playerID);
 
         SDL_RenderClear(renderer);
-
         renderGame(renderer, tiles, gridTiles, bullets, bulletTexture, players, playerText, playerRect, 
-                    gunFireTexture, explosionTexture, bloodTexture, sound, explosionTiles, bloodTiles, soundWall, soundDeath);
-        
+                    gunFireTexture, explosionTexture, bloodTexture, sound, explosionTiles, bloodTiles, soundWall, soundDeath, playerID, teamColors);
         renderTestBullets(renderer, bullets, bulletTEST); // Synligare bullets för testing    
-
         renderHUD(renderer, players[playerID], textRect, textTexture);
-          
         renderRoundState(renderer, aRoundStateRect, roundStateTexture, getRoundState(networkgamestate), winner, textRect, textTexture);
         if (scoreScreen) renderScoreScreen(renderer, aScoreRect, scoreTexture, textRect, textTexture, players);
         SDL_UnlockMutex(mutex);
         
         SDL_RenderPresent(renderer);
+
+        frameTicks = SDL_GetTicks() - frameTicks;
+        if(frameTicks < 1000/TARGET_FRAME_RATE)
+        {
+            SDL_Delay(1000/TARGET_FRAME_RATE - frameTicks);
+        }
     }
 
     SDL_DestroyRenderer(renderer);
@@ -218,7 +225,7 @@ int main(int argc, char* args[])
     return 0;
 }
 
-void handleEvents(SDL_Event* event, int* up, int* down, int* right, int* left, bool* isPlaying, SDL_Point *mouse, bool* shooting, bool *reload, bool *mute, int *tcpMessage, bool* scoreScreen)
+void handleEvents(SDL_Event* event, int* up, int* down, int* right, int* left, bool* isPlaying, SDL_Point *mouse, bool* shooting, bool *reload, bool *mute, int *tcpMessage, bool* scoreScreen, bool *teamColors)
 {
     SDL_GetMouseState(&mouse->x, &mouse->y);
     while (SDL_PollEvent(event))
@@ -261,6 +268,9 @@ void handleEvents(SDL_Event* event, int* up, int* down, int* right, int* left, b
                 break;
             case SDL_SCANCODE_M:
                 *mute = (*mute+1)%2;
+                break;
+            case SDL_SCANCODE_K:
+                *teamColors = (*teamColors+1)%2;
                 break;
             default:
                 break;

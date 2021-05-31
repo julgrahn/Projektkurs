@@ -25,5 +25,6 @@ void resetTileGridMap();
 void updateMap();
 void copyWallState(uint32_t destWallstate[]);
 void updateWallstate(uint32_t source[]);
+void setWallState(int wallNo, bool wall);
 
 #endif /* world_h */

@@ -9,9 +9,9 @@
 #define BLOODSPLATTERSIZE 45
 
 PUBLIC void renderGame(SDL_Renderer* renderer, SDL_Texture* mTiles, SDL_Rect gTiles[], Bullet bullets[][MAX_BULLETS],
-    SDL_Texture* bulletTexture, Player players[], SDL_Texture* playerText, SDL_Rect playerRect[],
+    SDL_Texture* bulletTexture, Player players[], SDL_Texture* playerText[], SDL_Rect playerRect[],
     SDL_Texture* gunFireTexture, SDL_Texture* explosionTexture, SDL_Texture* bloodTexture, Mix_Chunk* sound,
-    SDL_Rect explosionTiles[], SDL_Rect bloodTiles[], Mix_Chunk* soundWall, Mix_Chunk* soundDeath)
+    SDL_Rect explosionTiles[], SDL_Rect bloodTiles[], Mix_Chunk* soundWall, Mix_Chunk* soundDeath, int playerID, bool teamColors)
 {
     static SDL_Point playerRotationPoint = { 20, 32 };
     static SDL_Point muzzleRotationPoint = { 14, 16 };
@@ -21,6 +21,7 @@ PUBLIC void renderGame(SDL_Renderer* renderer, SDL_Texture* mTiles, SDL_Rect gTi
     static SDL_Rect gunFireRect = { 0, 0, 40, 40 };
     static SDL_Rect position = { 0, 0, TILE_WIDTH, TILE_HEIGHT };
     static SDL_Rect player = { 0, 0, 64, 64 };
+
 
     for (int i = 0; i < getTileRows(); i++)
     {
@@ -45,12 +46,19 @@ PUBLIC void renderGame(SDL_Renderer* renderer, SDL_Texture* mTiles, SDL_Rect gTi
         }
     }
     // Render Players
+    int playerTextureNo = 0;
     for (int i = 0; i < MAX_PLAYERS; i++)
     {
         if (isPlayerAlive(players[i]))
         {
+            if(teamColors)
+            {
+                if(playerID == i)
+                    playerTextureNo = 0;
+                else playerTextureNo = i+1;
+            }
             player.x = getPlayerX(players[i])-20, player.y = getPlayerY(players[i])-32;
-            SDL_RenderCopyEx(renderer, playerText, &playerRect[getPlayerFrame(players[i])], &player, getPlayerDirection(players[i]), &playerRotationPoint, SDL_FLIP_NONE);
+            SDL_RenderCopyEx(renderer, playerText[playerTextureNo], &playerRect[getPlayerFrame(players[i])], &player, getPlayerDirection(players[i]), &playerRotationPoint, SDL_FLIP_NONE);
         }
         else // dödsljud fungerar ej optimalt än
         {
@@ -71,11 +79,11 @@ PUBLIC void renderGame(SDL_Renderer* renderer, SDL_Texture* mTiles, SDL_Rect gTi
                 {
                     explosionRect.x = getBulletX(bullets[i][j]) - explosionRect.w/2;
                     explosionRect.y = getBulletY(bullets[i][j]) - explosionRect.h/2;
-
+                    if(getBulletHitValue(bullets[i][j]) == 12)
+                        Mix_PlayChannel(-1, soundWall, 0); // wall sound                    
                     if (getBulletHitValue(bullets[i][j]) > 12)
                     {
                         SDL_RenderCopyEx(renderer, explosionTexture, &explosionTiles[45], &explosionRect, 0, NULL, SDL_FLIP_NONE);   
-                        Mix_PlayChannel(-1, soundWall, 0); // wall sound                    
                     }
                     else if (getBulletHitValue(bullets[i][j]) > 9)
                     {
@@ -128,31 +136,30 @@ PUBLIC void renderGame(SDL_Renderer* renderer, SDL_Texture* mTiles, SDL_Rect gTi
     }
 }
 
-PUBLIC void renderRoundState(SDL_Renderer* renderer, SDL_Rect aRoundStateRect[], SDL_Texture* roundStateTexture, int roundState, int winner, SDL_Rect textrect[], SDL_Texture* texttexture)
+PUBLIC void renderRoundState(SDL_Renderer* renderer, SDL_Rect aRoundStateRect[], SDL_Texture* roundStateTexture[], int roundState, int winner, SDL_Rect textrect[], SDL_Texture* texttexture)
 {
+    static SDL_Rect drawRoundStateRect[3];
+    for(int i = 0; i < 3; i++)
+    {
+        drawRoundStateRect[i].w = aRoundStateRect[i].w;
+        drawRoundStateRect[i].h = aRoundStateRect[i].h;
+        drawRoundStateRect[i].x = WINDOWWIDTH/2-drawRoundStateRect[i].w/2;
+        drawRoundStateRect[i].y = WINDOWHEIGHT/2-drawRoundStateRect[i].h/2;
+    }
     if (roundState == 0 || roundState == 1)
     {
         if (roundState == 0) SDL_SetRenderDrawColor(renderer, 255, 255, 255, 0);
-        else SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-        aRoundStateRect[3].x = 0;
-        aRoundStateRect[3].y = WINDOWHEIGHT / 2;
-        SDL_RenderFillRect(renderer, &aRoundStateRect[3]);
-        SDL_RenderCopy(renderer, roundStateTexture, &aRoundStateRect[roundState], &aRoundStateRect[3]);
+        else SDL_SetRenderDrawColor(renderer, 255, 0, 0, 150);
+        SDL_RenderFillRect(renderer, &drawRoundStateRect[1]);
+        SDL_RenderCopy(renderer, roundStateTexture[roundState], &aRoundStateRect[roundState], &drawRoundStateRect[roundState]);
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     }
     else if (roundState == 3)
-    {        
-        aRoundStateRect[3].x = 0;
-        aRoundStateRect[3].y = WINDOWHEIGHT / 2;
-        
-        SDL_RenderCopy(renderer, roundStateTexture, &aRoundStateRect[2], &aRoundStateRect[3]);
-        aRoundStateRect[3].x += 900;
-        int temp = aRoundStateRect[3].w;
-        aRoundStateRect[3].w = 50;
-        SDL_RenderCopy(renderer, texttexture, &textrect[winner], &aRoundStateRect[3]);
-        aRoundStateRect[3].w = temp;
-        aRoundStateRect[3].x -= 900;
-
+    { 
+        SDL_RenderCopy(renderer, roundStateTexture[2], &aRoundStateRect[2], &drawRoundStateRect[2]);
+        drawRoundStateRect[2].x += 900;
+        drawRoundStateRect[2].w = 50;
+        SDL_RenderCopy(renderer, texttexture, &textrect[winner], &drawRoundStateRect[2]);
     }
 }
 
@@ -160,8 +167,8 @@ PUBLIC void renderScoreScreen(SDL_Renderer* renderer, SDL_Rect aScorerect[], SDL
 {
  
     int yPadding = 20;
-    aScorerect[2].x = 175;
-    aScorerect[2].y = 225;
+    aScorerect[2].x = WINDOWWIDTH/2 - aScorerect[2].w/2;
+    aScorerect[2].y = 175;//WINDOWHEIGHT/2 - 70;
 
     SDL_RenderCopy(renderer, scoreTexture, &aScorerect[1], &aScorerect[2]);
     for (int i = 0; i < MAX_PLAYERS; i++)
@@ -181,7 +188,7 @@ PUBLIC void renderScoreScreen(SDL_Renderer* renderer, SDL_Rect aScorerect[], SDL
 PUBLIC void renderHUD(SDL_Renderer* renderer, Player player, SDL_Rect textrect[], SDL_Texture *texttecture)
 {
     static SDL_Rect healthBar;
-    static SDL_Rect reloadTimer = {35, 0, 24, 0};
+    static SDL_Rect reloadTimer = {36, 0, 25, 0};
 
     SDL_RenderCopy(renderer, texttecture, &textrect[getPlayerweaponMag(player)/10], &textrect[3]);
     SDL_RenderCopy(renderer, texttecture, &textrect[getPlayerweaponMag(player)%10], &textrect[4]);

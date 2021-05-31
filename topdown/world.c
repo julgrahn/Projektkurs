@@ -7,7 +7,7 @@
 PRIVATE void wallColMultiAngleCompensation(double *xPos, double *yPos, int xWall, int yWall, int minDistance);
 PRIVATE void wallColSingleAngleCompensation(double *pos, int wallStart, int wallEnd, int minDistance);
 PRIVATE void countWallHits(int i, int j);
-PRIVATE void setWallState(int wallNo, bool wall);
+// PRIVATE void setWallState(int wallNo, bool wall);
 PRIVATE bool getWallState(int wallNo);
 enum material { sp = 121, br = 120, wa = 186, wall2 = 246, wall3 = 216 };
 // enum material { br = 222, wall = 186, truck = 102, wall2 = 246, wall3 = 216 };
@@ -172,18 +172,19 @@ PUBLIC bool getWallCollisionBullet(int x, int y, int h, int w)
 PRIVATE void countWallHits(int i, int j)
 {
     tileGridHits[i][j]++;
-    if (tileGridHits[i][j] == 7)
+    if (tileGridHits[i][j] == 2)
     {
         tileGrid[i][j] = wall2;
     }
-    else if (tileGridHits[i][j] == 14)
+    else if (tileGridHits[i][j] == 4)
     {
         tileGrid[i][j] = wall3;
     }
-    else if (tileGridHits[i][j] == 20)
+    else if (tileGridHits[i][j] == 6)
     {
-        // tileGrid[i][j] = br;
+        tileGrid[i][j] = br;
         setWallState(i*tileColumns+j, false);
+        tileGridHits[i][j] = 0;
     }
     return;
 }
@@ -221,12 +222,15 @@ PUBLIC void resetTileGridMap()
     }
 }
 
-PRIVATE void setWallState(int wallNo, bool wall)
+PUBLIC void setWallState(int wallNo, bool wall)
 {
-    uint32_t tmp = 1;
-    tmp = tmp << (wallNo%32);
-    tmp = ~tmp*!wall + tmp*wall;
-    wallState[(wallNo-1)/32] = (wallState[(wallNo-1)/32] | tmp)*wall + (wallState[(wallNo-1)/32] & tmp)*!wall;
+    if(wallNo >= 0)
+    {
+        uint32_t tmp = 1;
+        tmp = tmp << (wallNo%32);
+        tmp = ~tmp*!wall + tmp*wall;
+        wallState[(wallNo-1)/32] = (wallState[(wallNo-1)/32] | tmp)*wall + (wallState[(wallNo-1)/32] & tmp)*!wall;
+    }
 }
 
 PRIVATE bool getWallState(int wallNo)
@@ -257,6 +261,6 @@ PUBLIC void updateWallstate(uint32_t source[])
 {
     for (int i = 0; i < 27; i++)
     {
-        wallState[i] &= source[i];
+        wallState[i] = source[i];
     }
 }

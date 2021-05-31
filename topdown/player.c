@@ -184,66 +184,6 @@ PUBLIC void moveOtherPlayers(Player p)
     }
 }
 
-// PUBLIC void moveOtherPlayers(Player p)
-// {
-//     int xDelta = p->newX - p->pDimensions.x;
-//     int yDelta = p->newY - p->pDimensions.y;
-//     double distance = sqrt(xDelta * xDelta + yDelta * yDelta);
-//     double scaling = p->speed / (distance * (distance >= 1) + (distance < 1));
-//     if (distance >= SNAP_DISTANCE)
-//     {
-//         snapPlayer(p, p->newX, p->newY);
-//         return;
-//     }
-//     int old = p->direction + 180 + 5;
-//     int new = p->newDirection + 180 + 5;
-
-//     if (xDelta > 1 || xDelta < -1 || yDelta > 1 || yDelta < -1)
-//     {
-//         p->xSpeed = scaling * xDelta;
-//         p->ySpeed = scaling * yDelta;
-
-//         p->posX += p->xSpeed;
-//         p->posY += p->ySpeed;
-
-//         p->pDimensions.x = round(p->posX);
-//         p->pDimensions.y = round(p->posY);
-//         p->frameCounter = (p->frameCounter + 1) % (ANIMATIONSPEED + 1);
-//         p->frame = (p->frame + ((p->frameCounter / ANIMATIONSPEED))) % 4;
-//     }
-//     // if(p->direction != p->newDirection)
-//     // {
-//     //     if(new - old < 180 && new - old > 0)
-//     //     {
-//     //         old += ROTATION_UPDATE_SPEED;
-//     //     }
-//     //     else if(new - old > -180 && new - old < 0)
-//     //     {
-//     //         old -= ROTATION_UPDATE_SPEED;
-//     //     }
-//     //     else if(new - old < -180)
-//     //     {
-//     //             old += ROTATION_UPDATE_SPEED;
-//     //         if(old > 360)
-//     //         {
-//     //             old -= 360;
-//     //         }
-//     //     }
-//     //     else if(new - old > 180)
-//     //     {
-//     //         old -= ROTATION_UPDATE_SPEED;
-//     //         if(old < 0)
-//     //         {
-//     //             old += 360;
-//     //         }
-//     //         // if(new - old < ROTATION_UPDATE_SPEED) old = new;
-//     //     }
-//     //     old -= (180+5);
-//     //     p->direction = old;
-//     // }
-
-// }
-
 PUBLIC void snapPlayer(Player p, int x, int y)
 {
     p->newX = x;

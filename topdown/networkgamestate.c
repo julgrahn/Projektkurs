@@ -21,6 +21,7 @@ typedef struct NetworkPlayer_type{
 struct Networkgamestate_type {
     Networkplayer aPlayer[5];
     Uint8 roundState;
+    uint8_t createWalls;
 };
 
 PUBLIC Networkgamestate createNetworkgamestate()
@@ -39,9 +40,10 @@ PUBLIC Networkgamestate createNetworkgamestate()
         {
             a->aPlayer[i].aBullet[j].control_active = 0;
         }
-
-        a->roundState = 0;
     }
+    a->roundState = 0;
+    a->createWalls = 0;
+
     return a;
 }
 
@@ -280,4 +282,21 @@ PUBLIC void combineWallstates(Networkgamestate a, uint32_t wallstates[])
         wallstates[i] &= a->aPlayer[4].wallState[i];
         a->aPlayer[0].wallState[i] = a->aPlayer[1].wallState[i] = a->aPlayer[2].wallState[i] = a->aPlayer[3].wallState[i] = a->aPlayer[4].wallState[i] = wallstates[i];
     }
+}
+
+PUBLIC void resetWallStates(Networkgamestate a, uint32_t wallstates[])
+{
+     for (int i = 0; i < 27; i++)
+    {
+        a->aPlayer[0].wallState[i] = wallstates[i];
+        a->aPlayer[1].wallState[i] = wallstates[i];
+        a->aPlayer[2].wallState[i] = wallstates[i];
+        a->aPlayer[3].wallState[i] = wallstates[i];
+        a->aPlayer[4].wallState[i] = wallstates[i];
+    }
+}
+
+PUBLIC void createWalls(Networkgamestate a, bool b)
+{
+    a->createWalls = b;
 }
