@@ -7,7 +7,6 @@
 PRIVATE void wallColMultiAngleCompensation(double *xPos, double *yPos, int xWall, int yWall, int minDistance);
 PRIVATE void wallColSingleAngleCompensation(double *pos, int wallStart, int wallEnd, int minDistance);
 PRIVATE void countWallHits(int i, int j);
-// PRIVATE void setWallState(int wallNo, bool wall);
 PRIVATE bool getWallState(int wallNo);
 enum material { sp = 121, br = 120, wa = 186, wall2 = 246, wall3 = 216 };
 // enum material { br = 222, wall = 186, truck = 102, wall2 = 246, wall3 = 216 };

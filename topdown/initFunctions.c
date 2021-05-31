@@ -208,8 +208,7 @@ PUBLIC void loadMedia(SDL_Renderer* renderer, SDL_Rect gTiles[], SDL_Texture** t
     
 }
 
-// PUBLIC void initGameHUD(SDL_Renderer *renderer, SDL_Rect textRect[], SDL_Texture **textTexture)
-PUBLIC void initGameHUD2(SDL_Renderer *renderer, SDL_Rect textRect[], SDL_Texture **textTexture, SDL_Rect aScorerect[], SDL_Texture **scoreTexture, SDL_Rect aRoundStateRect[], SDL_Texture *roundStateTexture[])
+PUBLIC void initGameHUD(SDL_Renderer *renderer, SDL_Rect textRect[], SDL_Texture **textTexture, SDL_Rect aScorerect[], SDL_Texture **scoreTexture, SDL_Rect aRoundStateRect[], SDL_Texture *roundStateTexture[])
 {
     TTF_Init();
     TTF_Font *font;
@@ -293,86 +292,6 @@ PUBLIC void initGameHUD2(SDL_Renderer *renderer, SDL_Rect textRect[], SDL_Textur
             aRoundStateRect[i].w = aWidth[i];
             aRoundStateRect[i].h = aHeight[i];
         }
-        TTF_CloseFont(font);
-    }
-}
-PUBLIC void initGameHUD(SDL_Renderer *renderer, SDL_Rect textRect[], SDL_Texture **textTexture, SDL_Rect aScorerect[], SDL_Texture **scoreTexture, SDL_Rect aRoundStateRect[], SDL_Texture **roundStateTexture)
-{
-    TTF_Init();
-    TTF_Font *font;
-    font=TTF_OpenFont("unispace_bd.ttf", 20);
-    if(!font) {
-        printf("TTF_OpenFont: %s\n", TTF_GetError());
-    }
-    else
-    {
-        // Ammo, hp och liv
-        SDL_Color color = {255,255,255};
-        SDL_Surface *textSurface;
-        textSurface = TTF_RenderText_Blended(font,"0123456789|HP: ",color);
-        *textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
-        SDL_FreeSurface(textSurface);
-        int width, height;
-        TTF_SizeText(font, "0123456789|HP: ", &width, &height);
-        for(int i = 0; i < 11; i++)
-        {
-            textRect[i].x = i * width/15;
-            textRect[i].y = 0;
-            textRect[i].w = width/15;
-            textRect[i].h = height;
-        }
-        for(int i = 12; i < 15; i++)
-        {
-            textRect[i].x = i * width/15 + (width/15*4);
-            textRect[i].y = 0;
-            textRect[i].w = width/15;
-            textRect[i].h = height;
-        }
-        textRect[11].x = 11 * width/15;
-        textRect[11].y = 0;
-        textRect[11].w = width/15*4;
-        textRect[11].h = height;
-
-        // Scorescreen
-
-        aScorerect[0].x = 0;
-        aScorerect[0].y = 0;
-        aScorerect[0].w = width/15;
-        aScorerect[0].h = height;
-
-        textSurface = TTF_RenderText_Blended(font, "Player Kills", color);
-        *scoreTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
-        SDL_FreeSurface(textSurface);
-        TTF_SizeText(font, "Player Kills", &width, &height);
-
-        for (int i = 1; i < 3; i++)
-        {
-            aScorerect[i].x = 0;
-            aScorerect[i].y = 0;
-            aScorerect[i].w = width;
-            aScorerect[i].h = height;
-        }
-        aScorerect[3].x = 0;
-        aScorerect[3].y = 0;
-        aScorerect[3].w = width;
-        aScorerect[3].h = height;
-        TTF_CloseFont(font);
-        // Roundstate
-        font = TTF_OpenFont("unispace_bd.ttf", 72);
-        //textSurface = TTF_RenderText_Blended(font, "WARMUP          PREPARE TO FIGHT", color);
-        textSurface = TTF_RenderText_Blended(font, "WARMUP              PREPARE TO FIGHT    THE WINNER IS PLAYER", color);
-        *roundStateTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
-        SDL_FreeSurface(textSurface);
-        TTF_SizeText(font, "WARMUP              PREPARE TO FIGHT    THE WINNER IS PLAYER", &width, &height);
-        for (int i = 0; i < 4; i++)
-        {
-            aRoundStateRect[i].x = 0 + i*width/3;
-            aRoundStateRect[i].y = 0;
-            aRoundStateRect[i].w = width/3;
-            aRoundStateRect[i].h = height;
-        }
-
-        
         TTF_CloseFont(font);
     }
 }

@@ -82,7 +82,7 @@ int main(int argc, char* args[])
     mutex = SDL_CreateMutex();
     if (!initSDL(&renderer, &sound, &soundWall, &soundDeath)) return 1;
     initGameObjects(players, bullets);
-    initGameHUD2(renderer, textRect, &textTexture, aScoreRect, &scoreTexture, aRoundStateRect, roundStateTexture);
+    initGameHUD(renderer, textRect, &textTexture, aScoreRect, &scoreTexture, aRoundStateRect, roundStateTexture);
     loadMenu(renderer, connectTextures, hostTextures, quitTextures, &backgroundTexture);
     initClient(&sd, &p, &p2);
     loadMedia(renderer, gridTiles, &tiles, playerRect, playerText, &cursor, &bulletTexture, 
