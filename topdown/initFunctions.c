@@ -1,3 +1,5 @@
+#pragma warning(disable : 4996)
+
 #include "initFunctions.h"
 
 #define PUBLIC /* empty */
