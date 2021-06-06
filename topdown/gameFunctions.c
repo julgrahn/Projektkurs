@@ -15,6 +15,7 @@ PUBLIC void updateplayers(Networkgamestate networkgamestate, Player players[], i
 {
     for (int i = 0; i < MAX_PLAYERS; i++)
     {
+        setKilled(players[i], getNetPlayerKilled(networkgamestate, i));
         setActivePlayer(players[i], isNetPlayerActive(networkgamestate, i));
         setPlayerKills(players[i], getNetPlayerKills(networkgamestate, i));
         if (i != playerID)
@@ -23,6 +24,7 @@ PUBLIC void updateplayers(Networkgamestate networkgamestate, Player players[], i
         }
         else
         {
+            updateWallstate(getWallState(networkgamestate, i));
             setPlayerLives(players[playerID], getNetplayerLives(networkgamestate, playerID));
             setPlayerAlive(players[playerID], isNetPlayerAlive(networkgamestate, playerID));
             setPlayerhealth(players[playerID], getNetplayerHealth(networkgamestate, playerID));
@@ -53,18 +55,17 @@ PUBLIC void updateplayerbullets(Networkgamestate networkgamestate, int playerID,
         {
             for(int j = 0; j < MAX_BULLETS; j++)
             {
-                if(!isNetbulletActive(networkgamestate, i, j) && isBulletActive(*((bullets+i*MAX_BULLETS) + j)))
+                if(!isNetbulletActive(networkgamestate, i, j) && isBulletActive(*((bullets+i*MAX_BULLETS) + j)) && netbulletStatus(networkgamestate, i, j))
                 {
                     freeBullet(*((bullets+i*MAX_BULLETS) + j));
                 }
-                else if(isNetbulletActive(networkgamestate, i, j) && !isBulletActive(*((bullets+i*MAX_BULLETS) + j)))
+                else if(isNetbulletActive(networkgamestate, i, j) && !isBulletActive(*((bullets+i*MAX_BULLETS) + j)) && !getBulletHitValue(*((bullets+i*MAX_BULLETS) + j)))
                 {
                     spawnBullet(*((bullets+i*MAX_BULLETS) + j), getNetBulletX(networkgamestate, i, j), getNetBulletY(networkgamestate, i, j), getNetbulletAngle(networkgamestate, i, j), 0);
                 }
             }
         }
     }
-    
 }
 
 PUBLIC bool rectCollisionTest(SDL_Rect* a, SDL_Rect* b)

@@ -4,6 +4,7 @@
 #include "sdlinclude.h"
 #include "player.h"
 #include "bullet.h"
+#include <stdint.h>
 
 typedef struct Networkgamestate_type* Networkgamestate;
 
@@ -48,5 +49,14 @@ double getNetbulletspeedX(Networkgamestate a, int playerID, int bulletID);
 double getNetbulletspeedY(Networkgamestate a, int playerID, int bulletID);
 double getNetbulletAngle(Networkgamestate a, int playerID, int bulletID);
 int getNetbulletdamage(Networkgamestate a, int playerID, int bulletID);
+bool getNetPlayerKilled(Networkgamestate a, int playerID);
+void resetPlayerKilled(Networkgamestate a, int playerID);
+
+
+uint32_t* getWallState(Networkgamestate a, int playerID);
+void combineWallstates(Networkgamestate a, uint32_t wallstates[]);
+void resetWallStates(Networkgamestate a, uint32_t wallstates[]);
+void createWalls(Networkgamestate a, bool b);
+
 
 #endif

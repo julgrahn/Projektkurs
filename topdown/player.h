@@ -1,6 +1,8 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 #include "sdlinclude.h"
+#include "world.h"
+#include "weapon.h"
 #include <stdbool.h>
 
 typedef struct Player_type* Player;
@@ -8,7 +10,6 @@ typedef struct Player_type* Player;
 
 Player createPlayer(int x, int y);
 void movePlayer(Player p, int up, int down, int right, int left, int mouseX, int mouseY, bool reload);
-SDL_Rect* getPlayerRect(Player p);
 int getPlayerFrame(Player p);
 double getPlayerDirection(Player p);
 int getPlayerX(Player p);
@@ -43,5 +44,8 @@ int getPlayerlives(Player a);
 int getPlayerReloadprogress(Player a);
 void resetPlayer(Player a);
 double getPlayerShotAngle(Player a);
+int getPlayerRadius();
+bool checkKilled(Player a);
+void setKilled(Player p, bool n);
 
 #endif

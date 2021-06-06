@@ -11,14 +11,17 @@ typedef struct NetworkBullet_type{
 typedef struct NetworkPlayer_type{
     short direction;
     short posX, posY;
-    Uint8 status;   // bitpattern: 2 - alive, 1 - active, 0 - invulnerable
-    Sint8 lives, health, kills;  
+    Uint8 status;   // bit: 2 - alive, bit: 1 - active, bit: 0 - invulnerable
+    Sint8 lives, health, kills;
+    bool killed;//tillfälligt för dödsljud
     Networkbullet aBullet[MAX_BULLETS];
+    Uint32 wallState[27];
 }Networkplayer;
 
 struct Networkgamestate_type {
     Networkplayer aPlayer[5];
     Uint8 roundState;
+    uint8_t createWalls;
 };
 
 PUBLIC Networkgamestate createNetworkgamestate()
@@ -31,14 +34,16 @@ PUBLIC Networkgamestate createNetworkgamestate()
         a->aPlayer[i].health = 100;
         a->aPlayer[i].lives = 0;
         a->aPlayer[i].status = 0;
+        a->aPlayer[i].killed = false;
         a->aPlayer[i].kills = 0;
         for (int j = 0; j < MAX_BULLETS; j++)
         {
             a->aPlayer[i].aBullet[j].control_active = 0;
         }
-
-        a->roundState = 0;
     }
+    a->roundState = 0;
+    a->createWalls = 0;
+
     return a;
 }
 
@@ -137,11 +142,9 @@ PUBLIC void setNetPlayerAlive(Networkgamestate a, int n, bool alive)
     a->aPlayer[n].status = (a->aPlayer[n].status |= 0b100) * alive + (a->aPlayer[n].status &= 0b011) * !alive;
 }
 
-
 PUBLIC void setNetBullets(Networkgamestate a, int playerID, Bullet bullets[])
 {
-    int i;
-    for (i = 0; i < MAX_BULLETS; i++)
+    for (int i = 0; i < MAX_BULLETS; i++)
     {
         a->aPlayer[playerID].aBullet[i].control_active = (a->aPlayer[playerID].aBullet[i].control_active |= 0b01) * isBulletActive(bullets[i]) + (a->aPlayer[playerID].aBullet[i].control_active &= 0b10) * !isBulletActive(bullets[i]);
         a->aPlayer[playerID].aBullet[i].angle = getBulletDirection(bullets[i])*10000;
@@ -171,6 +174,7 @@ PUBLIC void damageNetplayer(Networkgamestate a, int playerID, int damage, int sh
     a->aPlayer[playerID].health -= damage;
     if(a->aPlayer[playerID].health <= 0)
     {
+        // a->aPlayer[playerID].killed = true;//tillfälligt för dödsljud
         if(--a->aPlayer[playerID].lives < 0) a->aPlayer[playerID].lives = 0;
         killNetPlayer(a, playerID);
         a->aPlayer[shooterID].kills++;
@@ -245,4 +249,54 @@ PUBLIC double getNetbulletAngle(Networkgamestate a, int playerID, int bulletID)
 PUBLIC int getNetbulletdamage(Networkgamestate a, int playerID, int bulletID)
 {
     return a->aPlayer[playerID].aBullet[bulletID].damage;
+}
+
+
+// för dödsljud
+PUBLIC bool getNetPlayerKilled(Networkgamestate a, int playerID)
+{
+    return a->aPlayer[playerID].killed;
+}
+
+PUBLIC void resetPlayerKilled(Networkgamestate a, int playerID)
+{
+    if(a->aPlayer[playerID].killed){
+        printf("skicka paket\n");
+    }
+    a->aPlayer[playerID].killed = false;
+}
+
+PUBLIC uint32_t* getWallState(Networkgamestate a, int playerID)
+{
+    return a->aPlayer[playerID].wallState;
+}
+
+PUBLIC void combineWallstates(Networkgamestate a, uint32_t wallstates[])
+{
+    for (int i = 0; i < 27; i++)
+    {
+        wallstates[i] &= a->aPlayer[0].wallState[i];
+        wallstates[i] &= a->aPlayer[1].wallState[i];
+        wallstates[i] &= a->aPlayer[2].wallState[i];
+        wallstates[i] &= a->aPlayer[3].wallState[i];
+        wallstates[i] &= a->aPlayer[4].wallState[i];
+        a->aPlayer[0].wallState[i] = a->aPlayer[1].wallState[i] = a->aPlayer[2].wallState[i] = a->aPlayer[3].wallState[i] = a->aPlayer[4].wallState[i] = wallstates[i];
+    }
+}
+
+PUBLIC void resetWallStates(Networkgamestate a, uint32_t wallstates[])
+{
+     for (int i = 0; i < 27; i++)
+    {
+        a->aPlayer[0].wallState[i] = wallstates[i];
+        a->aPlayer[1].wallState[i] = wallstates[i];
+        a->aPlayer[2].wallState[i] = wallstates[i];
+        a->aPlayer[3].wallState[i] = wallstates[i];
+        a->aPlayer[4].wallState[i] = wallstates[i];
+    }
+}
+
+PUBLIC void createWalls(Networkgamestate a, bool b)
+{
+    a->createWalls = b;
 }

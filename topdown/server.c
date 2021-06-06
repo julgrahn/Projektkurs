@@ -1,3 +1,5 @@
+#pragma warning(disable : 4996)
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -16,8 +18,7 @@ PRIVATE void handleTCP(Server server, int respawnDelay[]);
 PRIVATE void handleUDPreceive(Server server);
 PRIVATE void handleUDPsend(Server server);
 PRIVATE void startNewGame(Server server, int respawnDelay[]);
-PRIVATE bool circleHitDetect(SDL_Point *a, int rad0, SDL_Point *b, int rad1);
- 
+PRIVATE bool circleHitDetect(SDL_Point *a, int r0, SDL_Point *b, int r1);
 
 struct Server_type {
     UDPsocket sd;       /* Socket descriptor */
@@ -36,15 +37,19 @@ struct Server_type {
     SDLNet_SocketSet set;
     bool warmup;
     int spawnTime;
+    uint32_t wallStates[27];
+    uint8_t wallSyncDelay;
 };
 
 PUBLIC Server createServer()
 {
+    srand(time(0));
     Server server = malloc(sizeof(struct Server_type));
     server->state = createNetworkgamestate();
     server->set = SDLNet_AllocSocketSet(MAX_PLAYERS);
     server->warmup = true;
     server->spawnTime = STANDARDSPAWNTIME;
+    server->wallSyncDelay = 0;
     for (int i = 0; i < MAX_PLAYERS + 1; i++)
     {
         server->tcpsockClient[i] = NULL;
@@ -59,16 +64,16 @@ PUBLIC Server createServer()
     server->noOfPlayers = 0;
 
     // Hårdkodade startpositioner för spelare
-    server->spawnPoint[0].x = 1;
-    server->spawnPoint[0].y = 1;
-    server->spawnPoint[1].x = WINDOWWIDTH - 1;
-    server->spawnPoint[1].y = 1;
-    server->spawnPoint[2].x = 1;
-    server->spawnPoint[2].y = WINDOWHEIGHT - 1;
-    server->spawnPoint[3].x = WINDOWWIDTH - 1;
-    server->spawnPoint[3].y = WINDOWHEIGHT - 1;
-    server->spawnPoint[4].x = 500;
-    server->spawnPoint[4].y = 500;
+    server->spawnPoint[0].x = 96;
+    server->spawnPoint[0].y = 256;
+    server->spawnPoint[1].x = 550;
+    server->spawnPoint[1].y = 90;
+    server->spawnPoint[2].x = 1056;
+    server->spawnPoint[2].y = 256;
+    server->spawnPoint[3].x = 256;
+    server->spawnPoint[3].y = 672;
+    server->spawnPoint[4].x = 864;
+    server->spawnPoint[4].y = 672;
     for (int i = 0; i < MAX_PLAYERS; i++)
     {
         setNetplayerPos(server->state, i, server->spawnPoint[i].x, server->spawnPoint[i].y);
@@ -127,20 +132,23 @@ PRIVATE void runServer(void* args)
     int Gamelogicdelay = 0;
     int invulnerabilityDelay[MAX_PLAYERS] = {0};
     int respawnDelay[MAX_PLAYERS] = {0}; 
+    copyWallState(server->wallStates);
 
+    for (int i = 0; i < MAX_PLAYERS; i++)
+    {
+        copyWallState(getWallState(server->state, i));
+    }
+    
     SDL_Point a, b;
-    // SDL_Rect a, b;
-    // a.w = a.h = 64;
-    // b.w = b.h = 4;
     // Main-loop
     while (true)
-    {   
+    {
         SDL_Delay(1); 
         TCPdelay = (TCPdelay + 1) % 200;
         UDPreceiveDelay = (UDPreceiveDelay + 1) % 1;
-        UDPsendDelay = (UDPsendDelay + 1) % 10;
+        UDPsendDelay = (UDPsendDelay + 1) % 16;
         Gamelogicdelay = (Gamelogicdelay + 1) % 8;
-        
+
         // TCP
         if (!TCPdelay)
         {
@@ -150,7 +158,6 @@ PRIVATE void runServer(void* args)
         if (!UDPreceiveDelay)
         {
             handleUDPreceive(server);
-            
         }
         // Game logic
         if(!Gamelogicdelay)
@@ -175,6 +182,7 @@ PRIVATE void handleUDPsend(Server server)
             memcpy(server->pSent->data, server->state, getGamestatesize());
             server->pSent->len = getGamestatesize();
             SDLNet_UDP_Send(server->sd, -1, server->pSent);
+            resetPlayerKilled(server->state, i);
         }
     }
 }
@@ -192,7 +200,6 @@ PRIVATE void handleUDPreceive(Server server)
                 int lives = getNetplayerLives(server->state, i);
                 int kills = getNetPlayerKills(server->state, i);
                 bool invulnerable = isNetplayerInvulnerable(server->state, i);
-
                 memcpy(getNetPlayer(server->state, i), server->pRecive->data, getNetPlayerSize());
                 for(int j = 0; j < MAX_BULLETS; j++)
                 {
@@ -312,6 +319,14 @@ PRIVATE void startNewGame(Server server, int respawnDelay[])
 {   
     server->warmup = false;
     setRoundState(server->state, 1);
+    
+    resetTileGridMap();
+    server->wallSyncDelay = 200;
+    copyWallState(server->wallStates);
+    for (int i = 0; i < MAX_PLAYERS; i++)
+    {
+        copyWallState(getWallState(server->state, i));
+    }
 
     for (int i = 0; i < MAX_PLAYERS; i++)
     {
@@ -337,15 +352,10 @@ PRIVATE void handleGameLogic(Server server, int respawnDelay[], SDL_Point *a, SD
 {
     // Loop för kollisionshanteringen för kulor, om spelare dör och om spelet är över
     for (int i = 0; i < MAX_PLAYERS; i++)
-    {
         if(isNetPlayerActive(server->state, i))
-        {
             for(int j = 0; j < MAX_BULLETS; j++)
-            {
                 if(isNetbulletActive(server->state, i, j))
-                {                    
                     for (int k = 0; k < MAX_PLAYERS; k++)
-                    {
                         if((i!=k) && isNetPlayerAlive(server->state, k))
                         {
                             if (isNetplayerInvulnerable(server->state, i))
@@ -383,6 +393,7 @@ PRIVATE void handleGameLogic(Server server, int respawnDelay[], SDL_Point *a, SD
                                         }
                                         if (noOfPlayersAlive == 1)
                                         {
+                                            setRoundState(server->state, 3);
                                             printf("----------------------------------------\n");
                                             printf("%d seconds | Player % d has won!!!\n", SDL_GetTicks() / 1000, i);
                                             printf("----------------------------------------\n");
@@ -391,11 +402,6 @@ PRIVATE void handleGameLogic(Server server, int respawnDelay[], SDL_Point *a, SD
                                 }
                             }
                         }
-                    }
-                }
-            } 
-        }
-    }
     // Loop för respawn
     for (int i = 0; i < MAX_PLAYERS; i++)
     {
@@ -426,9 +432,20 @@ PRIVATE void handleGameLogic(Server server, int respawnDelay[], SDL_Point *a, SD
             }
         }
     }
+    if(server->wallSyncDelay)
+    {
+        resetWallStates(server->state, server->wallStates);
+        server->wallSyncDelay--;
+        createWalls(server->state, true);
+    }
+    else
+    {
+        combineWallstates(server->state, server->wallStates);
+        createWalls(server->state, false);
+    }
 }
 
-PRIVATE bool circleHitDetect(SDL_Point *a, int rad0, SDL_Point *b, int rad1)
+PRIVATE bool circleHitDetect(SDL_Point *a, int r0, SDL_Point *b, int r1)
 {
-    return sqrt((a->x - b->x) * (a->x - b->x) + (a->y - b->y) * (a->y - b->y)) < (rad0 + rad1);
+    return sqrt((a->x - b->x) * (a->x - b->x) + (a->y - b->y) * (a->y - b->y)) < (r0 + r1);
 }

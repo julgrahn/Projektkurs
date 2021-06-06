@@ -1,9 +1,10 @@
 #ifndef BULLET_H
 #define BULLET_H
 #include "sdlinclude.h"
+#include "world.h"
 #include <stdbool.h>
 
-#define BULLET_SPEED 10
+#define BULLET_SPEED 15
 
 typedef struct Bullet_type* Bullet;
 
@@ -25,4 +26,5 @@ int getBulletOriginX(Bullet a);
 int getBulletOriginY(Bullet a);
 bool checkShot(Bullet a);
 
+bool isWallhit(Bullet a);
 #endif
