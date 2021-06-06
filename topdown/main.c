@@ -19,62 +19,73 @@
 
 SDL_mutex* mutex;
 
-void renderTestBullets(SDL_Renderer *renderer, Bullet bullets[][MAX_BULLETS], SDL_Texture *testText); // Synligare bullets för testing 
+void renderTestBullets(SDL_Renderer* renderer, Bullet bullets[][MAX_BULLETS], SDL_Texture* testText); // Synligare bullets för testing 
 
-void handleEvents(SDL_Event* event, int* up, int* down, int* right, int* left, bool* isPlaying, SDL_Point *mouse, bool* shooting, bool *reload, bool *mute, int *tcpMessage, bool* scoreScreen, bool *teamColors);
+void handleEvents(SDL_Event* event, int* up, int* down, int* right, int* left,
+    bool* isPlaying, SDL_Point* mouse, bool* shooting, bool* reload,
+    bool* mute, int* tcpMessage, bool* scoreScreen, bool* teamColors);
 void connectPrompt(char* ip);
 
 int main(int argc, char* args[])
 {
-    // Variables
+    // SDL Variables
     SDL_Event event;
     SDL_Renderer* renderer = NULL;
+    SDL_Cursor* cursor = NULL;
+    SDL_Point mouse = { 0, 0 };
+
+    // SDL_Rects
+    SDL_Rect playerRect[4];
+    SDL_Rect bloodTiles[48];
+    SDL_Rect textRect[15];
+    SDL_Rect aRoundStateRect[3];
+    SDL_Rect gridTiles[900];
+    SDL_Rect aScoreRect[3];
+    SDL_Rect explosionTiles[121];
+
+    // Textures
+    SDL_Texture* playerText[6];
+    SDL_Texture* tiles = NULL;
+    SDL_Texture* bulletTexture = NULL;
+    SDL_Texture* gunFireTexture = NULL;
+    SDL_Texture* bloodTexture = NULL;
+    SDL_Texture* explosionTexture = NULL;
+    SDL_Texture* textTexture;
+    SDL_Texture* backgroundTexture = NULL;
+    SDL_Texture* roundStateTexture[3];
+    SDL_Texture* scoreTexture;
+    SDL_Texture* connectTextures[3];
+    SDL_Texture* hostTextures[3];
+    SDL_Texture* quitTextures[3];
+
+    // Sound variables
+    Mix_Chunk* sound;
+    Mix_Chunk* soundWall;
+    Mix_Chunk* soundDeath;
+    Mix_Chunk* prepareToFight;
+
+    // Network variables
     UDPsocket sd;
     TCPsocket tcpsock = NULL;
     SDLNet_SocketSet set;
     IPaddress srvadd;
     UDPpacket* p;
     UDPpacket* p2;
-    Server server = NULL;
-    int playerID;
-    SDL_Cursor* cursor = NULL;
-    Player players[MAX_PLAYERS];
-    SDL_Texture* playerText[6];
-    SDL_Rect playerRect[4];
-    SDL_Point mouse = {0, 0};
-    Bullet bullets[MAX_PLAYERS][MAX_BULLETS];
-    SDL_Texture* tiles = NULL;
-    SDL_Rect gridTiles[900];   // Kommer innehålla alla 900 rutor från bakgrundsbilden, kan optmiseras.
-    bool isPlaying = true, shooting = false, host = false, connected = false, reload = false, mute = false, scoreScreen = false, teamColors = true;
-    SDL_Texture* bulletTexture = NULL;
-    SDL_Texture* gunFireTexture = NULL;
-    Mix_Chunk* sound;
-    Mix_Chunk* soundWall;
-    Mix_Chunk* soundDeath;
-    Mix_Chunk* prepareToFight;
-    SDL_Texture* bloodTexture = NULL;
-    SDL_Rect bloodTiles[48];
-    SDL_Texture* explosionTexture = NULL;
-    SDL_Texture *textTexture;
-    SDL_Texture* backgroundTexture = NULL;
-    SDL_Rect textRect[15];
-    SDL_Rect aRoundStateRect[3];
-    SDL_Texture* roundStateTexture[3];
-    SDL_Rect aScoreRect[3];
-    SDL_Texture* scoreTexture;
-    SDL_Rect explosionTiles[121]; // Rutor från explosions.png
-    int up = 0, down = 0, left = 0, right = 0;
-    Networkgamestate networkgamestate = createNetworkgamestate();
-    Button buttons[3];
     char hostIP[20];
     int tcpMessage = 0;
-    int winner = 0;
-    bool newRoundFlag = false;
-    bool warmup = false;
-    SDL_Texture* connectTextures[3];
-    SDL_Texture* hostTextures[3];
-    SDL_Texture* quitTextures[3];
+    Server server = NULL;
 
+    // Other variables
+    int playerID;
+    Player players[MAX_PLAYERS];
+    Bullet bullets[MAX_PLAYERS][MAX_BULLETS];
+    Button buttons[3];
+    Networkgamestate networkgamestate = createNetworkgamestate();
+
+    bool isPlaying = true, shooting = false, host = false, connected = false,
+        reload = false, mute = false, scoreScreen = false, teamColors = true,
+        newRoundFlag = false, warmup = false;
+    int up = 0, down = 0, left = 0, right = 0, winner = 0;
     uint32_t frameTicks;
 
     // Init functions
@@ -85,20 +96,12 @@ int main(int argc, char* args[])
     initGameHUD(renderer, textRect, &textTexture, aScoreRect, &scoreTexture, aRoundStateRect, roundStateTexture);
     loadMenu(renderer, connectTextures, hostTextures, quitTextures, &backgroundTexture);
     initClient(&sd, &p, &p2);
-    loadMedia(renderer, gridTiles, &tiles, playerRect, playerText, &cursor, &bulletTexture, 
-            &gunFireTexture, &explosionTexture, &bloodTexture, 
-            &sound, explosionTiles, bloodTiles, &soundWall, &soundDeath,
-            &prepareToFight);
-
-    // För ny runda återställ kartan
+    loadMedia(renderer, gridTiles, &tiles, playerRect, playerText, &cursor, &bulletTexture,
+        &gunFireTexture, &explosionTexture, &bloodTexture,
+        &sound, explosionTiles, bloodTiles, &soundWall, &soundDeath,
+        &prepareToFight);
     initTileGridReset();
 
-    // Synligare bullets för testing 
-    SDL_Texture* bulletTEST;
-    SDL_Surface* bulletSurface = IMG_Load("resources/bullet.png");
-    bulletTEST = SDL_CreateTextureFromSurface(renderer, bulletSurface);
-    SDL_FreeSurface(bulletSurface);
-    
     // Menu loop
     buttons[0] = createButton((WINDOWWIDTH / 2) - BUTTON_HEIGHT, CONNECT_Y_POS);
     buttons[1] = createButton((WINDOWWIDTH / 2) - BUTTON_HEIGHT, HOST_Y_POS);
@@ -144,8 +147,12 @@ int main(int argc, char* args[])
     while (isPlaying)
     {
         frameTicks = SDL_GetTicks();
-        //Om ny runda
-        if (getRoundState(networkgamestate) == 1)
+        // Check what round state it is.
+        // 0 = Warmup
+        // 1 = New game
+        // 2 = Main game
+        // 3 = Game over
+        if (getRoundState(networkgamestate) == 1) // Enter this block only once per new game
         {
             if (newRoundFlag)
             {
@@ -157,11 +164,6 @@ int main(int argc, char* args[])
         {
             newRoundFlag = true;
         }
-        //Ljud av/på
-        Mix_Volume(-1, 5*!mute);
-        //Spel
-        playerTick(players[playerID]);
-
         if (getRoundState(networkgamestate) == 3)
         {
             for (int i = 0; i < MAX_PLAYERS; i++)
@@ -173,59 +175,76 @@ int main(int argc, char* args[])
                 }
             }
         }
+
+        // Sound on/off
+        Mix_Volume(-1, 5 * !mute);
+
+        // Handle reload and limit fire rate
+        playerTick(players[playerID]);
+
         handleEvents(&event, &up, &down, &right, &left, &isPlaying, &mouse, &shooting, &reload, &mute, &tcpMessage, &scoreScreen, &teamColors);
+
+        // Sends a message from host to server (start warmup or new game)
         if (tcpMessage && host)
         {
             sendTCPtoServer(&tcpsock, tcpMessage);
             tcpMessage = 0;
         }
+
+
         SDL_LockMutex(mutex);
+        // Move your own player and/or fire
         if (isPlayerAlive(players[playerID]))
         {
             movePlayer(players[playerID], up, down, right, left, mouse.x, mouse.y, reload);
             if (shooting) fire(bullets[playerID], players[playerID]);
         }
-        //Flytta på alla andra spelare
+        // Move all other players
         for (int i = 0; i < MAX_PLAYERS; i++)
         {
             if (i != playerID) {
                 moveOtherPlayers(players[i]);
             }
         }
-        //printf("%d\n", getRoundState(networkgamestate)); // felsökningsprintf
-        updateMap();
+        // Move bullets
         simulateBullets(bullets);
+
+        // Update maps
+        updateMap();       
         copyWallState(getWallState(networkgamestate, playerID));
+        
+
+        // Network functions
         setNetPlayer(networkgamestate, playerID, players[playerID]);
         setNetBullets(networkgamestate, playerID, bullets[playerID]);
         sendUDP(getNetPlayer(networkgamestate, playerID), &sd, &srvadd, &p, &p2);
         handleClientTCP(&tcpsock, &set, networkgamestate, players, playerID);
 
+        // Render functions
         SDL_RenderClear(renderer);
-        renderGame(renderer, tiles, gridTiles, bullets, bulletTexture, players, playerText, playerRect, 
-                    gunFireTexture, explosionTexture, bloodTexture, sound, explosionTiles, bloodTiles, soundWall, soundDeath, playerID, teamColors);
-        renderTestBullets(renderer, bullets, bulletTEST); // Synligare bullets för testing    
+        renderGame(renderer, tiles, gridTiles, bullets, bulletTexture, players, playerText, playerRect,
+            gunFireTexture, explosionTexture, bloodTexture, sound, explosionTiles, bloodTiles, soundWall, soundDeath, playerID, teamColors);   
         renderHUD(renderer, players[playerID], textRect, textTexture);
         renderRoundState(renderer, aRoundStateRect, roundStateTexture, getRoundState(networkgamestate), winner, textRect, textTexture);
-        if (scoreScreen) renderScoreScreen(renderer, aScoreRect, scoreTexture, textRect, textTexture, players);
+        if (scoreScreen) renderScoreScreen(renderer, aScoreRect, scoreTexture, textRect, textTexture, players);    
+
         SDL_UnlockMutex(mutex);
-        
+
         SDL_RenderPresent(renderer);
 
         frameTicks = SDL_GetTicks() - frameTicks;
-        if(frameTicks < 1000/TARGET_FRAME_RATE)
+        if (frameTicks < 1000 / TARGET_FRAME_RATE)
         {
-            SDL_Delay(1000/TARGET_FRAME_RATE - frameTicks);
+            SDL_Delay(1000 / TARGET_FRAME_RATE - frameTicks);
         }
     }
 
     SDL_DestroyRenderer(renderer);
-    //SDL_DestroyWindow(window); // beh�vs denna?
     SDL_Quit();
     return 0;
 }
 
-void handleEvents(SDL_Event* event, int* up, int* down, int* right, int* left, bool* isPlaying, SDL_Point *mouse, bool* shooting, bool *reload, bool *mute, int *tcpMessage, bool* scoreScreen, bool *teamColors)
+void handleEvents(SDL_Event* event, int* up, int* down, int* right, int* left, bool* isPlaying, SDL_Point* mouse, bool* shooting, bool* reload, bool* mute, int* tcpMessage, bool* scoreScreen, bool* teamColors)
 {
     SDL_GetMouseState(&mouse->x, &mouse->y);
     while (SDL_PollEvent(event))
@@ -267,10 +286,10 @@ void handleEvents(SDL_Event* event, int* up, int* down, int* right, int* left, b
                 *reload = true;
                 break;
             case SDL_SCANCODE_M:
-                *mute = (*mute+1)%2;
+                *mute = (*mute + 1) % 2;
                 break;
             case SDL_SCANCODE_K:
-                *teamColors = (*teamColors+1)%2;
+                *teamColors = (*teamColors + 1) % 2;
                 break;
             default:
                 break;
@@ -332,7 +351,7 @@ void handleEvents(SDL_Event* event, int* up, int* down, int* right, int* left, b
     return;
 }
 
-
+// Choose which server to connect to via input in terminal
 void connectPrompt(char* hostIP)
 {
     int nrOfHosts = 3;
@@ -341,11 +360,9 @@ void connectPrompt(char* hostIP)
     char hosts[3][20] = { "Local",
                           "Andreas",
                           "Alex"
-                        };
+    };
 
-    //printf("%s\n", hosts[0]);
-    //printf("%s\n", hosts[1]);
-    for(int i = 0; i < nrOfHosts; i++)
+    for (int i = 0; i < nrOfHosts; i++)
     {
         printf("%s [%d]\n", hosts[i], i);
     }
@@ -356,7 +373,7 @@ void connectPrompt(char* hostIP)
 
     switch (userChoice)
     {
-    case 0: 
+    case 0:
         strcpy(hostIP, "127.0.0.1");
         break;
     case 1:
@@ -370,13 +387,5 @@ void connectPrompt(char* hostIP)
         scanf("%s", hostIP);
         break;
     }
-    //fgets(hostIP, sizeof(hostIP), stdin);
 }
 
-void renderTestBullets(SDL_Renderer *renderer, Bullet bullets[][MAX_BULLETS], SDL_Texture *testText)
-{
-    for (int i = 0; i < MAX_PLAYERS; i++)
-        for(int j = 0; j < MAX_BULLETS; j++)
-            if(isBulletActive(bullets[i][j]))
-                SDL_RenderCopy(renderer, testText, NULL, getBulletRect(bullets[i][j]));
-}

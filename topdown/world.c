@@ -9,8 +9,7 @@ PRIVATE void wallColSingleAngleCompensation(double *pos, int wallStart, int wall
 PRIVATE void countWallHits(int i, int j);
 PRIVATE bool getWallState(int wallNo);
 enum material { sp = 121, br = 120, wa = 186, wall2 = 246, wall3 = 216 };
-
-//Creates map, assigning material to each individual tile
+// enum material { br = 222, wall = 186, truck = 102, wall2 = 246, wall3 = 216 };
 
 int tileGrid[24][36] = {
     {br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,wa,br,br,br,br,br,br,br,br,br,br,br},
@@ -128,7 +127,7 @@ PUBLIC void wallPlayerCollisionHandling(double *posX, double *posY, int r)
     }
 }
 
-//Makes a smoother collider around edges of walls if wall is adjacent to player
+//Makes a smoother collider around edges of walls
 PRIVATE void wallColSingleAngleCompensation(double *pos, int wallStart, int wallEnd, int minDistance)
 {
     double delta;
@@ -138,7 +137,7 @@ PRIVATE void wallColSingleAngleCompensation(double *pos, int wallStart, int wall
     else *pos = wallEnd + minDistance;
 }
 
-//Smoother collider with walls for player from multiple angles
+
 PRIVATE void wallColMultiAngleCompensation(double *xPos, double *yPos, int xWall, int yWall, int minDistance)
 {
     double xDelta, yDelta;
@@ -175,7 +174,7 @@ PUBLIC bool getWallCollisionBullet(int x, int y, int h, int w)
                 {
                     if(tileGrid[i][j] == wa || tileGrid[i][j] == wall2 || tileGrid[i][j] == wall3)
                     {
-                        countWallHits(i, j);
+                        countWallHits(i, j);  // Ta bort kommentaren om du vill förstöra väggar
                     }
                     return true;
                 }
@@ -205,7 +204,7 @@ PRIVATE void countWallHits(int i, int j)
     return;
 }
 
-// Creates a copy of original map
+// skapar kopia av orginalkarta
 PUBLIC void initTileGridReset()
 {
     for (int i = 0; i < tileRows; i++)

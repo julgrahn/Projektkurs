@@ -30,7 +30,6 @@ struct Player_type {
     Weapon gun;
     int lives;
     double shotAngle;
-    bool killed;// tillfälligt för dödsljud
     int kills;
 };
 
@@ -54,7 +53,6 @@ PUBLIC Player createPlayer(int x, int y)
     a->newDirection = 0;
     a->gun = createWeapon();
     a->lives = 0;
-    a->killed = false;//tillfälligt för dödsljud
     a->kills = 0;
     return a;
 }
@@ -166,6 +164,7 @@ PUBLIC void moveOtherPlayers(Player p)
     int yDelta = p->newY - p->posY;
     double distance = sqrt(xDelta * xDelta + yDelta * yDelta);
     double scaling = p->speed / (distance * (distance >= 1) + (distance < 1));
+
     if (distance >= SNAP_DISTANCE)
     {
         snapPlayer(p, p->newX, p->newY);
@@ -220,14 +219,12 @@ PUBLIC void playerTick(Player a)
 }
 
 PUBLIC int getPlayerGunbarrelX(Player a)
-{
-    // return round(a->pDimensions.x + 20 + (34*sin((-a->direction + 72)*M_PI/180)));   
+{ 
     return round(a->posX + (34*sin((-a->direction + 72)*M_PI/180)));   
 }
 
 PUBLIC int getPlayerGunbarrelY(Player a)
 {
-    // return round(a->pDimensions.y + 32 + (34*cos((-a->direction + 72)*M_PI/180)));
     return round(a->posY + (34*cos((-a->direction + 72)*M_PI/180)));
 }
 
@@ -274,18 +271,4 @@ PUBLIC double getPlayerShotAngle(Player a)
 PUBLIC int getPlayerRadius()
 {
     return PLAYER_RADIUS;
-}
-PUBLIC bool checkKilled(Player a) // experiment f�r att testa d�dsljud
-{
-    if (a->killed)
-    {
-        a->killed = false;
-        return true;
-    }
-    else return false;
-}
-
-PUBLIC void setKilled(Player p, bool n)
-{
-    p->killed = n;
 }

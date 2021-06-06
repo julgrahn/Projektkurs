@@ -2,21 +2,20 @@
 #define SDLINCLUDE_H
 
 /****************
-* Vad siffrorna i TCP-paketen betyder
+* What the numbers in the TCP-packets mean:
 * 
-* Host till server
-* 1: Starta en ny spelomg�ng
-* 2: Starta warmup
-* 
+* Message from host to server
+* 1: Start a new game
+* 2: Start warmup
 *********************/
 
 
-#include <SDL.h>
-#include <SDL_image.h>
-#include <SDL_timer.h>
-#include <SDL_net.h>
-#include <SDL_mixer.h>
-#include <SDL_ttf.h>
+ #include <SDL.h>
+ #include <SDL_image.h>
+ #include <SDL_timer.h>
+ #include <SDL_net.h>
+ #include <SDL_mixer.h>
+ #include <SDL_ttf.h>
 //#include <SDL2/SDL.h>
 //#include <SDL2/SDL_image.h>
 //#include <SDL2/SDL_timer.h>

@@ -5,14 +5,11 @@
 
 #define PUBLIC
 
-//enum ButtonState { NORMAL = 0, HOVER = 1, PRESSED = 2 };
-
 struct Button_Type
 {
 	SDL_Rect dimensions;
 	bool isPressed;
 	bool isHovered;
-
 };
 
 PUBLIC Button createButton(int xButtonPos, int yButtonPos)
@@ -52,6 +49,3 @@ PUBLIC void setButtonHovered(Button b, bool newValue)
 {
 	b->isHovered = newValue;
 }
-
-//public void buttonclick
-// exit game

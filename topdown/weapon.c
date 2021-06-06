@@ -7,9 +7,9 @@ struct Weapon_type {
     int firerate;
     int damage;
     int magazineSize, magazine;
+    bool isEmpty;
     int isReady;
     int reload;  
-    bool isEmpty;
 };
 
 PUBLIC Weapon createWeapon()
@@ -40,7 +40,6 @@ PUBLIC void weaponTick(Weapon a)
     }
 }
 
-//Check if weapon can fire then return true
 PUBLIC bool fireWeapon(Weapon a)
 {
     if(!a->isReady && a->magazine)

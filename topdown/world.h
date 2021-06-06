@@ -15,14 +15,13 @@ int getTileColumns();
 int getTileWidth();
 int getTileHeight();
 int getTileGrid(int x, int y);
+void wallPlayerCollisionHandling(double *posX, double *posY, int r);
+bool getWallCollisionBullet(int x, int y, int h, int w);
 int getTileGridHits(int x, int y);
-
 bool getWallCollisionBullet(int x, int y, int h, int w);
-bool getWallCollisionBullet(int x, int y, int h, int w);
-
-void wallPlayerCollisionHandling(double* posX, double* posY, int r);
 void initTileGridReset();
 void resetTileGridMap();
+
 void updateMap();
 void copyWallState(uint32_t destWallstate[]);
 void updateWallstate(uint32_t source[]);

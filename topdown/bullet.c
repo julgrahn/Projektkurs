@@ -20,8 +20,8 @@ struct Bullet_type {
 	double ySpeed;
 	double direction;
 	int damage;
-	int hit;
-	int shotTimer;
+	int hit; // Used to calculate wall explosion after hit 
+	int shotTimer; // Used to calculate fire rate
 	bool shot;
 	int xOrigin, yOrigin;
 	bool hitWall;
@@ -69,12 +69,14 @@ PRIVATE void moveBullet(Bullet bullet)
 		bullet->dimensions.x = round(bullet->xPos)-BULLET_CENTER_OFFSET_X/2;
 		bullet->dimensions.y = round(bullet->yPos)-BULLET_CENTER_OFFSET_Y/2;
 
+		// Remove bullet if it hits a wall
 		if (getWallCollisionBullet(bullet->dimensions.x, bullet->dimensions.y, bullet->dimensions.h, bullet->dimensions.w))
 		{	
 			freeBullet(bullet);
 			bulletWallHit(bullet);
 		}
-			
+		
+		// Remove bullet if it hits the edge of the screen
 		if (bullet->dimensions.x < 0 || bullet->dimensions.x > WINDOWWIDTH || bullet->dimensions.y < 0 || bullet->dimensions.y > WINDOWHEIGHT)
 			bullet->active = false;
 	}

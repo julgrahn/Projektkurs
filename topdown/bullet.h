@@ -25,6 +25,5 @@ bool bulletShot(Bullet a);
 int getBulletOriginX(Bullet a);
 int getBulletOriginY(Bullet a);
 bool checkShot(Bullet a);
-
 bool isWallhit(Bullet a);
 #endif

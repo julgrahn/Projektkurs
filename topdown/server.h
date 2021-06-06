@@ -9,6 +9,6 @@
 typedef struct Server_type* Server;
 
 Server createServer();
-void startServer(Server server);
+void startServer(Server server); // Starts the server thread
 
 #endif  // SERVER_H_
