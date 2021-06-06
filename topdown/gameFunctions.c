@@ -15,7 +15,6 @@ PUBLIC void updateplayers(Networkgamestate networkgamestate, Player players[], i
 {
     for (int i = 0; i < MAX_PLAYERS; i++)
     {
-        setKilled(players[i], getNetPlayerKilled(networkgamestate, i));
         setActivePlayer(players[i], isNetPlayerActive(networkgamestate, i));
         setPlayerKills(players[i], getNetPlayerKills(networkgamestate, i));
         if (i != playerID)

@@ -18,9 +18,11 @@ void renderGame(SDL_Renderer* renderer, SDL_Texture* mTiles, SDL_Rect gTiles[], 
     SDL_Texture* gunFireTexture, SDL_Texture* explosionTexture, SDL_Texture* bloodTexture, Mix_Chunk* sound,
     SDL_Rect explosionTiles[], SDL_Rect bloodTiles[], Mix_Chunk* soundWall, Mix_Chunk* soundDeath, int playerID, bool teamColors);
     
-void renderRoundState(SDL_Renderer* renderer, SDL_Rect aRoundStateRect[], SDL_Texture* roundStateTexture[], int roundState, int winner, SDL_Rect textrect[], SDL_Texture* texttextur);
+void renderRoundState(SDL_Renderer* renderer, SDL_Rect aRoundStateRect[], SDL_Texture* roundStateTexture[],
+    int roundState, int winner, SDL_Rect textrect[], SDL_Texture* texttextur); // Round state text (Warmup, prepare to fight etc)
+
 void renderScoreScreen(SDL_Renderer* renderer, SDL_Rect aScorerect[], SDL_Texture* scoreTexture, SDL_Rect textrect[], SDL_Texture* texttecture, Player players[]);
-void newRound(Mix_Chunk* roundStartSound);
+void newRound(Mix_Chunk* roundStartSound); // Resets the map and plays the "Prepare to fight" sound
 
 void renderMenu(SDL_Renderer* renderer, SDL_Texture* connectTextures[], SDL_Texture* hostTextures[], SDL_Texture* quitTextures[], 
     Button buttons[], SDL_Texture* backgroundTexture, int mouseX, int mouseY, bool shooting);

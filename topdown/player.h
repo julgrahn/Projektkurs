@@ -27,10 +27,6 @@ void snapPlayer(Player p, int x, int y);
 void damagePlayer(Player p, int damage);
 bool isPlayerAlive(Player p);
 void setPlayerAlive(Player p, bool value);
-void clientDamagePlayer(Player p);
-bool checkIfPlayerdamaged(Player p);
-void resetDamagedPlayer(Player p);
-void clientDamagePlayer(Player p);
 
 bool canShoot(Player a);
 void playerTick(Player a);

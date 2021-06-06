@@ -2,12 +2,11 @@
 #define SDLINCLUDE_H
 
 /****************
-* Vad siffrorna i TCP-paketen betyder
+* What the numbers in the TCP-packets mean:
 * 
-* Host till server
-* 1: Starta en ny spelomg�ng
-* 2: Starta warmup
-* 
+* Message from host to server
+* 1: Start a new game
+* 2: Start warmup
 *********************/
 
 

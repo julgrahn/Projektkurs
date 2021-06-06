@@ -29,8 +29,6 @@ struct Server_type {
     IPaddress serverIP;
     IPaddress clients[MAX_PLAYERS];
     Networkgamestate state;
-    SDL_Thread* UDPreceiveThread;
-    SDL_Thread* UDPsendThread;
     SDL_Point spawnPoint[MAX_PLAYERS];
     short noOfPlayers;
     short bulletTimers[MAX_PLAYERS][MAX_BULLETS];
@@ -63,7 +61,7 @@ PUBLIC Server createServer()
     
     server->noOfPlayers = 0;
 
-    // Hårdkodade startpositioner för spelare
+    // Hard coded start positions for players
     server->spawnPoint[0].x = 96;
     server->spawnPoint[0].y = 256;
     server->spawnPoint[1].x = 550;
@@ -140,10 +138,11 @@ PRIVATE void runServer(void* args)
     }
     
     SDL_Point a, b;
-    // Main-loop
+    // Main loop
     while (true)
     {
         SDL_Delay(1); 
+        // Different delays for different functions. The value to the right of the % determines the delay in ms
         TCPdelay = (TCPdelay + 1) % 200;
         UDPreceiveDelay = (UDPreceiveDelay + 1) % 1;
         UDPsendDelay = (UDPsendDelay + 1) % 16;
@@ -176,13 +175,12 @@ PRIVATE void handleUDPsend(Server server)
 {
     for (int i = 0; i < MAX_PLAYERS; i++)
     {
-        if (server->tcpsockClient[i] != NULL) // Skicka bara paket till de som är anslutna
+        if (server->tcpsockClient[i] != NULL) // Send packets only to those who are connected
         {
             server->pSent->address = server->clients[i];
             memcpy(server->pSent->data, server->state, getGamestatesize());
             server->pSent->len = getGamestatesize();
             SDLNet_UDP_Send(server->sd, -1, server->pSent);
-            resetPlayerKilled(server->state, i);
         }
     }
 }
@@ -193,13 +191,16 @@ PRIVATE void handleUDPreceive(Server server)
     {
         for (int i = 0; i < MAX_PLAYERS; i++)
         {
-            if (server->pRecive->address.port == server->clients[i].port) // Kollar vem paket kom ifrån och uppdaterar endast den spelaren
+            if (server->pRecive->address.port == server->clients[i].port) // Only update the player that sent the packet
             {
+                // Temporary store some old values so the client doesnt overwrite them
                 bool alive = isNetPlayerAlive(server->state, i);
                 int health = getNetplayerHealth(server->state, i);
                 int lives = getNetplayerLives(server->state, i);
                 int kills = getNetPlayerKills(server->state, i);
                 bool invulnerable = isNetplayerInvulnerable(server->state, i);
+
+                // Read packet
                 memcpy(getNetPlayer(server->state, i), server->pRecive->data, getNetPlayerSize());
                 for(int j = 0; j < MAX_BULLETS; j++)
                 {
@@ -213,6 +214,7 @@ PRIVATE void handleUDPreceive(Server server)
                     }
                     else netBulletclearcontrol(server->state, i, j);
                 }
+                // ...and restore the values
                 setNetPlayerKills(server->state, i, kills);
                 setNetPlayerAlive(server->state, i, alive);
                 setNetplayerHealth(server->state, i, health);
@@ -226,39 +228,37 @@ PRIVATE void handleUDPreceive(Server server)
 
 PRIVATE void handleTCP(Server server, int respawnDelay[])
 {
-    // Gå igenom alla TCPsockets för klienter (g som index)
-    for (int g = 0; g < MAX_PLAYERS + 1; g++) // En socket för varje spelare PLUS en som används för att säga åt en klient om servern är full
+    // Check all TCP sockets (g as index)
+    for (int g = 0; g < MAX_PLAYERS + 1; g++) 
     {
-        if (server->tcpsockClient[g] == NULL) // Om socketen är NULL så betyder det att den är ledig
+        if (server->tcpsockClient[g] == NULL) // The socket is free if it is NULL
         {
-            server->tcpsockClient[g] = SDLNet_TCP_Accept(server->tcpsockServer); // TCP_Accept kollar om det är någon som försöker kopplar upp sig till servern (Serverns TCPsocket, tcpsockServer)
+            server->tcpsockClient[g] = SDLNet_TCP_Accept(server->tcpsockServer); // See if someone is trying to connect
 
-            if (server->tcpsockClient[g]) // Om det är någon som svarar så är inte tcpsockClient[g] = NULL längre. Den tilldelas till den som har anslutit.
+            if (server->tcpsockClient[g]) // Assign a socket to a connected player
             {
-                if (server->noOfPlayers >= MAX_PLAYERS) // Om servern är full, bryt kontakten med den som försökte ansluta
+                if (server->noOfPlayers >= MAX_PLAYERS) // Decline connections if the server is full
                 {
-                    // Här kan kod skrivas för att behandla spelare som ansluter när servern är full
                     server->tcpsockClient[MAX_PLAYERS] = NULL;
-                    printf("%d seconds | A client tried to connect, but the server was full :(\n", SDL_GetTicks() / 1000);
+                    printf("%d seconds | A client tried to connect, but the server was full\n", SDL_GetTicks() / 1000);
                 }
-                else // Annars så körs alla startrutiner. Dela ut spelar ID, skicka ut positioner på alla andra spelare etc.
+                else
                 {
                     printf("%d seconds | Client %d has connected\n", SDL_GetTicks() / 1000, g);
-
-                    // Om warmup är igång så ska man direkt kunna lira. Annars måste man vänta tills nästa runda/warmup                   
+                
                     activateNetPlayer(server->state, g);
                     if(server->warmup)
                         {
                             reviveNetPlayer(server->state, g);
                         }
                     
-                    // Tilldela spelarID och skicka startpositionerna för alla spelare
+                    // Assign playerID and send the gamestate to the client
                     int newPlayerID = g;
                     SDLNet_TCP_Send(server->tcpsockClient[g], server->state, getGamestatesize());
                     SDLNet_TCP_Send(server->tcpsockClient[g], &newPlayerID, sizeof(newPlayerID));
                     server->clients[g].host = SDLNet_TCP_GetPeerAddress(server->tcpsockClient[g])->host;
 
-                    // Klienten behöver skicka sin lokala UDP-port till servern så servern vet vilken port den ska skicka UDP-paketen till.
+                    // Stores the local UDP port of the client
                     char msg[1024];
                     SDLNet_TCP_Recv(server->tcpsockClient[g], msg, 1024);
                     sscanf((char*)msg, "%hd\n", &(server->clients[g].port));
@@ -267,14 +267,14 @@ PRIVATE void handleTCP(Server server, int respawnDelay[])
                 }
             }
         }
-        else // Om socketen inte är NULL så betyder det att den är upptagen av någon klient.             
+        else // Handle other TCP packets from the connected players             
         {
             int ping = 0;
             int response = 0;
           
             SDLNet_CheckSockets(server->set, 0);
 
-            // Kollar om hosten har skickat något kontrollmeddelande och utför motsvarande åtgärd
+            // Check if the host has requested something
             if (SDLNet_SocketReady(server->tcpsockClient[g]))
             {
                 SDLNet_TCP_Recv(server->tcpsockClient[g], &response, sizeof(response));
@@ -298,7 +298,7 @@ PRIVATE void handleTCP(Server server, int respawnDelay[])
                 }                               
             }
 
-            // Servern "Pingar" alla uppkopplade spelare. Om TCP_Send returnerar en int mindre än "sizeof(ping)" så betyder det att klienten inte svarar och servern gör en plats ledig.
+            // Ping players. Free the socket if they are not responding.
             ping = 0;
             if (SDLNet_TCP_Send(server->tcpsockClient[g], &ping, sizeof(ping)) < sizeof(ping))
             {
@@ -350,7 +350,7 @@ PRIVATE void startNewGame(Server server, int respawnDelay[])
 
 PRIVATE void handleGameLogic(Server server, int respawnDelay[], SDL_Point *a, SDL_Point *b, int invulnerabilityDelay[])
 {
-    // Loop för kollisionshanteringen för kulor, om spelare dör och om spelet är över
+    // Loop for collision detection
     for (int i = 0; i < MAX_PLAYERS; i++)
         if(isNetPlayerActive(server->state, i))
             for(int j = 0; j < MAX_BULLETS; j++)
@@ -382,7 +382,7 @@ PRIVATE void handleGameLogic(Server server, int respawnDelay[], SDL_Point *a, SD
                                     {
                                         printf("%d seconds | Player %d is out of lives!\n", SDL_GetTicks() / 1000, k);
 
-                                        // Kollar om endast en spelare är vid liv. Isåfall har den vunnit
+                                        // If only one player is alive, end the game
                                         int noOfPlayersAlive = 0;
                                         for (int l = 0; l < MAX_PLAYERS; l++)
                                         {
@@ -402,7 +402,7 @@ PRIVATE void handleGameLogic(Server server, int respawnDelay[], SDL_Point *a, SD
                                 }
                             }
                         }
-    // Loop för respawn
+    // Loop for respawn
     for (int i = 0; i < MAX_PLAYERS; i++)
     {
         if (!isNetPlayerAlive(server->state, i) && isNetPlayerActive(server->state, i) && (getNetplayerLives(server->state, i) > 0))
@@ -419,7 +419,7 @@ PRIVATE void handleGameLogic(Server server, int respawnDelay[], SDL_Point *a, SD
             }
         }
     }
-    // Loop för odödlighet
+    // Loop for invincibility
     for (int i = 0; i < MAX_PLAYERS; i++)
     {
         if (isNetplayerInvulnerable(server->state, i))
@@ -445,6 +445,7 @@ PRIVATE void handleGameLogic(Server server, int respawnDelay[], SDL_Point *a, SD
     }
 }
 
+// Collision detection based on circles instead of rectangles
 PRIVATE bool circleHitDetect(SDL_Point *a, int r0, SDL_Point *b, int r1)
 {
     return sqrt((a->x - b->x) * (a->x - b->x) + (a->y - b->y) * (a->y - b->y)) < (r0 + r1);

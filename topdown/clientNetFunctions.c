@@ -37,15 +37,17 @@ PUBLIC void connectToServer(char* ip, IPaddress* srvadd, TCPsocket* tcpsock, Net
     }
     char msg[1024];
 
+    // If connection is successful, get a playerID and update the game based on the server's gamestate
     if (SDLNet_TCP_Recv(*tcpsock, networkgamestate, getGamestatesize()))
     {
         SDLNet_TCP_Recv(*tcpsock, playerID, sizeof(*playerID));
-        //setPlayerAlive(players[*playerID], true);
+
         for (int i = 0; i < MAX_PLAYERS; i++)
         {
             snapPlayer(players[i], getNetPlayerX(networkgamestate, i), getNetPlayerY(networkgamestate, i));
         }
-
+        
+        // Send local UDP port
         sprintf(msg, "%d\n", SDLNet_UDP_GetPeerAddress(*sd, -1)->port);
         SDLNet_TCP_Send(*tcpsock, msg, 1024);
 
@@ -101,6 +103,7 @@ PUBLIC void handleClientTCP(TCPsocket* tcpsock, SDLNet_SocketSet* set, Networkga
 {
     SDLNet_CheckSockets(*set, 0);
 
+    // Check if server has sent a TCP packet. A message of "0" is a ping to see if the client is still connected.
     if (SDLNet_SocketReady(*tcpsock))
     {
         int response;
@@ -109,22 +112,11 @@ PUBLIC void handleClientTCP(TCPsocket* tcpsock, SDLNet_SocketSet* set, Networkga
         {
         case 0:
             break;
-        case 1:
-            SDLNet_TCP_Recv(*tcpsock, networkgamestate, getGamestatesize());
-            setPlayerAlive(players[playerID], true);
-            for (int i = 0; i < MAX_PLAYERS; i++)
-            {
-                snapPlayer(players[i], getNetPlayerX(networkgamestate, i), getNetPlayerY(networkgamestate, i));
-            }
-            break;
         default:
             break;
         }
     }
 }
-
-// PUBLIC void startNewGame(TCPsocket* tcpsock)
-
 
 void sendTCPtoServer(TCPsocket* tcpsock, int message)
 {

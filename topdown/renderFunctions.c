@@ -15,14 +15,14 @@ PUBLIC void renderGame(SDL_Renderer* renderer, SDL_Texture* mTiles, SDL_Rect gTi
 {
     static SDL_Point playerRotationPoint = { 20, 32 };
     static SDL_Point muzzleRotationPoint = { 14, 16 };
-    static SDL_Point bloodRotationPoint = { BLOODSPLATTERSIZE/2, BLOODSPLATTERSIZE/2 };
+    static SDL_Point bloodRotationPoint = { BLOODSPLATTERSIZE / 2, BLOODSPLATTERSIZE / 2 };
     static SDL_Rect explosionRect = { 0, 0, EXPLOSIONSIZE, EXPLOSIONSIZE };
     static SDL_Rect bloodRect = { 0, 0, BLOODSPLATTERSIZE, BLOODSPLATTERSIZE };
     static SDL_Rect gunFireRect = { 0, 0, 40, 40 };
     static SDL_Rect position = { 0, 0, TILE_WIDTH, TILE_HEIGHT };
     static SDL_Rect player = { 0, 0, 64, 64 };
 
-
+    // Render map
     for (int i = 0; i < getTileRows(); i++)
     {
         for (int j = 0; j < getTileColumns(); j++)
@@ -30,19 +30,27 @@ PUBLIC void renderGame(SDL_Renderer* renderer, SDL_Texture* mTiles, SDL_Rect gTi
             position.y = i * TILE_HEIGHT;
             position.x = j * TILE_WIDTH;
             SDL_RenderCopy(renderer, mTiles, &gTiles[getTileGrid(i, j)], &position);
+<<<<<<< Updated upstream
             // SDL_RenderCopyEx(renderer, mTiles, &gTiles[getTileGrid(i, j)], &position, 0, NULL, SDL_FLIP_NONE);
+=======
+>>>>>>> Stashed changes
         }
     }
     // Render Bullets
     for (int i = 0; i < MAX_PLAYERS; i++)
     {
-        for(int j = 0; j < MAX_BULLETS; j++)
+        for (int j = 0; j < MAX_BULLETS; j++)
         {
             if (isBulletActive(bullets[i][j]))
             {
+<<<<<<< Updated upstream
                 SDL_RenderCopy(renderer, explosionTexture, &explosionTiles[12], getBulletRect(bullets[i][j]));
                 // SDL_RenderCopyEx(renderer, explosionTexture, &explosionTiles[12], getBulletRect(bullets[i][j]), 0 , NULL, SDL_FLIP_NONE);
             } 
+=======
+                SDL_RenderCopy(renderer, bulletTexture, NULL, getBulletRect(bullets[i][j]));
+            }
+>>>>>>> Stashed changes
         }
     }
     // Render Players
@@ -51,23 +59,17 @@ PUBLIC void renderGame(SDL_Renderer* renderer, SDL_Texture* mTiles, SDL_Rect gTi
     {
         if (isPlayerAlive(players[i]))
         {
-            if(teamColors)
+            if (teamColors)
             {
-                if(playerID == i)
+                if (playerID == i)
                     playerTextureNo = 0;
-                else playerTextureNo = i+1;
+                else playerTextureNo = i + 1;
             }
-            player.x = getPlayerX(players[i])-20, player.y = getPlayerY(players[i])-32;
+            player.x = getPlayerX(players[i]) - 20, player.y = getPlayerY(players[i]) - 32;
             SDL_RenderCopyEx(renderer, playerText[playerTextureNo], &playerRect[getPlayerFrame(players[i])], &player, getPlayerDirection(players[i]), &playerRotationPoint, SDL_FLIP_NONE);
         }
-        else // dödsljud fungerar ej optimalt än
-        {
-            if (checkKilled(players[i]))
-            {
-                Mix_PlayChannel(-1, soundDeath, 0);
-            }
-        }
     }
+
     // Render Muzzleflash, Bullet Hit
     for (int i = 0; i < MAX_PLAYERS; i++)
     {
@@ -77,13 +79,13 @@ PUBLIC void renderGame(SDL_Renderer* renderer, SDL_Texture* mTiles, SDL_Rect gTi
             {
                 if (isWallhit(bullets[i][j]))
                 {
-                    explosionRect.x = getBulletX(bullets[i][j]) - explosionRect.w/2;
-                    explosionRect.y = getBulletY(bullets[i][j]) - explosionRect.h/2;
-                    if(getBulletHitValue(bullets[i][j]) == 12)
+                    explosionRect.x = getBulletX(bullets[i][j]) - explosionRect.w / 2;
+                    explosionRect.y = getBulletY(bullets[i][j]) - explosionRect.h / 2;
+                    if (getBulletHitValue(bullets[i][j]) == 12)
                         Mix_PlayChannel(-1, soundWall, 0); // wall sound                    
                     if (getBulletHitValue(bullets[i][j]) > 12)
                     {
-                        SDL_RenderCopyEx(renderer, explosionTexture, &explosionTiles[45], &explosionRect, 0, NULL, SDL_FLIP_NONE);   
+                        SDL_RenderCopyEx(renderer, explosionTexture, &explosionTiles[45], &explosionRect, 0, NULL, SDL_FLIP_NONE);
                     }
                     else if (getBulletHitValue(bullets[i][j]) > 9)
                     {
@@ -98,38 +100,38 @@ PUBLIC void renderGame(SDL_Renderer* renderer, SDL_Texture* mTiles, SDL_Rect gTi
                         SDL_RenderCopyEx(renderer, explosionTexture, &explosionTiles[45], &explosionRect, 0, NULL, SDL_FLIP_NONE);
                     }
                 }
-                // else traff på spelare, visa blod. 
+                // else if a player gets hit. Render blood 
                 else
                 {
-                    bloodRect.x = getBulletX(bullets[i][j]) - bloodRect.w/2;
-                    bloodRect.y = getBulletY(bullets[i][j]) - bloodRect.h/2;
+                    bloodRect.x = getBulletX(bullets[i][j]) - bloodRect.w / 2;
+                    bloodRect.y = getBulletY(bullets[i][j]) - bloodRect.h / 2;
                     if (getBulletHitValue(bullets[i][j]) > 12)
                     {
-                        SDL_RenderCopyEx(renderer, bloodTexture, &bloodTiles[9], &bloodRect, (getBulletDirection(bullets[i][j])*180/M_PI), &bloodRotationPoint, SDL_FLIP_HORIZONTAL && SDL_FLIP_VERTICAL);
-                        // ljud vid träff på spelare
+                        SDL_RenderCopyEx(renderer, bloodTexture, &bloodTiles[9], &bloodRect, (getBulletDirection(bullets[i][j]) * 180 / M_PI), &bloodRotationPoint, SDL_FLIP_HORIZONTAL && SDL_FLIP_VERTICAL);
                         Mix_PlayChannel(-1, soundDeath, 0);
                     }
                     else if (getBulletHitValue(bullets[i][j]) > 9)
                     {
-                        SDL_RenderCopyEx(renderer, bloodTexture, &bloodTiles[10], &bloodRect, (getBulletDirection(bullets[i][j])*180/M_PI), &bloodRotationPoint, SDL_FLIP_HORIZONTAL && SDL_FLIP_VERTICAL);
+                        SDL_RenderCopyEx(renderer, bloodTexture, &bloodTiles[10], &bloodRect, (getBulletDirection(bullets[i][j]) * 180 / M_PI), &bloodRotationPoint, SDL_FLIP_HORIZONTAL && SDL_FLIP_VERTICAL);
                     }
                     else if (getBulletHitValue(bullets[i][j]) > 6)
                     {
-                        SDL_RenderCopyEx(renderer, bloodTexture, &bloodTiles[11], &bloodRect, (getBulletDirection(bullets[i][j])*180/M_PI), &bloodRotationPoint, SDL_FLIP_HORIZONTAL && SDL_FLIP_VERTICAL);
+                        SDL_RenderCopyEx(renderer, bloodTexture, &bloodTiles[11], &bloodRect, (getBulletDirection(bullets[i][j]) * 180 / M_PI), &bloodRotationPoint, SDL_FLIP_HORIZONTAL && SDL_FLIP_VERTICAL);
                     }
                     else if (getBulletHitValue(bullets[i][j]) > 3)
                     {
-                        SDL_RenderCopyEx(renderer, bloodTexture, &bloodTiles[12], &bloodRect, (getBulletDirection(bullets[i][j])*180/M_PI), &bloodRotationPoint, SDL_FLIP_HORIZONTAL && SDL_FLIP_VERTICAL);
+                        SDL_RenderCopyEx(renderer, bloodTexture, &bloodTiles[12], &bloodRect, (getBulletDirection(bullets[i][j]) * 180 / M_PI), &bloodRotationPoint, SDL_FLIP_HORIZONTAL && SDL_FLIP_VERTICAL);
                     }
                 }
             }
+            // Muzzle flash and shot fired sound
             if (bulletShot(bullets[i][j]))
             {
                 gunFireRect.x = getPlayerGunbarrelX(players[i]) - 14;
                 gunFireRect.y = getPlayerGunbarrelY(players[i]) - 16;
                 SDL_RenderCopyEx(renderer, gunFireTexture, NULL, &gunFireRect, getPlayerDirection(players[i]), &muzzleRotationPoint, SDL_FLIP_NONE);
 
-                if(checkShot(bullets[i][j]))
+                if (checkShot(bullets[i][j]))
                     Mix_PlayChannel(-1, sound, 0);
             }
         }
@@ -138,6 +140,10 @@ PUBLIC void renderGame(SDL_Renderer* renderer, SDL_Texture* mTiles, SDL_Rect gTi
 
 PUBLIC void renderRoundState(SDL_Renderer* renderer, SDL_Rect aRoundStateRect[], SDL_Texture* roundStateTexture[], int roundState, int winner, SDL_Rect textrect[], SDL_Texture* texttexture)
 {
+    // 0 = Warmup
+    // 1 = New game
+    // 2 = Main game
+    // 3 = Game over
     if (roundState == 0 || roundState == 1)
     {
         if (roundState == 0) SDL_SetRenderDrawColor(renderer, 255, 255, 255, 0);
@@ -148,7 +154,7 @@ PUBLIC void renderRoundState(SDL_Renderer* renderer, SDL_Rect aRoundStateRect[],
     }
     else if (roundState == 3)
     {
-        int tmp = aRoundStateRect[2].w; 
+        int tmp = aRoundStateRect[2].w;
         SDL_RenderCopy(renderer, roundStateTexture[2], NULL, &aRoundStateRect[2]);
         aRoundStateRect[2].x += 900;
         aRoundStateRect[2].w = 50;
@@ -160,10 +166,10 @@ PUBLIC void renderRoundState(SDL_Renderer* renderer, SDL_Rect aRoundStateRect[],
 
 PUBLIC void renderScoreScreen(SDL_Renderer* renderer, SDL_Rect aScorerect[], SDL_Texture* scoreTexture, SDL_Rect textrect[], SDL_Texture* texttexture, Player players[])
 {
- 
+
     int yPadding = 20;
-    aScorerect[2].x = WINDOWWIDTH/2 - aScorerect[2].w/2;
-    aScorerect[2].y = 175;//WINDOWHEIGHT/2 - 70;
+    aScorerect[2].x = WINDOWWIDTH / 2 - aScorerect[2].w / 2;
+    aScorerect[2].y = 175;
 
     SDL_RenderCopy(renderer, scoreTexture, &aScorerect[1], &aScorerect[2]);
     for (int i = 0; i < MAX_PLAYERS; i++)
@@ -180,50 +186,45 @@ PUBLIC void renderScoreScreen(SDL_Renderer* renderer, SDL_Rect aScorerect[], SDL
     }
 }
 
-PUBLIC void renderHUD(SDL_Renderer* renderer, Player player, SDL_Rect textrect[], SDL_Texture *texttecture)
+PUBLIC void renderHUD(SDL_Renderer* renderer, Player player, SDL_Rect textrect[], SDL_Texture* texttecture)
 {
     static SDL_Rect healthBar;
-    static SDL_Rect reloadTimer = {36, 0, 25, 0};
+    static SDL_Rect reloadTimer = { 36, 0, 25, 0 };
 
-    SDL_RenderCopy(renderer, texttecture, &textrect[getPlayerweaponMag(player)/10], &textrect[3]);
-    SDL_RenderCopy(renderer, texttecture, &textrect[getPlayerweaponMag(player)%10], &textrect[4]);
+    SDL_RenderCopy(renderer, texttecture, &textrect[getPlayerweaponMag(player) / 10], &textrect[3]);
+    SDL_RenderCopy(renderer, texttecture, &textrect[getPlayerweaponMag(player) % 10], &textrect[4]);
     SDL_RenderCopy(renderer, texttecture, &textrect[10], &textrect[2]);
     SDL_RenderCopy(renderer, texttecture, &textrect[2], &textrect[0]);
     SDL_RenderCopy(renderer, texttecture, &textrect[0], &textrect[1]);
 
     SDL_RenderCopy(renderer, texttecture, &textrect[getPlayerlives(player)], &textrect[7]);
 
-    reloadTimer.h = round(((double)(90-getPlayerReloadprogress(player))/90)*22*(getPlayerReloadprogress(player)>0));
-    reloadTimer.y = 24 - round(((double)(90-getPlayerReloadprogress(player))/90)*22*(getPlayerReloadprogress(player)>0));
-    SDL_SetRenderDrawColor(renderer,255,255,255,200);
+    reloadTimer.h = round(((double)(90 - getPlayerReloadprogress(player)) / 90) * 22 * (getPlayerReloadprogress(player) > 0));
+    reloadTimer.y = 24 - round(((double)(90 - getPlayerReloadprogress(player)) / 90) * 22 * (getPlayerReloadprogress(player) > 0));
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 200);
     SDL_RenderFillRect(renderer, &reloadTimer);
-    
-    healthBar.h = 14, healthBar.w = HEALTHBARLENGTH+4, healthBar.x = 98, healthBar.y = 5;
-    SDL_SetRenderDrawColor(renderer,255,255,255,255);
+
+    healthBar.h = 14, healthBar.w = HEALTHBARLENGTH + 4, healthBar.x = 98, healthBar.y = 5;
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
     SDL_RenderDrawRect(renderer, &healthBar);
-    healthBar.h = 12, healthBar.w = HEALTHBARLENGTH+2, healthBar.x = 99, healthBar.y = 6;
+    healthBar.h = 12, healthBar.w = HEALTHBARLENGTH + 2, healthBar.x = 99, healthBar.y = 6;
     SDL_RenderDrawRect(renderer, &healthBar);
     healthBar.h = 10, healthBar.x = 100, healthBar.y = 7;
-    healthBar.w = ((double)getPlayerHealth(player)/100)*HEALTHBARLENGTH;
+    healthBar.w = ((double)getPlayerHealth(player) / 100) * HEALTHBARLENGTH;
 
-    SDL_SetRenderDrawColor(renderer,255,0,0,175);
+    SDL_SetRenderDrawColor(renderer, 255, 0, 0, 175);
     SDL_RenderFillRect(renderer, &healthBar);
-    SDL_SetRenderDrawColor(renderer,0,0,0,255);
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 }
 
-PUBLIC void renderMenu(SDL_Renderer* renderer, SDL_Texture* connectTextures[], SDL_Texture* hostTextures[], SDL_Texture* quitTextures[], Button buttons[], 
+PUBLIC void renderMenu(SDL_Renderer* renderer, SDL_Texture* connectTextures[], SDL_Texture* hostTextures[], SDL_Texture* quitTextures[], Button buttons[],
     SDL_Texture* backgroundTexture, int mouseX, int mouseY, bool shooting)
 {
-
-    // static SDL_Rect backgroundRect = { 0, 0, 0, 0 };
-
     SDL_RenderClear(renderer);
     SDL_RenderCopy(renderer, backgroundTexture, NULL, NULL);
 
-    // Connect button
     if (mouseX >= (WINDOWWIDTH / 2) - 64 && mouseX <= (WINDOWWIDTH / 2) + 64)
     {
-        //SDL_RenderCopy(renderer, backgroundTexture, NULL, getButtonRect(buttons[0]));
         SDL_RenderCopy(renderer, connectTextures[0], NULL, getButtonRect(buttons[0]));
         SDL_RenderCopy(renderer, hostTextures[0], NULL, getButtonRect(buttons[1]));
         SDL_RenderCopy(renderer, quitTextures[0], NULL, getButtonRect(buttons[2]));

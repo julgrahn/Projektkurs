@@ -82,6 +82,8 @@ PUBLIC void loadMedia(SDL_Renderer* renderer, SDL_Rect gTiles[], SDL_Texture** t
                         SDL_Rect explosionTiles[], SDL_Rect bloodTiles[], Mix_Chunk** soundWall,
                         Mix_Chunk** soundDeath, Mix_Chunk** prepareToFight)
 {
+
+    // Map textures
     SDL_Surface* gTilesSurface = IMG_Load("resources/tilemap.png");
     *tiles = SDL_CreateTextureFromSurface(renderer, gTilesSurface);
     SDL_FreeSurface(gTilesSurface);
@@ -96,6 +98,7 @@ PUBLIC void loadMedia(SDL_Renderer* renderer, SDL_Rect gTiles[], SDL_Texture** t
         }
     }
 
+    // Player textures
     SDL_Surface* playerSurface;
     char rootPath[1024] = "resources/playerRifle";
     char fullPath[1024];
@@ -118,20 +121,27 @@ PUBLIC void loadMedia(SDL_Renderer* renderer, SDL_Rect gTiles[], SDL_Texture** t
         playerRect[n].w = 64;
     }
 
+    // Crosshair texture
     SDL_Surface* cursorSurface = IMG_Load("resources/crosshair161.png");
     *cursor = SDL_CreateColorCursor(cursorSurface, 36, 36);
     SDL_FreeSurface(cursorSurface);
     SDL_SetCursor(*cursor);
 
+<<<<<<< Updated upstream
     SDL_Surface* bulletSurface = IMG_Load("resources/expl_04_0014.png");
+=======
+    // Bullet texture
+    SDL_Surface* bulletSurface = IMG_Load("resources/bullet.png");
+>>>>>>> Stashed changes
     *bulletTexture = SDL_CreateTextureFromSurface(renderer, bulletSurface);
     SDL_FreeSurface(bulletSurface);
      
-
+    // Muzzle flash texture
     SDL_Surface* gunFireSurface = IMG_Load("resources/muzzle2_0007.png");
     *gunFireTexture = SDL_CreateTextureFromSurface(renderer, gunFireSurface);
     SDL_FreeSurface(gunFireSurface);
 
+    // Wall explosion textures
     SDL_Surface* explosionSurface = IMG_Load("resources/explosions.png");
     *explosionTexture = SDL_CreateTextureFromSurface(renderer, explosionSurface);
     SDL_FreeSurface(explosionSurface);
@@ -160,7 +170,7 @@ PUBLIC void loadMedia(SDL_Renderer* renderer, SDL_Rect gTiles[], SDL_Texture** t
     explosionTiles[23].w = 50;
     explosionTiles[23].h = 50;
 
-    // Blod
+    // Blood textures
     SDL_Surface* bloodSurface = IMG_Load("resources/blood - right 1.png");
     *bloodTexture = SDL_CreateTextureFromSurface(renderer, bloodSurface);
     SDL_FreeSurface(bloodSurface);
@@ -197,7 +207,7 @@ PUBLIC void loadMedia(SDL_Renderer* renderer, SDL_Rect gTiles[], SDL_Texture** t
         printf("Failed to load beat music! SDL_mixer Error: %s\n", Mix_GetError());
     }
 
-    //Prepare to fight
+    //Prepare to fight sound
     *prepareToFight = Mix_LoadWAV("resources/prepare-to-fight.wav");
     if (prepareToFight == NULL)
     {
@@ -220,7 +230,7 @@ PUBLIC void initGameHUD(SDL_Renderer *renderer, SDL_Rect textRect[], SDL_Texture
     }
     else
     {
-        // Ammo, hp och liv
+        // Ammo, hp and lives
         SDL_Color color = {255,255,255};
         SDL_Surface *textSurface;
         textSurface = TTF_RenderText_Blended(font,"0123456789|HP: ",color);
@@ -267,7 +277,8 @@ PUBLIC void initGameHUD(SDL_Renderer *renderer, SDL_Rect textRect[], SDL_Texture
             aScorerect[i].h = height;
         }
         TTF_CloseFont(font);
-        // Roundstate
+
+        // Roundstate message
         int aWidth[3], aHeight[3];
         font = TTF_OpenFont("unispace_bd.ttf", 200);
         char text[3][1024] = {"WARMUP", "PREPARE TO FIGHT", "THE WINNER IS PLAYER"};
@@ -338,8 +349,5 @@ PUBLIC void loadMenu(SDL_Renderer* renderer, SDL_Texture* connectTextures[], SDL
     SDL_FreeSurface(quitButton);
     SDL_FreeSurface(quitButtonHover);
     SDL_FreeSurface(quitButtonClick);
-
-    /*if (connectTexture == NULL) printf("Finns ingen bild\n");
-    else printf("texturen har laddats\n");*/
 
 }
