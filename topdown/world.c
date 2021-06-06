@@ -128,7 +128,7 @@ PUBLIC void wallPlayerCollisionHandling(double *posX, double *posY, int r)
     }
 }
 
-//Makes a smoother collider around edges of walls
+//Makes a smoother collider around edges of walls if wall is adjacent to player
 PRIVATE void wallColSingleAngleCompensation(double *pos, int wallStart, int wallEnd, int minDistance)
 {
     double delta;
@@ -138,7 +138,7 @@ PRIVATE void wallColSingleAngleCompensation(double *pos, int wallStart, int wall
     else *pos = wallEnd + minDistance;
 }
 
-
+//Smoother collider with walls for player from multiple angles
 PRIVATE void wallColMultiAngleCompensation(double *xPos, double *yPos, int xWall, int yWall, int minDistance)
 {
     double xDelta, yDelta;
