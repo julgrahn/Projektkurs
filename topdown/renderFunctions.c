@@ -30,10 +30,6 @@ PUBLIC void renderGame(SDL_Renderer* renderer, SDL_Texture* mTiles, SDL_Rect gTi
             position.y = i * TILE_HEIGHT;
             position.x = j * TILE_WIDTH;
             SDL_RenderCopy(renderer, mTiles, &gTiles[getTileGrid(i, j)], &position);
-<<<<<<< Updated upstream
-            // SDL_RenderCopyEx(renderer, mTiles, &gTiles[getTileGrid(i, j)], &position, 0, NULL, SDL_FLIP_NONE);
-=======
->>>>>>> Stashed changes
         }
     }
     // Render Bullets
@@ -43,14 +39,8 @@ PUBLIC void renderGame(SDL_Renderer* renderer, SDL_Texture* mTiles, SDL_Rect gTi
         {
             if (isBulletActive(bullets[i][j]))
             {
-<<<<<<< Updated upstream
-                SDL_RenderCopy(renderer, explosionTexture, &explosionTiles[12], getBulletRect(bullets[i][j]));
-                // SDL_RenderCopyEx(renderer, explosionTexture, &explosionTiles[12], getBulletRect(bullets[i][j]), 0 , NULL, SDL_FLIP_NONE);
-            } 
-=======
                 SDL_RenderCopy(renderer, bulletTexture, NULL, getBulletRect(bullets[i][j]));
             }
->>>>>>> Stashed changes
         }
     }
     // Render Players

@@ -127,12 +127,8 @@ PUBLIC void loadMedia(SDL_Renderer* renderer, SDL_Rect gTiles[], SDL_Texture** t
     SDL_FreeSurface(cursorSurface);
     SDL_SetCursor(*cursor);
 
-<<<<<<< Updated upstream
-    SDL_Surface* bulletSurface = IMG_Load("resources/expl_04_0014.png");
-=======
     // Bullet texture
     SDL_Surface* bulletSurface = IMG_Load("resources/bullet.png");
->>>>>>> Stashed changes
     *bulletTexture = SDL_CreateTextureFromSurface(renderer, bulletSurface);
     SDL_FreeSurface(bulletSurface);
      

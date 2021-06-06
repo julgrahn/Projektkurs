@@ -7,14 +7,12 @@
 typedef struct Weapon_type* Weapon;
 
 Weapon createWeapon();
+bool fireWeapon(Weapon a);
+void weaponTick(Weapon a);
 int getWeapondamage(Weapon a);
 int getMag(Weapon a);
 int getReloadprogress(Weapon a);
-
-void weaponTick(Weapon a);
 void resetWeapon(Weapon a);
 void reloadWeapon(Weapon a);
-
-bool fireWeapon(Weapon a);
 
 #endif

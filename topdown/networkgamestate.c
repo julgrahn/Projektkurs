@@ -13,10 +13,6 @@ typedef struct NetworkPlayer_type{
 	short posX, posY;
 	Uint8 status;   // bit: 2 - alive, bit: 1 - active, bit: 0 - invulnerable
 	Sint8 lives, health, kills;
-<<<<<<< Updated upstream
-	bool killed;//tillfälligt för dödsljud
-=======
->>>>>>> Stashed changes
 	Networkbullet aBullet[MAX_BULLETS];
 	Uint32 wallState[27];
 }Networkplayer;
@@ -37,10 +33,6 @@ PUBLIC Networkgamestate createNetworkgamestate()
 		a->aPlayer[i].health = 100;
 		a->aPlayer[i].lives = 0;
 		a->aPlayer[i].status = 0;
-<<<<<<< Updated upstream
-		a->aPlayer[i].killed = false;
-=======
->>>>>>> Stashed changes
 		a->aPlayer[i].kills = 0;
 		for (int j = 0; j < MAX_BULLETS; j++)
 		{
@@ -180,10 +172,6 @@ PUBLIC void damageNetplayer(Networkgamestate a, int playerID, int damage, int sh
 	a->aPlayer[playerID].health -= damage;
 	if(a->aPlayer[playerID].health <= 0)
 	{
-<<<<<<< Updated upstream
-		// a->aPlayer[playerID].killed = true;//tillfälligt för dödsljud
-=======
->>>>>>> Stashed changes
 		if(--a->aPlayer[playerID].lives < 0) a->aPlayer[playerID].lives = 0;
 		killNetPlayer(a, playerID);
 		a->aPlayer[shooterID].kills++;
@@ -261,23 +249,6 @@ PUBLIC int getNetbulletdamage(Networkgamestate a, int playerID, int bulletID)
 }
 
 
-<<<<<<< Updated upstream
-// för dödsljud
-PUBLIC bool getNetPlayerKilled(Networkgamestate a, int playerID)
-{
-	return a->aPlayer[playerID].killed;
-}
-
-PUBLIC void resetPlayerKilled(Networkgamestate a, int playerID)
-{
-	if(a->aPlayer[playerID].killed){
-		printf("skicka paket\n");
-	}
-	a->aPlayer[playerID].killed = false;
-}
-
-=======
->>>>>>> Stashed changes
 PUBLIC uint32_t* getWallState(Networkgamestate a, int playerID)
 {
 	return a->aPlayer[playerID].wallState;
